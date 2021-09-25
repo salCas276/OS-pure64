@@ -12,9 +12,9 @@ typedef struct bitmap_font {
 	unsigned char Width;		///< max. character width
 	unsigned char Height;		///< character height
 	unsigned short Chars;		///< number of characters in font
-	const unsigned char *Widths;	///< width of each character
-	const unsigned short *Index;	///< encoding to character index
-	const unsigned char *Bitmap;	///< bitmap of all characters
+	unsigned char *Widths;	///< width of each character
+	unsigned long *Index;	///< encoding to character index
+	unsigned char *Bitmap;	///< bitmap of all characters
 } bitmap_font;
 
 extern bitmap_font font;

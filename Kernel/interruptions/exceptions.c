@@ -1,5 +1,8 @@
 #include <naiveConsole.h>
 #include <video.h>
+#include <keyboard.h>
+#include "../include/multitasking.h"
+#include "../include/video.h"
 
 #define EXCEPTION_COUNT		32
 #define ZERO_EXCEPTION_ID	0x00
@@ -7,6 +10,9 @@
 
 static void zero_division();
 static void invalid_opcode();
+
+
+extern void _hlt(void);
 
 char * exceptionMessages[EXCEPTION_COUNT] = {
 	"[Exception] Division By Zero", /* 0x00 */

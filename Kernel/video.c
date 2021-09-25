@@ -2,7 +2,7 @@
 #include <font.h>
 #include <lib.h>
 
-vbe_mode_info * vbeInfo = 0x5C00;
+vbe_mode_info * vbeInfo = (vbe_mode_info *) 0x5C00;
 
 Color PURPLE = {.r = 0x88, .g = 0x00, .b = 0xFF};
 Color WHITE = {.r = 0xFF, .g = 0xFF, .b = 0xFF};
@@ -51,23 +51,23 @@ void fillScreen(Color * color) {
 
 static void scrollUp(prompt_info * p, Color * backgroundColor) {
     for (int dy = 0; dy < p->windowHeight - font.Height; dy++){
-        int x = p->baseX;
+        int x = (long )p->baseX;
         int yTo = p->baseY + dy;
         int yFrom = p->baseY + dy + font.Height;
-        uint8_t * to = (uint8_t *) ((uint64_t) vbeInfo->framebuffer + x * vbeInfo->bpp / 8 + (int) yTo * vbeInfo->pitch);
-        uint8_t * from = (uint8_t *) ((uint64_t) vbeInfo->framebuffer + x * vbeInfo->bpp / 8 + (int) yFrom * vbeInfo->pitch);
+        uint8_t * to = (uint8_t *) ((uint64_t) vbeInfo->framebuffer + x * vbeInfo->bpp / 8 + (long) yTo * vbeInfo->pitch);
+        uint8_t * from = (uint8_t *) ((uint64_t) vbeInfo->framebuffer + x * vbeInfo->bpp / 8 + (long) yFrom * vbeInfo->pitch);
         memcpy(to, from, p->windowWidth * vbeInfo->bpp / 8);
     }
     
     for (int y = p->windowHeight - font.Height; y < p->windowHeight; y++)
-        for (int x = p->baseX; x < p->baseX + p->windowWidth; x++) 
+        for (int x = (long)p->baseX; x < (long)p->baseX + p->windowWidth; x++) 
             setPixel(x, y, backgroundColor);
 }
 
 void clearWindow(prompt_info * p, Color * backgroundColor) {
-    for (int x = 0; x < p->windowWidth; x++)
+    for (int x = 0; x < (long)p->windowWidth; x++)
         for (int y = 0; y < p->y * font.Height; y++)
-            setPixel(p->baseX + x, p->baseY + y, backgroundColor);
+            setPixel((long)p->baseX + x, p->baseY + y, backgroundColor);
 
     p->y = 0;
     p->x = 0;
@@ -94,7 +94,7 @@ void drawChar(prompt_info * p, char c, Color * fontColor, Color * backgroundColo
 
     
     uint8_t * bitMapCharacter = bitMap(c);
-    int baseXPixel = p->x * font.Width + p->baseX;
+    int baseXPixel = (long)(p->x * font.Width + p->baseX);
     int baseYPixel = p->y * font.Height + p->baseY;
     for (int i = 0; i < font.Height; i++) {
         for (int j = 0; j < font.Width; j++) {
@@ -126,7 +126,7 @@ void eraseChar(prompt_info * p, Color * backgroundColor) {
     } else 
         p->x--;
     
-    int baseXPixel = p->baseX + getXPixel(p); // Coordenadas absolutas
+    int baseXPixel = (long)p->baseX + getXPixel(p); // Coordenadas absolutas
     int baseYPixel = p->baseY + getYPixel(p);
     for (int y = baseYPixel; y < baseYPixel + font.Height; y++)
         for (int x = baseXPixel; x < baseXPixel + font.Width; x++)

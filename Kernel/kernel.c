@@ -38,7 +38,7 @@ void * getStackBase()
 
 void * initializeKernelBinary()
 {
-	char buffer[10];
+	//char buffer[10];
 
 	// ncPrint("[x64BareBones]");
 	// ncNewline();
@@ -109,13 +109,13 @@ int main() {
 
 	prompt_info rightPrompt = {	.x = 0,
 								.y = 0,
-								.baseX = getScreenWidth() / 2 + 4,
+								.baseX = (uint8_t * )(long)(getScreenWidth() / 2 + 4),
 								.baseY = 0,
 								.windowWidth = getScreenWidth()/2 - 4, 
 								.windowHeight = getScreenHeight()};
 
-	loadTask(0, sampleCodeModuleAddress, 0x600000, leftPrompt);
-	loadTask(1, sampleCodeModuleAddress, 0x700000, rightPrompt);
+	loadTask(0, (uint64_t)sampleCodeModuleAddress, 0x600000, leftPrompt);
+	loadTask(1, (uint64_t)sampleCodeModuleAddress, 0x700000, rightPrompt);
 	initCurrentTask();
 	// ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
 	// currentTask = 1;

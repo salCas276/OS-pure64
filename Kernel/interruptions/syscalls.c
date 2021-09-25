@@ -18,9 +18,9 @@ uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
 // TODO: Usar un arreglo y no switch case
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	switch(rcx) {
-		case 1: return sys_write(rdi, rsi, rdx);
+		case 1: return sys_write(rdi, (char*)rsi, rdx);
 		case 2: return sys_read();
-		case 3: return sys_date(rdi);
+		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
 	}
 	return 0;
@@ -68,7 +68,7 @@ uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx){
 	// qemu tiene 64GB mapeados en memoria, asi que en el emulador
 	// incluso con sólo 512MB de memoria
 	// Podés acceder a todas las direcciones hasta 0x1000000000 - 1
-	if (src >= 0x1000000000 || src - 1 + rdx >= 0x1000000000)
+	if (src >= (uint8_t *) 0x1000000000 || src - 1 + rdx >= (uint8_t *)0x1000000000)
 		return 1;
 
 	uint8_t i;

@@ -4,7 +4,7 @@
 #include <font.h>
 
 /// character bitmap for each encoding
-static const unsigned char __font_bitmap__[] = {
+static  unsigned char __font_bitmap__[] = {
 //   0 $00 'uni0000.dup1'
 //	width 8, bbx 0, bby 0, bbw 1, bbh 1
 	________,
@@ -14085,7 +14085,7 @@ static const unsigned char __font_bitmap__[] = {
 };
 
 	/// character width for each encoding
-static const unsigned char __font_widths__[] = {
+static  unsigned char __font_widths__[] = {
 	8,
 	8,
 	8,
@@ -14871,7 +14871,7 @@ static const unsigned char __font_widths__[] = {
 };
 
 	/// character encoding for each index entry
-static const unsigned short __font_index__[] = {
+static  unsigned long __font_index__[] = {
 	0,
 	1,
 	2,

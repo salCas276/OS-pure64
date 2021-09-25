@@ -100,7 +100,7 @@ int print_f(uint8_t fd, const char * format, ...) {
     return (traverse - format) / sizeof(traverse);
 }
 
-void put_char(uint8_t fd, const char character) {
+void put_char(uint8_t fd,  char character) {
     print(fd, &character, 1);
 }
 
@@ -192,7 +192,7 @@ int sscan(char * buff, char * fmt, ...) {
     return ret;
 }
 
-double strtodouble(const char * start, char ** end) {
+double strtodouble( char * start, char ** end) {
     char flagOnDecimal = 0;
     char flagNegative = 0;
     double ans = 0;
