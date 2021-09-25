@@ -6,6 +6,9 @@
 #include <idtLoader.h>
 #include <multitasking.h>
 #include <video.h>
+#include "./include/ListFreeMemoryManager.h"//C:\Users\Usuario\Desktop\OS-pure64\Kernel\include\ListFreeMemoryManager.h
+//C:\Users\Usuario\Desktop\OS-pure64\Kernel\kernel.c
+
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -18,6 +21,7 @@ static const uint64_t PageSize = 0x1000;
 
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
+static void * memoryManagerPtr=(void*)0x900000;
 
 typedef int (*EntryPoint)();
 
@@ -89,17 +93,19 @@ void * initializeKernelBinary()
 
 
 int main() {	
-	//fillScreen(&PURPLE);
-	drawShellBorder(&WHITE);
-	load_idt();
-	// ncPrint("  IDT loaded");
-	// ncNewline();
-	// ncPrint("[Kernel Main]");
-	// ncNewline();
-	// ncPrint("  Sample code module at 0x");
-	// ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	// ncNewline();
-	// ncPrint("  Calling the sample code module returned: ");
+	//illScreen(&PURPLE);
+	 drawShellBorder(&WHITE);
+	 InitializeMM(memoryManagerPtr);
+	 load_idt();
+	// // ncPrint("  IDT loaded");
+	// // ncNewline();
+	// // ncPrint("[Kernel Main]");
+	// // ncNewline();
+	// // ncPrint("  Sample code module at 0x");
+	// // ncPrintHex((uint64_t)sampleCodeModuleAddress);
+	// // ncNewline();
+	// // ncPrint("  Calling the sample code module returned: ");
+	
 	prompt_info leftPrompt = {	.x = 0,
 								.y = 0,
 							  	.baseX = 0,
@@ -117,27 +123,29 @@ int main() {
 	loadTask(0, sampleCodeModuleAddress, 0x600000, leftPrompt);
 	loadTask(1, sampleCodeModuleAddress, 0x700000, rightPrompt);
 	initCurrentTask();
-	// ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	// currentTask = 1;
-	// task1RSP = 0x600000;
-	// create_task(1, 0x600000, sampleCodeModuleAddress);
-	// uint64_t task2RSP = create_task(2, 0x700000, sampleCodeModuleAddress);
-	// setOtherRSP(task2RSP);
-	// init_task(task1RSP);
 	
-	ncNewline();
-	ncNewline();
+	// // ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
+	// // currentTask = 1;
+	// // task1RSP = 0x600000;
+	// // create_task(1, 0x600000, sampleCodeModuleAddress);
+	// // uint64_t task2RSP = create_task(2, 0x700000, sampleCodeModuleAddress);
+	// // setOtherRSP(task2RSP);
+	// // init_task(task1RSP);
+	
 
-	ncPrint("  Sample data module at 0x");
-	ncPrintHex((uint64_t)sampleDataModuleAddress);
+	// ncNewline();
+	// ncNewline();
+
+	// ncPrint("  Sample data module at 0x");
+	// ncPrintHex((uint64_t)sampleDataModuleAddress);
 	
-	ncNewline();
-	ncPrint("  Sample data module contents: ");
-	ncPrint((char*)sampleDataModuleAddress);
-	ncNewline();
+	// ncNewline();
+	// ncPrint("  Sample data module contents: ");
+	// ncPrint((char*)sampleDataModuleAddress);
+	// ncNewline();
 	
-	ncPrint("[Finished]");
-	ncNewline();
+	// ncPrint("[Finished]");
+	// ncNewline();
 
 	
 
