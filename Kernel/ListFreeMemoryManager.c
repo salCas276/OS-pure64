@@ -8,7 +8,8 @@ static void * ptr;
 
 static void prvHeapInit( void );
 
-static const unsigned int heapSTRUCT_SIZE	=  sizeof ( BlockLink_t );
+
+static const unsigned long heapSTRUCT_SIZE	= ( ( sizeof ( BlockLink_t ) + ( portBYTE_ALIGNMENT - 1 ) ) & ~portBYTE_ALIGNMENT_MASK );
 
 
 
@@ -42,7 +43,7 @@ void InitializeMM(void * StartPointer){
 
 
 
-void *memalloc( unsigned int  xWantedSize ){
+void *malloc( unsigned int  xWantedSize ){
   BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
   static int xHeapHasBeenInitialised = 0;
   void *pvReturn =(void*)0;
@@ -60,6 +61,13 @@ void *memalloc( unsigned int  xWantedSize ){
   if( xWantedSize > 0 )
 		{
 			xWantedSize += heapSTRUCT_SIZE; //adding the block before.
+
+			      /* Ensure that blocks are always aligned to the required number of bytes. */
+			if( ( xWantedSize & portBYTE_ALIGNMENT_MASK ) != 0 )
+			{
+				/* Byte alignment required. */
+				xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & portBYTE_ALIGNMENT_MASK ) );
+			}
 		}
 
 if( ( xWantedSize > 0 ) && ( xWantedSize < configADJUSTED_HEAP_SIZE ) ){
@@ -106,7 +114,7 @@ if( ( xWantedSize > 0 ) && ( xWantedSize < configADJUSTED_HEAP_SIZE ) ){
 }
 
 
-void vPortFree( void * ptr )
+void free( void * ptr )
 {
 char * BlockStartPtr = ( char * ) ptr;
 BlockLink_t * NewFreeBlock;
@@ -152,10 +160,11 @@ BlockLink_t * NewFreeBlock;
 static void prvHeapInit( void )
 {
   BlockLink_t *pxFirstFreeBlock;
+  unsigned int * alignedptr = ( unsigned int * ) ( ( ( unsigned long ) (char*)(ptr)+ portBYTE_ALIGNMENT ) & ( ~( ( unsigned long ) portBYTE_ALIGNMENT_MASK ) ) );
 
   /* xStart is used to hold a pointer to the first item in the list of free
 	blocks.*/
-	xStart.pxNextFreeBlock = ptr;
+	xStart.pxNextFreeBlock = (void *) alignedptr;
 	xStart.xBlockSize = ( unsigned int ) 0;
 
 	/* xEnd is used to mark the end of the list of free blocks. */
@@ -164,7 +173,7 @@ static void prvHeapInit( void )
 
 	/* To start with there is a single free block that is sized to take up the
 	entire heap space. */
-	pxFirstFreeBlock = (BlockLink_t*)ptr;
+	pxFirstFreeBlock = (void*) alignedptr;
 	pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }

@@ -9,15 +9,20 @@ typedef struct A_BLOCK_LINK
 } BlockLink_t;
 
 
-#define heapMINIMUM_BLOCK_SIZE	 ( heapSTRUCT_SIZE * 2 ) 
 
-#define configADJUSTED_HEAP_SIZE 1048576 //1MB
+#define portBYTE_ALIGNMENT			8  
+#define configADJUSTED_HEAP_SIZE	( configTOTAL_HEAP_SIZE - portBYTE_ALIGNMENT )
+#define portBYTE_ALIGNMENT_MASK ( 0x0007 )
+#define heapMINIMUM_BLOCK_SIZE	( ( unsigned int ) ( heapSTRUCT_SIZE * 2 ) )
+#define configTOTAL_HEAP_SIZE 1048576
+typedef  unsigned long  portPOINTERSIZETYPE;
+
 
 //test
 void printBlocks();
 
-void * memalloc( unsigned int xWantedSize );
+void * malloc( unsigned int xWantedSize );
 
-void vPortFree( void *pv );
+void free( void *pv );
 
 void InitializeMM(void * StartPointer);

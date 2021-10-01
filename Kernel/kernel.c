@@ -10,6 +10,8 @@
 //C:\Users\Usuario\Desktop\OS-pure64\Kernel\kernel.c
 
 
+#include "./include/test_util.h"
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -92,6 +94,55 @@ void * initializeKernelBinary()
 
 
 
+#define MAX_BLOCKS 128
+#define MAX_MEMORY 838861 //Should be around 80% of memory managed by the MM
+
+typedef struct MM_rq{
+  void *address;
+  uint32_t size;
+}mm_rq;
+
+void test_mm(){
+  mm_rq mm_rqs[MAX_BLOCKS];
+  uint8_t rq;
+  uint32_t total;
+
+  while (1){
+    rq = 0;
+    total = 0;
+
+    // Request as many blocks as we can
+    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+      mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
+//TODO: check if NULL
+      total += mm_rqs[rq].size;
+      rq++;
+    }
+
+    // Set
+    uint32_t i;
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
+
+    // Check
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL){
+		  if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size) || ( ( int ) mm_rqs[i].address ) % 4 == 0 ){
+			  ncPrint("ERROR!\n");*/ // TODO: Port this call as required
+		  
+		}
+        
+    // Free
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        free(mm_rqs[i].address);  // TODO: Port this call as required
+  } 
+}
+
+
+
 int main() {	
 	//illScreen(&PURPLE);
 	 drawShellBorder(&WHITE);
@@ -121,9 +172,12 @@ int main() {
 								.windowHeight = getScreenHeight()};
 
 	loadTask(0, sampleCodeModuleAddress, 0x600000, leftPrompt);
-	loadTask(1, sampleCodeModuleAddress, 0x700000, rightPrompt);
+	loadTask(1, test_mm, 0x700000, rightPrompt);
+
+
 	initCurrentTask();
-	
+
+
 	// // ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
 	// // currentTask = 1;
 	// // task1RSP = 0x600000;
@@ -149,6 +203,7 @@ int main() {
 
 	
 
+	ncPrint("Pass");
 
 	while(1);
 
