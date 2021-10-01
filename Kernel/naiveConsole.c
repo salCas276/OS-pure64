@@ -1,6 +1,7 @@
 #include <naiveConsole.h>
 #include <video.h>
-#include <multitasking.h>
+#include "./interruptions/Scheduler.h"
+
 
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
@@ -43,6 +44,9 @@ void ncPrintChar(char character) {
 
 void ncPrintCharAtt(char character, Color * fontColor, Color * backgroundColor) {
 	prompt_info * pPrompt = getCurrentPrompt();
+	if(pPrompt == (void*) 0 ) //no tiene una pantalla asignada.
+		return;
+
 	if (character == '\n') 
 		newLine(pPrompt, backgroundColor);
 	else if (character == '\b')

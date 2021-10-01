@@ -1,4 +1,5 @@
-GLOBAL _buildContext, _openContext
+GLOBAL _buildContext , InitFirstProcess
+EXTERN irqDispatcher , getCurrentRSP 
 
 %macro pushState 0
 	push rax
@@ -42,7 +43,7 @@ _buildContext:
     mov rbp, rsp
 
 	mov rsp, rdi
-    ; TODO: Add program cemetery
+
     push 0x0    ; SS
     push rdi    ; RSP
     push 0x206  ; RFLAGS
@@ -50,19 +51,22 @@ _buildContext:
     push rsi    ; RIP
     pushState
 
-    ; TODO: Check if necessary
-    ; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
-
     mov rax, rsp
 
     mov rsp, rbp
     pop rbp
     ret
 
-; void _openContext(uint64_t baseRSP)
-_openContext:
-    mov rsp, rdi
-    popState
-    iretq
+
+InitFirstProcess: 
+	
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	call getCurrentRSP;
+	mov rsp , rax ;; cambio de contexto.
+
+	popState
+	sti ;;set interrupts
+
+	iretq

@@ -2,8 +2,7 @@
 #include <keyboard.h>
 #include <stdint.h>
 #include <naiveConsole.h>
-
-#define NULL 0
+#include <Scheduler.h>
 
 void (*handlers[15])(void) = {
 	timer_handler, 				// int 20h

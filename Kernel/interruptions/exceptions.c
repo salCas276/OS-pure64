@@ -1,8 +1,8 @@
 #include <naiveConsole.h>
 #include <video.h>
 #include <keyboard.h>
-#include "../include/multitasking.h"
 #include "../include/video.h"
+#include "Scheduler.h"
 
 #define EXCEPTION_COUNT		32
 #define ZERO_EXCEPTION_ID	0x00
@@ -54,8 +54,7 @@ void exceptionDispatcher(int exception) {
 	
 	// Clear window
 	clearWindow(getCurrentPrompt(), &BLACK);
-	// Reiniciar shell (Ojalá)
-	rebootCurrentTask();
+
 }
 
 static void zero_division() {

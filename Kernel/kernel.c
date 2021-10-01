@@ -4,11 +4,9 @@
 #include <moduleLoader.h>
 #include <naiveConsole.h>
 #include <idtLoader.h>
-#include <multitasking.h>
 #include <video.h>
-#include "./include/ListFreeMemoryManager.h"//C:\Users\Usuario\Desktop\OS-pure64\Kernel\include\ListFreeMemoryManager.h
-//C:\Users\Usuario\Desktop\OS-pure64\Kernel\kernel.c
-
+#include "./include/ListFreeMemoryManager.h"
+#include "./interruptions/Scheduler.h"
 
 #include "./include/test_util.h"
 
@@ -24,6 +22,9 @@ static const uint64_t PageSize = 0x1000;
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
 static void * memoryManagerPtr=(void*)0x900000;
+
+void _cli(); //clear interrupts.
+
 
 typedef int (*EntryPoint)();
 
@@ -130,8 +131,8 @@ void test_mm(){
     // Check
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address != NULL)
-        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
-          ncPrint("ERROR!\n"); // TODO: Port this call as required
+        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) 
+          ncPrint("ERROR!"); // TODO: Port this call as required
 
     // Free
     for (i = 0; i < rq; i++)
@@ -144,7 +145,8 @@ void test_mm(){
 
 int main() {	
 	//illScreen(&PURPLE);
-	 drawShellBorder(&WHITE);
+	 //drawShellBorder(&WHITE);
+	_cli();
 	 InitializeMM(memoryManagerPtr);
 	 load_idt();
 	// // ncPrint("  IDT loaded");
@@ -163,18 +165,24 @@ int main() {
 							  	.windowWidth = getScreenWidth()/2 - 4,
 							  	.windowHeight = getScreenHeight()};
 
-	prompt_info rightPrompt = {	.x = 0,
-								.y = 0,
-								.baseX = (uint8_t * )(long)(getScreenWidth() / 2 + 4),
-								.baseY = 0,
-								.windowWidth = getScreenWidth()/2 - 4, 
-								.windowHeight = getScreenHeight()};
+	// prompt_info rightPrompt = {	.x = 0,
+	// 							.y = 0,
+	// 							.baseX = (uint8_t * )(long)(getScreenWidth() / 2 + 4),
+	// 							.baseY = 0,
+	// 							.windowWidth = getScreenWidth()/2 - 4, 
+	// 							.windowHeight = getScreenHeight()};
 
-	loadTask(0, (uint64_t)sampleCodeModuleAddress, 0x600000, leftPrompt);
-	loadTask(1, (uint64_t)test_mm, 0x700000, rightPrompt);
+	uint64_t * bsP1 = malloc(4096 * sizeof(uint64_t));
+//	uint64_t * bsP2 = malloc(4096 * sizeof(uint64_t));
+
+	//addProcess(0,(uint64_t)test_mm,(uint64_t)&bsP2[4095],rightPrompt);
+	FirstProcess((uint64_t)sampleCodeModuleAddress, (uint64_t)&bsP1[4095], leftPrompt);
 
 
-	initCurrentTask();
+//	loadTask(1, (uint64_t)test_mm, 0x700000, rightPrompt);
+
+
+	//initCurrentTask();
 
 
 	// // ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());

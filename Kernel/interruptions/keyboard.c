@@ -1,7 +1,6 @@
 #include <keyboard.h>
 #include <lib.h>
 #include <naiveConsole.h>
-#include <multitasking.h>
 
 #define LEFT_SHIFT  0x2A
 #define LEFT_SHIFT_FLAG 0b00000001
@@ -81,8 +80,6 @@ void keyboard_handler() {
         flags &= ~LEFT_SHIFT_FLAG;
       else if (scancode == RIGHT_SHIFT) 
         flags &= ~RIGHT_SHIFT_FLAG;
-      else if (scancode == LEFT_ALT)
-        switchTasks();
     }
 }
 

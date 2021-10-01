@@ -98,6 +98,7 @@ SECTION .text
 	pushState
 
 	mov rdi, %1 ; pasaje de parametro
+
 	call irqDispatcher
 
 	; signal pic EOI (End of Interrupt)
@@ -154,13 +155,36 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	
+	pushState
+	
+	;;backupear el currentRSP
+	mov rdi, rsp
+	call setCurrentRSP
+
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	call getCurrentRSP;
+	mov rsp , rax ;; cambio de contexto.
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
+
+
+
+
 
 ;Keyboard
 _irq01Handler:
-	pushState ; <-- Save rsp
-	mov rdi, rsp
-	call setCurrentRSP
+	pushState ; 
+	;;<-- Save rsp
+	;;mov rdi, rsp
+	;;call setCurrentRSP
 
 	mov rdi, 1 ; pasaje de parametro
 	call irqDispatcher
@@ -169,8 +193,8 @@ _irq01Handler:
 	mov al, 20h
 	out 20h, al
 
-	call getCurrentRSP
-	mov rsp, rax
+	;;call getCurrentRSP
+	;;mov rsp, rax
 
 	popState
 	iretq
