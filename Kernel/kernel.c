@@ -102,6 +102,7 @@ typedef struct MM_rq{
   uint32_t size;
 }mm_rq;
 
+
 void test_mm(){
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
@@ -128,12 +129,10 @@ void test_mm(){
 
     // Check
     for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL){
-		  if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size) || ( ( int ) mm_rqs[i].address ) % 4 == 0 ){
-			  ncPrint("ERROR!\n");*/ // TODO: Port this call as required
-		  
-		}
-        
+      if (mm_rqs[i].address != NULL)
+        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size))
+          ncPrint("ERROR!\n"); // TODO: Port this call as required
+
     // Free
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address != NULL)
@@ -171,8 +170,8 @@ int main() {
 								.windowWidth = getScreenWidth()/2 - 4, 
 								.windowHeight = getScreenHeight()};
 
-	loadTask(0, sampleCodeModuleAddress, 0x600000, leftPrompt);
-	loadTask(1, test_mm, 0x700000, rightPrompt);
+	loadTask(0, (uint64_t)sampleCodeModuleAddress, 0x600000, leftPrompt);
+	loadTask(1, (uint64_t)test_mm, 0x700000, rightPrompt);
 
 
 	initCurrentTask();
