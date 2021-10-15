@@ -1,7 +1,5 @@
 #include <Scheduler.h>
-#include "../include/ListFreeMemoryManager.h"
 
-#define SIZE 20
 
 
 
@@ -11,14 +9,14 @@ void InitFirstProcess();
 
 //call when scheduler executes. Selects next Process.
 void timer_handler(void){
-    next();
+    nextTask();
 }
 
 //First process created by the kernel.
 void FirstProcess(uint64_t functionAddress, uint64_t baseRSP, prompt_info prompt) {
 
     processControlBlock * task= malloc(sizeof(processControlBlock));
-    task->pid=ProcessTotal;
+    task->pid=0;
     task->prompt = prompt;
     task->baseRSP = baseRSP;
     task->functionAddress = functionAddress;

@@ -1,3 +1,9 @@
+#ifndef _ROUNDROBIN_H_
+#define _ROUNROBIN_H_
+
+
+
+#include <stdint.h>
 #include "../include/video.h"
 
 
@@ -17,10 +23,13 @@ void addProcess(processControlBlock * process);
 
 void nextTask();
 
-processControlBlock getCurrentTask();
+processControlBlock * getCurrentTask();
 
 void setCurrentRSP(uint64_t rsp) ;
 
 uint64_t getCurrentRSP();
 
 prompt_info * getCurrentPrompt();
+
+
+#endif

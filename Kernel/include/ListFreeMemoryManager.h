@@ -1,4 +1,7 @@
 
+#ifndef _LISTFREEMEMORYMANAGER_H_
+#define _LISTFREEMEMORYMANAGER_H_
+
 
 #include <stdint.h>
 
@@ -26,3 +29,6 @@ void * malloc( unsigned int xWantedSize );
 void free( void *pv );
 
 void InitializeMM(void * StartPointer);
+
+
+#endif

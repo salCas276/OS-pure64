@@ -1,20 +1,20 @@
 
 #include <RoundRobin.h>
 
-
+#define SIZE 20
 static processControlBlock * ActiveProcess[SIZE];
 static int currentIndex = 0 ; 
 static int ProcessTotal = 0;
 
 
 void addProcess(processControlBlock * process){
-    ActiveProcess[ProcessTotal]=task;
+    ActiveProcess[ProcessTotal]=process;
 	ProcessTotal++;
 }
 
 
 void nextTask(){
-    return currentIndex = (currentIndex + 1) % ProcessTotal;
+    currentIndex = (currentIndex + 1) % ProcessTotal;
 }
 
 processControlBlock * getCurrentTask(){

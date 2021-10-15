@@ -7,7 +7,6 @@
 #include <video.h>
 #include "./include/ListFreeMemoryManager.h"
 #include "./interruptions/Scheduler.h"
-#include "./interruptions/RoundRobin.h"
 
 #include "./include/test_util.h"
 
@@ -118,7 +117,7 @@ void test_mm(){
     while(rq < MAX_BLOCKS && total < MAX_MEMORY){
       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
       mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
-//TODO: check if NULL
+	//TODO: check if NULL
       total += mm_rqs[rq].size;
       rq++;
     }
