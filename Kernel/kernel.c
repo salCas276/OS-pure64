@@ -7,6 +7,7 @@
 #include <video.h>
 #include "./include/ListFreeMemoryManager.h"
 #include "./interruptions/Scheduler.h"
+#include "./interruptions/RoundRobin.h"
 
 #include "./include/test_util.h"
 
