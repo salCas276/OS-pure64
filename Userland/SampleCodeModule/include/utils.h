@@ -9,4 +9,6 @@ void printmem(void);
 void printFeatures(void);
 void printQuadraticRoots(void);
 
+void printHola(void);
+
 #endif

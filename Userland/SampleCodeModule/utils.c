@@ -2,6 +2,8 @@
 #include <lib.h>
 #include <cpuid.h>
 #include <cpuidflags.h>
+#include <ProcessAPI.h>
+
 
 #define BUFFER_SIZE 16
 
@@ -115,4 +117,17 @@ void printQuadraticRoots(){
             print_f(1, "%c no es una funcion cuadratica.\n", 13);
             break;
     };
+}
+
+void aux(void);
+
+void printHola(){
+    createProcessUserland( (uint64_t) &aux);
+}
+
+
+void aux(void){
+    while(1){
+        print_f(1,"hola\n");
+    }
 }

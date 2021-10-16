@@ -5,6 +5,7 @@ GLOBAL fillDate
 GLOBAL inforeg
 GLOBAL fillMem
 GLOBAL _quadratic
+GLOBAL createProcessAsm
 
 EXTERN print_f
 
@@ -206,6 +207,22 @@ inforeg:
     popState
     popf
     ret
+
+
+
+
+createProcessAsm:
+    mov rax , 5 
+    int 80h
+    ret
+
+
+
+
+
+
+
+
 
 section .data
 fmt db "%s: %xh", 10, 0
