@@ -6,11 +6,13 @@ static uint64_t pid = 1;
 
 
 
-uint64_t _buildContext(uint64_t baseRSP, uint64_t functionAddress);
+int64_t functionAddress;
 void InitFirstProcess();
 
 
 
+ #define SIZE 50
+ processControlBlock * allProcesses[SIZE]; 
 
 //First process created by the kernel.
 void firstProcess(uint64_t functionAddress, prompt_info prompt) {
@@ -24,6 +26,7 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+    allProcesses[pid-1] = task;
 
     addProcess(task); 
     InitFirstProcess();
@@ -41,9 +44,22 @@ uint64_t createProcess(uint64_t functionAddress){
     task->baseRSP = (uint64_t)&basePointer[4095] ; 
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+    allProcesses[pid-1] = task;
 
     addProcess(task); 
 
     return pid - 1 ;  
 
+}
+
+//Carga un conjunto de datos predefinidos (mirar la struct processDescriptor) en la direccion indicada
+//Retorna la cantidad de procesos listados
+int getProcessesData(uint64_t descriptorArray){
+    int i = 0;
+    processDescriptor * descriptorArrayAux = (processDescriptor *) descriptorArray;
+    while(allProcesses[i]){
+        (descriptorArrayAux+i)->pid=allProcesses[i]->pid;
+        i++;
+    }
+    return i;
 }

@@ -10,6 +10,6 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt);
 
 uint64_t createProcess(uint64_t functionAddress);
 
-
+int getProcessesData(uint64_t descriptorsArray);
 
 #endif

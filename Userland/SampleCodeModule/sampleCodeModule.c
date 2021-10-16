@@ -11,7 +11,7 @@
 #include <stdarg.h>
 
 #define MAX_COMMAND 19 // Habria que achicarlo
-#define MODULES_SIZE 9
+#define MODULES_SIZE 10
 
 typedef void (*commandType)(void);
 
@@ -24,7 +24,8 @@ static char * commandStrings[MODULES_SIZE] = {
 	"invalidOpcode",
 	"printFeatures",
 	"printQuadraticRoots",
-	"printHola"
+	"printHola",
+	"ps"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -35,7 +36,8 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	throwInvalidOpcodeException,
 	printFeatures,
 	printQuadraticRoots,
-	printHola
+	printHola,
+	printProcessesData
 };
 
 void checkModule(char * string);

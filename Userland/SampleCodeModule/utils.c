@@ -3,11 +3,14 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <ProcessAPI.h>
+#include "../../Kernel/include/ListFreeMemoryManager.h"
 
 
 #define BUFFER_SIZE 16
-
+#define MAX_PROCS 5
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
+
+
 
 void printDate() {
 	dateType currDate;
@@ -30,6 +33,7 @@ void help() {
     print_f(1, " - printQuadraticRoots: Resuelve una funcion cuadratica\n");
     print_f(1, " - invalidOpcode: Genera excepcion por operacion invalida\n");
     print_f(1, " - divisionByZero: Genera excepcion por division por 0\n");
+    print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
 }
 
 void printmem() {
@@ -63,7 +67,7 @@ void printmem() {
 }
 
 void printFeatures() {
-    // Chequear si se pude usar cpuid
+    // Chequear si se pude usar cpuig
     uint32_t eax, ebx, ecx, edx;
 
     if (supports_cpuid()){
@@ -125,9 +129,20 @@ void printHola(){
     createProcessUserland( (uint64_t) &aux);
 }
 
+void printProcessesData(){
+    processDescriptor * descriptorArray = malloc(MAX_PROCS*sizeof(processDescriptor));
+    int count = getProcessesDataAsm(descriptorArray);
+    print_f(1, "  PID\n\n");
+    for(int i = 0; i < count; i++){
+        print_f(1, "  %d\n\n", (descriptorArray+i)->pid);
+    }
+}
+
 
 void aux(void){
+
     while(1){
         print_f(1,"hola\n");
     }
+
 }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include "utils.h"
 
 #define IN_RANGE(x, a, b) ((x) >= (a) && (x) <= (b))
 #define ISUPPER(x) IN_RANGE(x, 'A', 'Z')
@@ -33,5 +34,6 @@ void inforeg(void);
 int64_t fillMem(uint64_t src, uint8_t * dst, uint8_t size);
 int64_t getChar(void);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);
+int getProcessesDataAsm(processDescriptor * despriptorArray);
 
 #endif

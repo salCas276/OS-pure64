@@ -15,7 +15,9 @@ typedef struct processControlBlock {
     prompt_info prompt;
 } processControlBlock;
 
-
+typedef struct processDescriptor{
+    uint8_t pid;
+} processDescriptor;
 
 void addProcess(processControlBlock * process);
 

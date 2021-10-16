@@ -24,6 +24,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
 		case 5 : return createProcess(rdi);
+		case 6 : return getProcessesData(rdi);
 	}
 	return 0;
 }
