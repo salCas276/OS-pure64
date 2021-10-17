@@ -136,6 +136,7 @@ void printProcessesData(){
     for(int i = 0; i < count; i++){
         print_f(1, "  %d\n\n", (descriptorArray+i)->pid);
     }
+    free(descriptorArray);
 }
 
 
