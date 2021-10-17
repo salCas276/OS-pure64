@@ -14,7 +14,6 @@ void printmem(void);
 void printFeatures(void);
 void printQuadraticRoots(void);
 void printProcessesData(void);
-
 void printHola(void);
 
 #endif

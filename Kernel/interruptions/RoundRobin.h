@@ -33,5 +33,7 @@ uint64_t getCurrentRSP();
 
 prompt_info * getCurrentPrompt();
 
+int getCurrentPid();
+
 
 #endif

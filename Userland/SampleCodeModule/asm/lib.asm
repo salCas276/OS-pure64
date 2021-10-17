@@ -6,7 +6,8 @@ GLOBAL inforeg
 GLOBAL fillMem
 GLOBAL _quadratic
 GLOBAL createProcessAsm
-GLOBAL getProcessesDataAsm
+GLOBAL getProcessesData
+GLOBAL getpid
 
 EXTERN print_f
 
@@ -210,7 +211,7 @@ inforeg:
     ret
 
 
-getProcessesDataAsm:
+getProcessesData:
     mov rax, 6
     int 80h
     ret
@@ -220,7 +221,10 @@ createProcessAsm:
     int 80h
     ret
 
-
+getpid:
+    mov rax, 7
+    int 80h
+    ret
 
 
 

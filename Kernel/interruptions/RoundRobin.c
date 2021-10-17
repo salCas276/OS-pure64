@@ -33,3 +33,7 @@ uint64_t getCurrentRSP(){
 prompt_info * getCurrentPrompt() {
     return &(getCurrentTask()->prompt);
 }
+
+int getCurrentPid(){
+    return ActiveProcess[currentIndex]->pid;
+}

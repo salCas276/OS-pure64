@@ -37,7 +37,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printFeatures,
 	printQuadraticRoots,
 	printHola,
-	printProcessesData
+	printProcessesData,
 };
 
 void checkModule(char * string);

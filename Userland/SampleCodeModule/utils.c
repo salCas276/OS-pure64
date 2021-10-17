@@ -131,7 +131,7 @@ void printHola(){
 
 void printProcessesData(){
     processDescriptor * descriptorArray = malloc(MAX_PROCS*sizeof(processDescriptor));
-    int count = getProcessesDataAsm(descriptorArray);
+    int count = getProcessesData(descriptorArray);
     print_f(1, "  PID\n\n");
     for(int i = 0; i < count; i++){
         print_f(1, "  %d\n\n", (descriptorArray+i)->pid);
@@ -141,9 +141,9 @@ void printProcessesData(){
 
 
 void aux(void){
-
     while(1){
         print_f(1,"hola\n");
     }
 
 }
+
