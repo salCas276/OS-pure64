@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include "utils.h"
 
 #define IN_RANGE(x, a, b) ((x) >= (a) && (x) <= (b))
 #define ISUPPER(x) IN_RANGE(x, 'A', 'Z')
@@ -35,5 +36,7 @@ int64_t getChar(void);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);
 void * memalloc(uint64_t size); 
 void memfree(void * pv); 
+int getProcessesData(processDescriptor * despriptorArray);
+int getpid();
 
 #endif

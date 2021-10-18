@@ -7,6 +7,9 @@ GLOBAL fillMem
 GLOBAL _quadratic
 GLOBAL memalloc
 GLOBAL memfree
+GLOBAL createProcessAsm
+GLOBAL getProcessesData
+GLOBAL getpid
 
 EXTERN print_f
 
@@ -97,12 +100,12 @@ fillMem:
     ret
 
 memalloc:
-    mov rax, 5
+    mov rax, 8
     int 80h
     ret
 
 memfree:
-    mov rax, 6
+    mov rax, 9
     int 80h
     ret
 
@@ -219,6 +222,28 @@ inforeg:
     popState
     popf
     ret
+
+
+getProcessesData:
+    mov rax, 6
+    int 80h
+    ret
+
+createProcessAsm:
+    mov rax , 5 
+    int 80h
+    ret
+
+getpid:
+    mov rax, 7
+    int 80h
+    ret
+
+
+
+
+
+
 
 section .data
 fmt db "%s: %xh", 10, 0

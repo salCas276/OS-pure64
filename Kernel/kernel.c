@@ -5,8 +5,9 @@
 #include <naiveConsole.h>
 #include <idtLoader.h>
 #include <video.h>
-#include "./interruptions/Scheduler.h"
 #include "./include/memoryManager.h"
+#include <Process.h>
+
 #include "./include/test_util.h"
 
 extern uint8_t text;
@@ -179,10 +180,12 @@ void test_mm(){
 
 
 
+
+
 int main() {	
 
 	//illScreen(&PURPLE);
-	 //drawShellBorder(&WHITE);
+	 drawShellBorder(&WHITE);
 	_cli();
 	 load_idt();
 	// // ncPrint("  IDT loaded");
@@ -193,7 +196,6 @@ int main() {
 	// // ncPrintHex((uint64_t)sampleCodeModuleAddress);
 	// // ncNewline();
 	// // ncPrint("  Calling the sample code module returned: ");
-	
 	prompt_info leftPrompt = {	.x = 0,
 								.y = 0,
 							  	.baseX = 0,
@@ -208,11 +210,11 @@ int main() {
 	// 							.windowWidth = getScreenWidth()/2 - 4, 
 	// 							.windowHeight = getScreenHeight()};
 
-	uint64_t * bsP1 = malloc(4096 * sizeof(uint64_t));
 //	uint64_t * bsP2 = malloc(4096 * sizeof(uint64_t));
 
 	//addProcess(0,(uint64_t)test_mm,(uint64_t)&bsP2[4095],rightPrompt);
-	FirstProcess((uint64_t)sampleCodeModuleAddress, (uint64_t)&bsP1[4095], leftPrompt);
+	//createProcess((uint64_t)print , rightPrompt );
+	firstProcess((uint64_t)sampleCodeModuleAddress,leftPrompt);
 
 
 //	loadTask(1, (uint64_t)test_mm, 0x700000, rightPrompt);

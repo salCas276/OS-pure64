@@ -7,7 +7,6 @@
 
 
 void timer_handler(void);
-void FirstProcess(uint64_t functionAddress, uint64_t baseRSP, prompt_info prompt);
 
 
 #endif

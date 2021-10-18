@@ -10,7 +10,7 @@
 #include <stdarg.h>
 
 #define MAX_COMMAND 19 // Habria que achicarlo
-#define MODULES_SIZE 8
+#define MODULES_SIZE 10
 
 typedef void (*commandType)(void);
 
@@ -22,7 +22,9 @@ static char * commandStrings[MODULES_SIZE] = {
 	"divisionByZero",
 	"invalidOpcode",
 	"printFeatures",
-	"printQuadraticRoots"
+	"printQuadraticRoots",
+	"printHola",
+	"ps"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -32,7 +34,9 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	throwDivisionByZeroException,
 	throwInvalidOpcodeException,
 	printFeatures,
-	printQuadraticRoots
+	printQuadraticRoots,
+	printHola,
+	printProcessesData,
 };
 
 void checkModule(char * string);
