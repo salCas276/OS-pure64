@@ -5,9 +5,8 @@
 #include <naiveConsole.h>
 #include <idtLoader.h>
 #include <video.h>
-#include "./include/ListFreeMemoryManager.h"
 #include "./interruptions/Scheduler.h"
-
+#include "./include/memoryManager.h"
 #include "./include/test_util.h"
 
 extern uint8_t text;
@@ -21,7 +20,6 @@ static const uint64_t PageSize = 0x1000;
 
 static void * const sampleCodeModuleAddress = (void*)0x400000;
 static void * const sampleDataModuleAddress = (void*)0x500000;
-static void * memoryManagerPtr=(void*)0x900000;
 
 void _cli(); //clear interrupts.
 
@@ -71,6 +69,43 @@ void * initializeKernelBinary()
 
 	clearBSS(&bss, &endOfKernel - &bss);
 
+
+	char *c = malloc( 20000 * sizeof(char));
+	// char *d = malloc( 20000 * sizeof(char));
+	// char *e = malloc( 20000 * sizeof(char));
+	int summer = 0; 
+
+	for (int i=0; i<20000; i++)
+		c[i] = 1; 
+
+	// for (int i=0; i<20000; i++)
+	// 	d[i] = 2; 
+
+	// for (int i=0; i<20000; i++)
+	// 	e[i] = 3; 
+
+	// summer = 0; 
+	// for (int i=0; i<20000; i++) 
+	// 	summer += c[i]; 
+	
+	// if (summer != 20000)
+	// 	return (void*) 0; 
+
+	// summer = 0; 
+	// for (int i=0; i<20000; i++) 
+	// 	summer += d[i]; 
+
+	// if (summer != 40000)
+	// 	return (void*) 0; 
+
+	// summer = 0; 
+	// for (int i=0; i<20000; i++) 
+	// 	summer += e[i]; 
+
+	// if (summer != 60000)
+	// 	return (void*) 0; 
+
+		
 	// ncPrint("  text: 0x");
 	// ncPrintHex((uint64_t)&text);
 	// ncNewline();
@@ -90,6 +125,7 @@ void * initializeKernelBinary()
 
 	init_screen();
 
+
 	return getStackBase();
 }
 
@@ -105,49 +141,49 @@ typedef struct MM_rq{
 
 
 void test_mm(){
-  mm_rq mm_rqs[MAX_BLOCKS];
-  uint8_t rq;
-  uint32_t total;
+//   mm_rq mm_rqs[MAX_BLOCKS];
+//   uint8_t rq;
+//   uint32_t total;
 
-  while (1){
-    rq = 0;
-    total = 0;
+//   while (1){
+//     rq = 0;
+//     total = 0;
 
-    // Request as many blocks as we can
-    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
-      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
-      mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
-	//TODO: check if NULL
-      total += mm_rqs[rq].size;
-      rq++;
-    }
+//     // Request as many blocks as we can
+//     while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+//       mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+//       mm_rqs[rq].address = malloc(mm_rqs[rq].size); // TODO: Port this call as required
+// 	//TODO: check if NULL
+//       total += mm_rqs[rq].size;
+//       rq++;
+//     }
 
-    // Set
-    uint32_t i;
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
+//     // Set
+//     uint32_t i;
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         memset(mm_rqs[i].address, i, mm_rqs[i].size); // TODO: Port this call as required
 
-    // Check
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) 
-          ncPrint("ERROR!"); // TODO: Port this call as required
+//     // Check
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) 
+//           ncPrint("ERROR!"); // TODO: Port this call as required
 
-    // Free
-    for (i = 0; i < rq; i++)
-      if (mm_rqs[i].address != NULL)
-        free(mm_rqs[i].address);  // TODO: Port this call as required
-  } 
+//     // Free
+//     for (i = 0; i < rq; i++)
+//       if (mm_rqs[i].address != NULL)
+//         free(mm_rqs[i].address);  // TODO: Port this call as required
+//   } 
 }
 
 
 
 int main() {	
+
 	//illScreen(&PURPLE);
 	 //drawShellBorder(&WHITE);
 	_cli();
-	 InitializeMM(memoryManagerPtr);
 	 load_idt();
 	// // ncPrint("  IDT loaded");
 	// // ncNewline();

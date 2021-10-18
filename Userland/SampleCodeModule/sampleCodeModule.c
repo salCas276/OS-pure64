@@ -5,9 +5,8 @@
 #include <exceptions.h>
 #include <string.h>
 
-
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <stdarg.h>
 
 #define MAX_COMMAND 19 // Habria que achicarlo
@@ -44,10 +43,6 @@ int main() {
 
 	print_f(1, "Estamos en userland.\n");
 	help();
-
-
-
-
 
 	while(1) {
 		print_f(2, "\n>> ");

@@ -1,5 +1,7 @@
 include Makefile.inc
 
+
+MEMMANAGER=listfree # buddy o listfree 
 KERNEL=kernel.bin
 SOURCES=$(wildcard *.c)
 SOURCES_INTERRUPTIONS=$(wildcard interruptions/*.c)
@@ -14,16 +16,22 @@ LOADERSRC=loader.asm
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
 STATICLIBS=
 
-ALL_OBJECTS= $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_INTERRUPTIONS) $(OBJECTS_INTERRUPTIONS_ASM)
+ALL_OBJECTS= $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_INTERRUPTIONS) $(OBJECTS_INTERRUPTIONS_ASM) 
 
-all: $(KERNEL)
+all: $(MEMMANAGER) $(KERNEL)
 
-$(KERNEL): $(STATICLIBS) $(ALL_OBJECTS)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $@ $^
-	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $^
+$(KERNEL): $(STATICLIBS)  $(ALL_OBJECTS)
+	$(LD) $(LDFLAGS) -T kernel.ld -o $@ $^ memoryManager.o
+	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $^ memoryManager.o
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -I./interruptions -c $< -o $@
+
+buddy:
+	$(GCC) $(GCCFLAGS) -I./include -c "memoryManager/buddyMemoryManager.c" -o memoryManager.o
+
+listfree:
+	$(GCC) $(GCCFLAGS) -I./include -c "memoryManager/listFreeMemoryManager.c" -o memoryManager.o
 
 %.o : %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
@@ -32,6 +40,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf $(ALL_OBJECTS) *.bin
+	rm -rf $(ALL_OBJECTS) memoryManager.o *.bin
 
 .PHONY: all clean
