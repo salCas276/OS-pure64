@@ -42,7 +42,39 @@ int main() {
 	//int32_t counter = 0;
 
 	print_f(1, "Estamos en userland.\n");
-	help();
+	// help();
+
+
+	print_f(1, "--------First round------\n");
+
+	void * ary[20] = {0}; 
+	void * aux; 
+	int i = 0; 
+	do {
+		aux = memalloc(0x10000); 
+		ary[i++] = aux; 
+	} while (aux!=NULL); 
+
+	for (int i=0; i<20; i++)
+		print_f(2, "%d\n", ary[i]);
+
+	for (int i=0; i<20; i++)
+		memfree(ary[i]); 
+
+	print_f(1, "--------Second round------\n");
+
+	void * ary2[20] = {0}; 
+	void * aux2; 
+	int i2 = 0; 
+	do {
+		aux2 = memalloc(0x10000); 
+		ary2[i2++] = aux2; 
+	} while (aux2!=NULL); 
+
+	for (int i2=0; i2<20; i2++)
+		print_f(2, "%d\n", ary2[i2]);
+
+
 
 	while(1) {
 		print_f(2, "\n>> ");

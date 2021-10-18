@@ -5,6 +5,8 @@ GLOBAL fillDate
 GLOBAL inforeg
 GLOBAL fillMem
 GLOBAL _quadratic
+GLOBAL memalloc
+GLOBAL memfree
 
 EXTERN print_f
 
@@ -93,6 +95,17 @@ fillMem:
     mov rax, 4
     int 80h
     ret
+
+memalloc:
+    mov rax, 5
+    int 80h
+    ret
+
+memfree:
+    mov rax, 6
+    int 80h
+    ret
+
 
 setReg:
     mov rax, 0xFFFF

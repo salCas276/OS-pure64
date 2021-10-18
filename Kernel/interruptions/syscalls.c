@@ -4,6 +4,7 @@
 #include <lib.h>
 #include <keyboard.h>
 #include <video.h>
+#include <memoryManager.h>
 
 typedef struct dateType {
 	uint8_t year, month, day;
@@ -14,6 +15,9 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count);
 int64_t sys_read(void);
 uint64_t sys_date(dateType * pDate);
 uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
+uint64_t sys_malloc(uint64_t size);
+uint64_t sys_free(uint64_t pv); 
+
 
 // TODO: Usar un arreglo y no switch case
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
@@ -22,6 +26,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 2: return sys_read();
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
+		case 5: return sys_malloc(rdi); 
+		case 6: return sys_free(rdi); 
 	}
 	return 0;
 }
@@ -76,4 +82,13 @@ uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx){
 		dst[i] = src[i];
 	
 	return i;
+}
+
+uint64_t sys_malloc(uint64_t size) {
+	return malloc((unsigned int) size); 
+}
+
+uint64_t sys_free(uint64_t pv) {
+	free((void *) pv); 
+	return 0; 
 }
