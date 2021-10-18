@@ -3,7 +3,7 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <ProcessAPI.h>
-#include "../../Kernel/include/ListFreeMemoryManager.h"
+#include "../../Kernel/include/memoryManager.h"
 
 
 #define BUFFER_SIZE 16
