@@ -16,6 +16,7 @@ typedef struct processControlBlock {
     char priority; // between 0 and WORSTPRIORITY. 0 = HIGHPRIORITY 
     char currentPushes; 
     prompt_info prompt;
+    struct processControlBlock * tail; 
 } processControlBlock;
 
 typedef struct processDescriptor{
@@ -39,5 +40,7 @@ prompt_info * getCurrentPrompt();
 int getCurrentPid();
 
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
+
+int killProcess(int pid);
 
 #endif

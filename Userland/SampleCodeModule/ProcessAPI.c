@@ -11,3 +11,7 @@ uint64_t createProcessUserland(uint64_t function){
 uint64_t nice(int pid, int deltaNice) {
     return niceAsm(pid, deltaNice); 
 }
+
+uint64_t kill(int signal, int pid) {
+    return killAsm(signal, pid); 
+}

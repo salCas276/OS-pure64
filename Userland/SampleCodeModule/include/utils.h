@@ -20,5 +20,6 @@ void echo(_ARGUMENTS);
 void printProcessesData(_ARGUMENTS);
 void printHola(_ARGUMENTS);
 void nicecmd(_ARGUMENTS); 
+void killcmd(_ARGUMENTS); 
 
 #endif

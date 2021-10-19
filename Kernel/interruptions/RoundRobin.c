@@ -1,33 +1,103 @@
 
 #include <roundRobin.h>
 #include "../include/naiveConsole.h"
+#include "../include/memoryManager.h"
 
 #define SIZE 20
-static processControlBlock * ActiveProcess[SIZE];
-static int currentIndex = 0 ; 
-static int ProcessTotal = 0;
+// static processControlBlock * ActiveProcess[SIZE];
+static int currentIndex = 0 ; // idx in the list 
+static int processTotal = 0;
+static processControlBlock * currentProcess = (processControlBlock *)(0); 
+static processControlBlock * header = (processControlBlock *)(0); 
+
+// Debugging
+static void printChain(processControlBlock * c) {
+   
+   if ( c ==0 ) {
+       ncPrint("[EOP]\n"); 
+       return; 
+   } 
+
+   char str[] = {2, 0}; 
+   str[0] = c->pid + '0'; 
+   ncPrint(str); 
+   ncPrint("->"); 
+   printChain(c->tail); 
+}
 
 
+// El agregado de procesos se hace al estilo stack, se lo pushea en una lista simplemente encadenada de procesos 
+// En la iteracion de la lista, si llegue al final, vuelvo a empezar (RR)
+// Agregar un proceso no cambia el proceso que actualmente se esta ejecutando 
 void addProcess(processControlBlock * process){
-    ActiveProcess[ProcessTotal]=process;
-    // char c[] = { 'p', 'r', 'o', 'c', 'e', 's', 's', 'P', 'R', ':', ' ', '0'+process->priority, '\n', 0}; 
-    //ncPrint(c);
-	ProcessTotal++;
+
+    // No hay procesos 
+    if ( header == 0 ) {
+        header = process; 
+        header->tail = (processControlBlock *)(0); 
+        currentProcess = process; 
+        printChain(header); 
+        return; 
+    }
+
+    // push 
+    process->tail = header; 
+    header = process; 
+	processTotal++;
+    printChain(header); 
+
+}
+
+static processControlBlock * killR(processControlBlock * process, int pid, int * flags) {
+
+    if (process == 0) {
+        *flags = 1; 
+        return process; 
+    }
+
+    if ( process->pid == pid) {
+        processControlBlock * aux = process->tail; 
+        free(process); 
+        return aux; 
+    }
+
+    process->tail = killR(process->tail, pid, flags); 
+    return process; 
+}
+
+
+int killProcess(int pid) {
+    int flags = 0; 
+    header = killR(header, pid, &flags);
+    return flags; 
 }
 
 
 void nextTask(){
-    if ( ActiveProcess[currentIndex]->currentPushes < WORSTPRIORITY + 1 - ActiveProcess[currentIndex]->priority ) {
-        ActiveProcess[currentIndex]->currentPushes ++; 
+    //FOR DEBUGGING CHAMPAGNE
+    // char str[] = {'0', 0}; 
+    // ncPrint("CS "); 
+    // str[0] = '0'+currentProcess->pid;
+    // ncPrint(str); 
+    // ncPrint("("); 
+    // str[0] = '0' + currentProcess->priority; 
+    // ncPrint(str); 
+    // ncPrint(")->"); 
+
+    if ( currentProcess->currentPushes < WORSTPRIORITY + 1 - currentProcess->priority ) {
+        currentProcess->currentPushes ++; 
 
     } else {
-        ActiveProcess[currentIndex]->currentPushes = 0; 
-        currentIndex = (currentIndex + 1) % ProcessTotal;
+        currentProcess->currentPushes = 0; 
+        currentProcess = ( currentProcess->tail == (processControlBlock *)(0) ? header : currentProcess->tail); 
     } 
+//     str[0] = '0'+ currentProcess->pid;
+//     ncPrint(str); 
+//     ncPrint("\n"); 
 }
 
 processControlBlock * getCurrentTask(){
-    return ActiveProcess[currentIndex];
+    return currentProcess;
 }
 
 
@@ -44,12 +114,23 @@ prompt_info * getCurrentPrompt() {
 }
 
 int getCurrentPid(){
-    return ActiveProcess[currentIndex]->pid;
+    return currentProcess->pid;
+}
+
+// Se podria mejorar. Conformarse con O(N) y despues lo mejoramos si alcanza el tiempo. 
+static processControlBlock * getProcessFromPID(int pid) {
+
+    processControlBlock * c = header; 
+    while ( c!=0 && c->pid != pid ) c = c->tail; 
+    return c; 
+    
 }
 
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
 
-    if (ActiveProcess[pid] == (processControlBlock *)0) return 1; 
+    processControlBlock * p = getProcessFromPID(pid); 
+
+    if ( p == 0) return 1; 
 
 
     // ncPrint("Vieja prioridad era: ");
@@ -58,13 +139,13 @@ int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
     // ncPrint("\n");   
 
 
-    int aux = ActiveProcess[pid]->priority+deltaNice; 
+    int aux = p->priority+deltaNice; 
 
-    // Si no anda sacar esto     
+    //Si no anda sacar esto     
     if ( aux > WORSTPRIORITY ) aux = WORSTPRIORITY; 
     else if ( aux < 0 ) aux = 0; 
 
-    ActiveProcess[pid]->priority = aux; 
+    p->priority = aux; 
 
     // ncPrint("Nueva prioridad es: ");
     // char d[] = { ActiveProcess[pid]->priority+'0', 0}; 

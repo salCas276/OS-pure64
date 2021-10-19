@@ -25,7 +25,8 @@ static char * commandStrings[MODULES_SIZE] = {
 	"echo",
 	"printHola",
 	"ps", 
-	"nice"
+	"nice", 
+	"kill"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -39,7 +40,8 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	echo, 
 	printHola,
 	printProcessesData,
-	nicecmd
+	nicecmd, 
+	killcmd
 };
 
 void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 

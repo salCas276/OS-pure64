@@ -35,6 +35,8 @@ void help(_ARGUMENTS) {
     print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
+    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar o 1 para bloquear.\n ");
+
 
 }
 
@@ -149,16 +151,37 @@ void nicecmd(_ARGUMENTS) {
     if ( pid < 0 ) return; 
     int bonus = strtoint(&argv[2][3], NULL, 10); 
     if ( bonus > 19 || bonus < -20 ) return; 
-    print_f(1, "Updating priority for process %d priority+= %d...\n", pid, bonus); 
     nice(pid, bonus);
 }
 
+
+void killcmd(_ARGUMENTS) {
+    if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'k' || argv[1][2] != '=') {
+        print_f(2, "Cantidad de parametros invalida\n");
+        return; 
+    }  
+    int pid = strtoint( &argv[2][0], NULL, 10); 
+    int sg = strtoint( &argv[1][3], NULL, 10); 
+
+    if (pid == 0) {
+        print_f(2, "No puedes matar a la shell\n");
+        return; 
+    }
+
+    if ( sg >= 2 ) {
+        print_f(2, "No existe una senal con ese codigo\n");
+        return;  
+    }
+
+    if ( kill(sg, pid) != 0 ) {
+        print_f(2, "No existe ese pid\n");
+    } 
+}
+
+
 void printHola(_ARGUMENTS){
-    // createProcessUserland( (uint64_t) &aux);
     createProcessUserland( (uint64_t) &auxa);
     createProcessUserland( (uint64_t) &auxb);
-    nice(1, 20); 
-    nice(1, 20); 
 }
 
 void printProcessesData(_ARGUMENTS){
@@ -181,16 +204,16 @@ void aux(void){
 void auxa(void){
     int i = 0; 
     while(1) {
-        for(int i=0; i<100000000; i++); 
-        print_f(2,"AAAA #%d\n", i++);
+        // for(int i=0; i<100000000; i++); 
+        // print_f(1,"AAAA #%d\n", i++);
     }
 }
 
 void auxb(void){
     int i = 0; 
     while(1) {
-        for(int i=0; i<100000000; i++); 
-        print_f(1,"BBBB #%d\n", i++);
+        // for(int i=0; i<100000000; i++); 
+        // print_f(1,"BBBB #%d\n", i++);
     }
 }
 

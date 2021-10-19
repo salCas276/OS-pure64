@@ -11,6 +11,8 @@ GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getpid
 GLOBAL niceAsm
+GLOBAL killAsm
+
 
 EXTERN print_f
 
@@ -242,6 +244,12 @@ getpid:
 
 niceAsm:
     mov rax, 10
+    int 80h
+    ret
+
+
+killAsm:
+    mov rax, 11
     int 80h
     ret
 
