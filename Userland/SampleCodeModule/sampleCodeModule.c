@@ -46,9 +46,9 @@ int main() {
 	//int32_t counter = 0;
 
 	print_f(1, "Estamos en userland.\n");
-	// help();
+	help();
 
-
+	/*
 	print_f(1, "--------First round------\n");
 
 	void * ary[20] = {0}; 
@@ -77,7 +77,10 @@ int main() {
 
 	for (int i2=0; i2<20; i2++)
 		print_f(2, "%d\n", ary2[i2]);
-
+	
+	for (int i=0; i<20; i++)
+		memfree(ary[i]);
+	*/
 
 
 	while(1) {

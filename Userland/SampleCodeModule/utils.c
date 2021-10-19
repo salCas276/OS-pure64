@@ -141,7 +141,7 @@ void printProcessesData(){
 
 void aux(void){
     while(1){
-        //print_f(1,"hola\n");
+        print_f(1,"hola\n");
     }
 
 }
