@@ -89,6 +89,38 @@ int killProcess(int pid) {
     return flags; 
 }
 
+int blockProcess(int pid, int password) {
+
+    printChain(header);
+    printChain(blockHeaders[password]); 
+    if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
+    int flags = 0; 
+
+    processControlBlock * p; 
+    header = unlinkProcess(header, pid, &flags, &p); 
+    pushProcess( &blockHeaders[0], p); 
+
+    printChain(header);
+    printChain(blockHeaders[password]); 
+    return flags; 
+}
+
+int unblockProcess(int pid, int password) {
+
+    if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
+    
+    int flags = 0; 
+
+    processControlBlock * p; 
+    blockHeaders[password] = unlinkProcess(blockHeaders[password], pid, &flags, &p); 
+    pushProcess( &header, p); 
+
+    printChain(header);
+    printChain(blockHeaders[password]); 
+
+    return flags; 
+}
+
 
 void nextTask(){
     //FOR DEBUGGING CHAMPAGNE

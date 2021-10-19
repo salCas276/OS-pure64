@@ -2,6 +2,7 @@
 
 uint64_t createProcessAsm(uint64_t function);
 uint64_t niceAsm(uint64_t pid, uint64_t deltaNice); 
+uint64_t killAsm(uint64_t signal, uint64_t pid); 
 
 
 uint64_t createProcessUserland(uint64_t function){

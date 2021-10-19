@@ -43,5 +43,7 @@ int getCurrentPid();
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 
 int killProcess(int pid);
+int blockProcess(int pid, int password);
+int unblockProcess(int pid, int password);
 
 #endif

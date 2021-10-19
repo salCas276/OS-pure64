@@ -35,7 +35,7 @@ void help(_ARGUMENTS) {
     print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
-    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar o 1 para bloquear.\n ");
+    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n ");
 
 
 }
@@ -168,7 +168,7 @@ void killcmd(_ARGUMENTS) {
         return; 
     }
 
-    if ( sg >= 2 ) {
+    if ( sg >= 3 ) {
         print_f(2, "No existe una senal con ese codigo\n");
         return;  
     }

@@ -103,7 +103,8 @@ uint64_t sys_free(uint64_t pv) {
 uint64_t sys_kill(uint64_t code, uint64_t pid) {
 	switch(code) {
 		case 0: return killProcess(pid); 
-		case 1: return 0; // PARA BLOQUEAR
+		case 1: return blockProcess(pid, 0); 
+		case 2: return unblockProcess(pid, 0); 
 	}
 	return -1; 
 }
