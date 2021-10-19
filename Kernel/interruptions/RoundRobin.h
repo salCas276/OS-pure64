@@ -13,7 +13,7 @@ typedef struct processControlBlock {
     uint64_t taskRSP;
     uint64_t functionAddress; //no deberia ser necesario
     uint64_t baseRSP; //no deberia ser necesario 
-    char priority; // between 0 and WORSTPRIORITY
+    char priority; // between 0 and WORSTPRIORITY. 0 = HIGHPRIORITY 
     char currentPushes; 
     prompt_info prompt;
 } processControlBlock;
@@ -38,5 +38,6 @@ prompt_info * getCurrentPrompt();
 
 int getCurrentPid();
 
+int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 
 #endif

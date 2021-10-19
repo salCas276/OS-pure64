@@ -15,5 +15,6 @@ void printFeatures(void);
 void printQuadraticRoots(void);
 void printProcessesData(void);
 void printHola(void);
+void niceab(void); 
 
 #endif

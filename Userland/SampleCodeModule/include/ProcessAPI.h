@@ -5,4 +5,7 @@
 
 uint64_t createProcessUserland(uint64_t function);
 
+uint64_t nice(int pid, int deltaNice); 
+
+
 #endif

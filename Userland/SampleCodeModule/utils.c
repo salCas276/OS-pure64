@@ -124,6 +124,17 @@ void printQuadraticRoots(){
 
 void aux(void);
 
+void auxa(void);
+void auxb(void);
+
+
+void niceab(void) {
+    createProcessUserland( (uint64_t) &auxa);
+    createProcessUserland( (uint64_t) &auxb);
+    nice(1, 9);
+    nice(1, 9); 
+}
+
 void printHola(){
     createProcessUserland( (uint64_t) &aux);
 }
@@ -140,9 +151,25 @@ void printProcessesData(){
 
 
 void aux(void){
-    while(1){
+    while(1) {
         print_f(1,"hola\n");
     }
-
 }
+
+void auxa(void){
+    int i = 0; 
+    while(1) {
+        for(int i=0; i<10000000; i++); 
+        print_f(0,"AAAA #%d\n", i++);
+    }
+}
+
+void auxb(void){
+    int i = 0; 
+    while(1) {
+        for(int i=0; i<100000000; i++); 
+        print_f(0,"BBBB #%d\n", i++);
+    }
+}
+
 

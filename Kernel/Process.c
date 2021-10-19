@@ -14,6 +14,8 @@ static int lastPid = 0;
 static int freePidsCounter = MAX_PIDS;
 processControlBlock * allProcesses[MAX_PIDS]; 
 
+
+uint64_t _buildContext(uint64_t baseRSP, uint64_t functionAddress);
 static int generateNextPid();
 
 //First process created by the kernel.
@@ -52,6 +54,10 @@ uint64_t createProcess(uint64_t functionAddress){
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
     allProcesses[task->pid] = task;
+
+    // Processes are created with the worst possible priority 
+    task->priority = WORSTPRIORITY; 
+    task->currentPushes = 0; 
 
     addProcess(task); 
 

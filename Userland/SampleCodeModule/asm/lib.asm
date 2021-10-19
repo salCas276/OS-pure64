@@ -10,6 +10,7 @@ GLOBAL memfree
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getpid
+GLOBAL niceAsm
 
 EXTERN print_f
 
@@ -236,6 +237,11 @@ createProcessAsm:
 
 getpid:
     mov rax, 7
+    int 80h
+    ret
+
+niceAsm:
+    mov rax, 10
     int 80h
     ret
 

@@ -32,6 +32,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 7 : return getCurrentPid();
 		case 8: return sys_malloc(rdi); 
 		case 9: return sys_free(rdi); 
+		case 10: return changeNicenessBy(rdi, rsi); 
 	}
 	return 0;
 }
