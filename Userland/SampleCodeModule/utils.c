@@ -3,7 +3,6 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <ProcessAPI.h>
-#include "../../Kernel/include/memoryManager.h"
 
 
 #define BUFFER_SIZE 16
@@ -130,19 +129,19 @@ void printHola(){
 }
 
 void printProcessesData(){
-    processDescriptor * descriptorArray = malloc(MAX_PROCS*sizeof(processDescriptor));
+    processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
     int count = getProcessesData(descriptorArray);
     print_f(1, "  PID\n\n");
     for(int i = 0; i < count; i++){
         print_f(1, "  %d\n\n", (descriptorArray+i)->pid);
     }
-    free(descriptorArray);
+    memfree(descriptorArray);
 }
 
 
 void aux(void){
     while(1){
-        print_f(1,"hola\n");
+        //print_f(1,"hola\n");
     }
 
 }
