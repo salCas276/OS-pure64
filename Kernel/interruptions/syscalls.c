@@ -5,7 +5,7 @@
 #include <keyboard.h>
 #include <video.h>
 #include <memoryManager.h>
-#include <Process.h>
+#include <process.h>
 
 typedef struct dateType {
 	uint8_t year, month, day;

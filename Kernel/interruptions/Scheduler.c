@@ -1,4 +1,4 @@
-#include <Scheduler.h>
+#include <scheduler.h>
 #include "../include/memoryManager.h"
 
 

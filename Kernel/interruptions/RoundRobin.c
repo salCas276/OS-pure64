@@ -1,5 +1,5 @@
 
-#include <RoundRobin.h>
+#include <roundRobin.h>
 
 #define SIZE 20
 static processControlBlock * ActiveProcess[SIZE];
@@ -14,7 +14,12 @@ void addProcess(processControlBlock * process){
 
 
 void nextTask(){
-    currentIndex = (currentIndex + 1) % ProcessTotal;
+    if ( ActiveProcess[currentIndex]->currentPushes < WORSTPRIORITY + 1 - ActiveProcess[currentIndex]->priority ) 
+        ActiveProcess[currentIndex]->currentPushes ++; 
+    else {
+        ActiveProcess[currentIndex]->currentPushes = 0; 
+        currentIndex = (currentIndex + 1) % ProcessTotal;
+    } 
 }
 
 processControlBlock * getCurrentTask(){

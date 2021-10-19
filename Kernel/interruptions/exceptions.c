@@ -2,7 +2,7 @@
 #include <video.h>
 #include <keyboard.h>
 #include "../include/video.h"
-#include "Scheduler.h"
+#include "scheduler.h"
 
 #define EXCEPTION_COUNT		32
 #define ZERO_EXCEPTION_ID	0x00

@@ -1,4 +1,4 @@
-#include <Process.h>
+#include <process.h>
 
 
 static prompt_info Prompt;
@@ -29,6 +29,11 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+
+    // Processes are created with the worst possible priority 
+    task->priority = WORSTPRIORITY; 
+    task->currentPushes = 0; 
+    
     allProcesses[task->pid] = task;
 
     addProcess(task); 
@@ -77,3 +82,4 @@ static int generateNextPid(){
         lastPid = (lastPid+1)%MAX_PIDS;
     return lastPid;
 }
+
