@@ -7,6 +7,7 @@
 #include "../include/video.h"
 
 #define WORSTPRIORITY 40
+#define MAXBLOCKTYPES 10
 
 typedef struct processControlBlock {
     uint8_t pid;

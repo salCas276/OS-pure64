@@ -10,6 +10,13 @@ static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
 static processControlBlock * header = (processControlBlock *)(0); 
 
+
+static processControlBlock * blockHeaders[MAXBLOCKTYPES]; 
+
+
+static processControlBlock * unlinkProcess(processControlBlock * process, int pid, int * flags, processControlBlock ** p) ; 
+static void pushProcess( processControlBlock ** header, processControlBlock * process);
+
 // Debugging
 static void printChain(processControlBlock * c) {
    
@@ -41,14 +48,19 @@ void addProcess(processControlBlock * process){
     }
 
     // push 
-    process->tail = header; 
-    header = process; 
+    pushProcess(&header, process);
 	processTotal++;
     printChain(header); 
 
 }
 
-static processControlBlock * killR(processControlBlock * process, int pid, int * flags) {
+static void pushProcess( processControlBlock ** header, processControlBlock * process) {
+    process->tail = (*header); 
+    (*header) = process; 
+}
+
+
+static processControlBlock * unlinkProcess(processControlBlock * process, int pid, int * flags, processControlBlock ** p) {
 
     if (process == 0) {
         *flags = 1; 
@@ -56,19 +68,24 @@ static processControlBlock * killR(processControlBlock * process, int pid, int *
     }
 
     if ( process->pid == pid) {
-        processControlBlock * aux = process->tail; 
-        free(process); 
+        processControlBlock * aux = process->tail;
+        *p = process;  
         return aux; 
     }
 
-    process->tail = killR(process->tail, pid, flags); 
+    process->tail = unlinkProcess(process->tail, pid, flags, p); 
     return process; 
 }
 
 
 int killProcess(int pid) {
-    int flags = 0; 
-    header = killR(header, pid, &flags);
+    int flags = 0;
+    processControlBlock * p = 0;  
+    header = unlinkProcess(header, pid, &flags, &p);
+    if (!flags) {
+        free(p); // Efectivamente lo borra
+        if (!flags) processTotal --; 
+    }
     return flags; 
 }
 

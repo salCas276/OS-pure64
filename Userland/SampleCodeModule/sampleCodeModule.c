@@ -53,6 +53,10 @@ int main() {
 	char argv[MAX_ARGC][MAX_COMMAND]; 
 	//int32_t counter = 0;
 
+	// Queremos que nuestra shell tenga prioridad maxima 
+	nice(0, -20); 
+	nice(0, -20); 
+
 	print_f(1, "Estamos en userland.\n");
 	help(argv, 0);
 
