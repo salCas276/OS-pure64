@@ -11,7 +11,7 @@
 
 
 
-void printDate() {
+void printDate(_ARGUMENTS) {
 	dateType currDate;
 	fillDate(&currDate);
 	print_f(1, "Date: %d/%d/%d\nTime: %d:%d:%d (UTC)\n", currDate.day, 
@@ -22,7 +22,7 @@ void printDate() {
                                                          currDate.second);
 }
 
-void help() {
+void help(_ARGUMENTS) {
     print_f(1, "Los comandos disponibles son:\n");
     print_f(1, " - help: Muestra los comandos disponibles\n");
     print_f(1, " - inforeg: Muestra el estado de los registros\n");
@@ -30,12 +30,15 @@ void help() {
     print_f(1, " - printDate: Imprime informacion acerca del tiempo\n");
     print_f(1, " - printFeatures: Muestra caracteristicas del microprocesador\n");
     print_f(1, " - printQuadraticRoots: Resuelve una funcion cuadratica\n");
-    print_f(1, " - invalidOpcode: Genera excepcion por operacion invalida\n");
-    print_f(1, " - divisionByZero: Genera excepcion por division por 0\n");
+   // print_f(1, " - invalidOpcode: Genera excepcion por operacion invalida\n");
+   //  print_f(1, " - divisionByZero: Genera excepcion por division por 0\n");
+    print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
+    print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
+
 }
 
-void printmem() {
+void printmem(_ARGUMENTS) {
     uint8_t arr[BYTES_TO_READ] = {0};
     char buffer[BUFFER_SIZE + 1] = {0};
     uint64_t dir = 0;
@@ -65,7 +68,7 @@ void printmem() {
     print_f(1, "\n");
 }
 
-void printFeatures() {
+void printFeatures(_ARGUMENTS) {
     // Chequear si se pude usar cpuig
     uint32_t eax, ebx, ecx, edx;
 
@@ -93,7 +96,7 @@ void printFeatures() {
 
 }
 
-void printQuadraticRoots(){
+void printQuadraticRoots(_ARGUMENTS){
     double a, b, c, x1, x2;
     char buffer[100 + 1] = {0};
     int ans;
@@ -122,24 +125,43 @@ void printQuadraticRoots(){
     };
 }
 
+void echo(_ARGUMENTS) {
+    if (argc > 2 && argv[1][0] == '-') {
+        if ( argv[1][1] == 'm' ) {
+            for (int i=0; argv[2][i]; i++)
+                if (argv[2][i] >= 'a' && argv[2][i] <= 'z') argv[2][i] += 'A'-'a'; 
+            print_f(0, "%s", argv[2]);
+        } 
+    } else if (argc >= 2)
+        print_f(0, "%s", argv[1]); 
+}
+
+
 void aux(void);
 
 void auxa(void);
 void auxb(void);
 
 
-void niceab(void) {
+void nicecmd(_ARGUMENTS) {
+    if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '=' ||  argv[2][0] != '-' || argv[2][1] != 'b' || argv[2][2] != '=') return; 
+    int pid = strtoint( &argv[1][3], NULL, 10); 
+    if ( pid < 0 ) return; 
+    int bonus = strtoint(&argv[2][3], NULL, 10); 
+    if ( bonus > 19 || bonus < -20 ) return; 
+    print_f(1, "Updating priority for process %d priority+= %d...\n", pid, bonus); 
+    nice(pid, bonus);
+}
+
+void printHola(_ARGUMENTS){
+    // createProcessUserland( (uint64_t) &aux);
     createProcessUserland( (uint64_t) &auxa);
     createProcessUserland( (uint64_t) &auxb);
-    nice(1, 9);
-    nice(1, 9); 
+    nice(1, 20); 
+    nice(1, 20); 
 }
 
-void printHola(){
-    createProcessUserland( (uint64_t) &aux);
-}
-
-void printProcessesData(){
+void printProcessesData(_ARGUMENTS){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
     int count = getProcessesData(descriptorArray);
     print_f(1, "  PID\n\n");
@@ -159,8 +181,8 @@ void aux(void){
 void auxa(void){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(0,"AAAA #%d\n", i++);
+        for(int i=0; i<100000000; i++); 
+        print_f(2,"AAAA #%d\n", i++);
     }
 }
 
@@ -168,7 +190,7 @@ void auxb(void){
     int i = 0; 
     while(1) {
         for(int i=0; i<100000000; i++); 
-        print_f(0,"BBBB #%d\n", i++);
+        print_f(1,"BBBB #%d\n", i++);
     }
 }
 
