@@ -7,6 +7,7 @@
 #define _ARGUMENTS char argv[MAX_ARGC][MAX_COMMAND], int argc
 #include <stdint.h>
 
+
 typedef struct processDescriptor{
     uint8_t pid;
 } processDescriptor;

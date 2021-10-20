@@ -18,6 +18,8 @@ typedef struct processControlBlock {
     char currentPushes; 
     prompt_info prompt;
     struct processControlBlock * tail; 
+
+    
 } processControlBlock;
 
 typedef struct processDescriptor{

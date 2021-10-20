@@ -8,10 +8,10 @@
 static int currentIndex = 0 ; // idx in the list 
 static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
-static processControlBlock * header = (processControlBlock *)(0); 
 
 
-static processControlBlock * blockHeaders[MAXBLOCKTYPES]; 
+static processControlBlock * header = (processControlBlock *)(0); // Cola de listos
+static processControlBlock * blockHeaders[MAXBLOCKTYPES]; // ColaS de bloqueados donde el id es el pswd
 
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
@@ -47,7 +47,7 @@ void addProcess(processControlBlock * process){
         return; 
     }
 
-    // push 
+    // push
     pushProcess(&header, process);
 	processTotal++;
     printChain(header); 
@@ -76,7 +76,7 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
     return process; 
 }
 
-
+// Te mata un proceso que esta en la cola de listos 
 int killProcess(int pid) {
     processControlBlock * p = 0;  
     header = unlinkProcess(header, pid, &p);
@@ -96,7 +96,7 @@ int blockProcess(int pid, int password) {
     header = unlinkProcess(header, pid, &p); 
     if (p == 0) return 1; 
 
-    pushProcess( &blockHeaders[0], p); 
+    pushProcess( &blockHeaders[password], p); // Deberia ser password
     printChain(header);
     printChain(blockHeaders[password]); 
     return 0; 
