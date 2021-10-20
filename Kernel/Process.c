@@ -7,6 +7,7 @@ static prompt_info Prompt;
 
 int64_t functionAddress;
 void InitFirstProcess();
+uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress );
 
 
 #define MAX_PIDS 20

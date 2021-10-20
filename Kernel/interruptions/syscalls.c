@@ -6,6 +6,7 @@
 #include <video.h>
 #include <memoryManager.h>
 #include <Process.h>
+#include <semaphore.h>
 
 typedef struct dateType {
 	uint8_t year, month, day;
@@ -18,6 +19,10 @@ uint64_t sys_date(dateType * pDate);
 uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
 uint64_t sys_malloc(uint64_t size);
 uint64_t sys_free(uint64_t pv); 
+uint64_t sysOpenSemaphore(uint64_t rdi , uint64_t rsi );
+uint64_t sysWaitSemaphore(uint64_t rdi );
+uint64_t sysPostSemaphore(uint64_t rdi );
+uint64_t sysCloseSemaphore(uint64_t rdi );
 
 
 // TODO: Usar un arreglo y no switch case
@@ -32,6 +37,11 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 7 : return getCurrentPid();
 		case 8: return sys_malloc(rdi); 
 		case 9: return sys_free(rdi); 
+		case 12: return sysOpenSemaphore(rdi,rsi);
+		case 13 : return sysWaitSemaphore(rdi);
+		case 14 : return sysPostSemaphore(rdi);
+		case 15 : return sysCloseSemaphore(rdi);
+
 	}
 	return 0;
 }
@@ -89,10 +99,31 @@ uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx){
 }
 
 uint64_t sys_malloc(uint64_t size) {
-	return malloc((unsigned int) size); 
+	return (uint64_t) malloc((unsigned int) size); 
 }
 
 uint64_t sys_free(uint64_t pv) {
 	free((void *) pv); 
 	return 0; 
+}
+
+
+
+uint64_t sysOpenSemaphore(uint64_t rdi , uint64_t rsi){
+	return semOpen( (char*) rdi , rsi);
+}
+
+uint64_t sysWaitSemaphore(uint64_t rdi ){
+	return semWait( (char*) rdi);
+ 
+}
+
+uint64_t sysPostSemaphore(uint64_t rdi ){
+	return semPost( (char*) rdi);
+ 
+}
+
+uint64_t sysCloseSemaphore(uint64_t rdi ){
+	return semClose( (char*) rdi);
+ 
 }

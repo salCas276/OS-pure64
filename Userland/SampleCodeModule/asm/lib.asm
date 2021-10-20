@@ -10,6 +10,10 @@ GLOBAL memfree
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getpid
+GLOBAL openSemAsm
+GLOBAL waitSemAsm
+GLOBAL postSemAsm
+GLOBAL closeSemAsm
 
 EXTERN print_f
 
@@ -230,6 +234,9 @@ getProcessesData:
     ret
 
 createProcessAsm:
+
+
+
     mov rax , 5 
     int 80h
     ret
@@ -239,7 +246,25 @@ getpid:
     int 80h
     ret
 
+openSemAsm:
+    mov rax , 12
+    int 80h
+    ret 
 
+waitSemAsm:
+    mov rax , 13
+    int 80h
+    ret 
+
+postSemAsm:
+    mov rax , 14
+    int 80h
+    ret
+
+closeSemAsm:
+    mov rax , 15
+    int 80h
+    ret 
 
 
 
