@@ -34,7 +34,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 8: return sys_malloc(rdi); 
 		case 9: return sys_free(rdi); 
 		case 10: return changeNicenessBy(rdi, rsi); 
-		case 11: return sys_kill(rdi, rsi); 
+		case 11: return sys_kill(rdi, rsi);
+		case 12: return renounce();  
 	}
 	return 0;
 }

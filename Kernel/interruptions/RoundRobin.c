@@ -14,7 +14,7 @@ static processControlBlock * header = (processControlBlock *)(0);
 static processControlBlock * blockHeaders[MAXBLOCKTYPES]; 
 
 
-static processControlBlock * unlinkProcess(processControlBlock * process, int pid, int * flags, processControlBlock ** p) ; 
+static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
 static void pushProcess( processControlBlock ** header, processControlBlock * process);
 
 // Debugging
@@ -60,10 +60,9 @@ static void pushProcess( processControlBlock ** header, processControlBlock * pr
 }
 
 
-static processControlBlock * unlinkProcess(processControlBlock * process, int pid, int * flags, processControlBlock ** p) {
+static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) {
 
     if (process == 0) {
-        *flags = 1; 
         return process; 
     }
 
@@ -73,20 +72,18 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
         return aux; 
     }
 
-    process->tail = unlinkProcess(process->tail, pid, flags, p); 
+    process->tail = unlinkProcess(process->tail, pid, p); 
     return process; 
 }
 
 
 int killProcess(int pid) {
-    int flags = 0;
     processControlBlock * p = 0;  
-    header = unlinkProcess(header, pid, &flags, &p);
-    if (!flags) {
-        free(p); // Efectivamente lo borra
-        if (!flags) processTotal --; 
-    }
-    return flags; 
+    header = unlinkProcess(header, pid, &p);
+    if ( p == 0 ) return 1; 
+    free(p); // Efectivamente lo borra
+    processTotal --; 
+    return 0; 
 }
 
 int blockProcess(int pid, int password) {
@@ -94,31 +91,30 @@ int blockProcess(int pid, int password) {
     printChain(header);
     printChain(blockHeaders[password]); 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
-    int flags = 0; 
 
     processControlBlock * p; 
-    header = unlinkProcess(header, pid, &flags, &p); 
-    pushProcess( &blockHeaders[0], p); 
+    header = unlinkProcess(header, pid, &p); 
+    if (p == 0) return 1; 
 
+    pushProcess( &blockHeaders[0], p); 
     printChain(header);
     printChain(blockHeaders[password]); 
-    return flags; 
+    return 0; 
 }
 
 int unblockProcess(int pid, int password) {
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
     
-    int flags = 0; 
-
     processControlBlock * p; 
-    blockHeaders[password] = unlinkProcess(blockHeaders[password], pid, &flags, &p); 
-    pushProcess( &header, p); 
+    blockHeaders[password] = unlinkProcess(blockHeaders[password], pid, &p); 
 
+    if (p == 0) return 1; 
+    pushProcess( &header, p); 
     printChain(header);
     printChain(blockHeaders[password]); 
 
-    return flags; 
+    return 0; 
 }
 
 
@@ -147,6 +143,11 @@ void nextTask(){
 
 processControlBlock * getCurrentTask(){
     return currentProcess;
+}
+
+int renounce() {
+    currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; 
+    return 0; 
 }
 
 

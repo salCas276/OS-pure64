@@ -204,16 +204,16 @@ void aux(void){
 void auxa(void){
     int i = 0; 
     while(1) {
-        // for(int i=0; i<100000000; i++); 
-        // print_f(1,"AAAA #%d\n", i++);
+        for(int i=0; i<10000000; i++); 
+        print_f(1,"AAAA #%d\n", i++);
     }
 }
 
 void auxb(void){
     int i = 0; 
     while(1) {
-        // for(int i=0; i<100000000; i++); 
-        // print_f(1,"BBBB #%d\n", i++);
+        for(int i=0; i<10000000; i++); 
+        print_f(1,"BBBB #%d\n", i++);
     }
 }
 
