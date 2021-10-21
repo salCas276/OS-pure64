@@ -1,7 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <RoundRobin.h>
+#include <roundRobin.h>
 #include "../include/video.h"
 #include "../include/memoryManager.h"
 

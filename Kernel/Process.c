@@ -1,4 +1,4 @@
-#include <Process.h>
+#include <process.h>
 
 
 static prompt_info Prompt;
@@ -15,6 +15,8 @@ static int lastPid = 0;
 static int freePidsCounter = MAX_PIDS;
 processControlBlock * allProcesses[MAX_PIDS]; 
 
+
+uint64_t _buildContext(uint64_t baseRSP, uint64_t functionAddress);
 static int generateNextPid();
 
 //First process created by the kernel.
@@ -30,6 +32,12 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+    task->tail = (processControlBlock *) 0; 
+
+    // Processes are created with the worst possible priority.
+    task->priority = WORSTPRIORITY; 
+    task->currentPushes = 0; 
+    
     allProcesses[task->pid] = task;
 
     addProcess(task); 
@@ -48,6 +56,11 @@ uint64_t createProcess(uint64_t functionAddress){
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
     allProcesses[task->pid] = task;
+
+    // Processes are created with the worst possible priority 
+    task->priority = WORSTPRIORITY; 
+    task->currentPushes = 0;
+    task->tail = (processControlBlock *) 0; 
 
     addProcess(task); 
 
@@ -78,3 +91,4 @@ static int generateNextPid(){
         lastPid = (lastPid+1)%MAX_PIDS;
     return lastPid;
 }
+

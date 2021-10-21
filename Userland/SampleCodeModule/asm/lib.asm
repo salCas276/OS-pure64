@@ -14,6 +14,10 @@ GLOBAL openSemAsm
 GLOBAL waitSemAsm
 GLOBAL postSemAsm
 GLOBAL closeSemAsm
+GLOBAL niceAsm
+GLOBAL killAsm
+GLOBAL renounceAsm
+
 
 EXTERN print_f
 
@@ -247,7 +251,7 @@ getpid:
     ret
 
 openSemAsm:
-    mov rax , 12
+    mov rax , 16
     int 80h
     ret 
 
@@ -255,6 +259,22 @@ waitSemAsm:
     mov rax , 13
     int 80h
     ret 
+niceAsm:
+    mov rax, 10
+    int 80h
+    ret
+
+
+killAsm:
+    mov rax, 11
+    int 80h
+    ret
+
+renounceAsm:
+    mov rax, 12
+    int 80h
+    ret
+
 
 postSemAsm:
     mov rax , 14

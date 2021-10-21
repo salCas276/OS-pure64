@@ -5,4 +5,11 @@
 
 uint64_t createProcessUserland(uint64_t function);
 
+uint64_t nice(int pid, int deltaNice); 
+
+uint64_t kill(int signal, int pid); 
+
+uint64_t renounce(); 
+
+
 #endif
