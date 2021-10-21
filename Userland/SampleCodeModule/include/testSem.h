@@ -1,5 +1,5 @@
-#ifndef __SEMAPHOREAPI_H__
-#define __SEMAPHOREAPI_H__
+#ifndef __TESTSEM_H__
+#define __TESTSEM_H__
 #include <stdint.h>
 
 uint64_t openSemaphore(char * sem_id , uint64_t initialValue );

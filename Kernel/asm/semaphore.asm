@@ -9,9 +9,10 @@ acquire:
 
     _loop:
         mov rax , 1
-        xchg rax , rdi
+        xchg rax , qword[rdi]
         cmp rax , 0 
         jne _loop
+        
     pop rax 
     ret
 

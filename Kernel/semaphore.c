@@ -11,7 +11,7 @@ typedef struct semaphore {
 
 static semaphore * semaphores[LENGTH];
 
-void acquire(uint64_t lock);
+void acquire(uint64_t * lock);
 void release(uint64_t * lock);
 
 static int searchEmptySlot();
@@ -44,16 +44,20 @@ uint64_t semOpen(char * sem_id, uint64_t initialValue){
 
 uint64_t semWait(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
+    if(semIndex < 0){
+      return 0; //not found
+    }
+
     semaphore *  currentSem = semaphores[semIndex];
 
-    acquire(currentSem->lock);
+    acquire(&currentSem->lock);
 
     if(currentSem->value > 0 )
         currentSem->value--;
     else{
         release(&currentSem->lock);
         //blockmyself(); //wait 
-        acquire(currentSem->lock);
+        acquire(&currentSem->lock);
         currentSem->value--;
     }
     release(&currentSem->lock);
@@ -63,9 +67,12 @@ uint64_t semWait(char * sem_id){
 
 uint64_t semPost(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
+        if(semIndex < 0){ //not found
+      return 0;
+    }
     semaphore *  currentSem = semaphores[semIndex];
 
-    acquire(currentSem->lock);
+    acquire(&currentSem->lock);
     currentSem->value++;
     release(&currentSem->lock);
     return 0; //retorna uint64_t
@@ -103,7 +110,7 @@ static int searchEmptySlot(){
 
 static int searchSemaphore(char * sem_id){
     for(int i = 0 ; i < LENGTH ; i ++ )
-        if(strcmp(sem_id,semaphores[i]->id))
+        if(semaphores[i]!=(void*)0 && strcmp(sem_id,semaphores[i]->id))
             return i ; 
     return -1;//not found
 }
