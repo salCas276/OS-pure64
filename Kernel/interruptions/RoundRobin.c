@@ -4,18 +4,16 @@
 #include "../include/memoryManager.h"
 
 #define SIZE 20
-// static processControlBlock * ActiveProcess[SIZE];
-static int currentIndex = 0 ; // idx in the list 
+#define QHEADERS MAXBLOCKTYPES+1
 static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
 
-
-static processControlBlock * header = (processControlBlock *)(0); // Cola de listos
-static processControlBlock * blockHeaders[MAXBLOCKTYPES]; // ColaS de bloqueados donde el id es el pswd
+static processControlBlock * headers[QHEADERS] ={0}; // ColaS de bloqueados donde el id es el pswd
 
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
 static void pushProcess( processControlBlock ** header, processControlBlock * process);
+static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
 
 // Debugging
 static void printChain(processControlBlock * c) {
@@ -39,18 +37,18 @@ static void printChain(processControlBlock * c) {
 void addProcess(processControlBlock * process){
 
     // No hay procesos 
-    if ( header == 0 ) {
-        header = process; 
-        header->tail = (processControlBlock *)(0); 
+    if ( headers[0] == 0 ) {
+        headers[0] = process; 
+        headers[0]->tail = (processControlBlock *)(0); 
         currentProcess = process; 
-        printChain(header); 
+        printChain(headers[0]); 
         return; 
     }
 
     // push
-    pushProcess(&header, process);
+    pushProcess(&headers[0], process);
 	processTotal++;
-    printChain(header); 
+    printChain(headers[0]); 
 
 }
 
@@ -62,13 +60,15 @@ static void pushProcess( processControlBlock ** header, processControlBlock * pr
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) {
 
+
     if (process == 0) {
+        (*p) = 0; 
         return process; 
     }
 
     if ( process->pid == pid) {
         processControlBlock * aux = process->tail;
-        *p = process;  
+        (*p) = process;  
         return aux; 
     }
 
@@ -78,8 +78,15 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
 
 // Te mata un proceso que esta en la cola de listos 
 int killProcess(int pid) {
-    processControlBlock * p = 0;  
-    header = unlinkProcess(header, pid, &p);
+
+    if (pid == 0) return -1; // No puedes matar al primer proceso!
+    processControlBlock * p = 0;
+    int i = 0; 
+    do { 
+        headers[i] = unlinkProcess(headers[i], pid, &p);
+        i++; 
+    } while( p == 0 && i<QHEADERS); 
+    
     if ( p == 0 ) return 1; 
     free(p); // Efectivamente lo borra
     processTotal --; 
@@ -88,17 +95,22 @@ int killProcess(int pid) {
 
 int blockProcess(int pid, int password) {
 
-    printChain(header);
-    printChain(blockHeaders[password]); 
+    printChain(headers[0]);
+    printChain(headers[password+1]); 
+
+    if (pid == 0) return -1; // No puedes bloquear al primer proceso 
+
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 
-    processControlBlock * p; 
-    header = unlinkProcess(header, pid, &p); 
+    processControlBlock * p = 0; 
+    headers[0] = unlinkProcess(headers[0], pid, &p);
+
     if (p == 0) return 1; 
 
-    pushProcess( &blockHeaders[password], p); // Deberia ser password
-    printChain(header);
-    printChain(blockHeaders[password]); 
+    pushProcess( &headers[password+1], p); // Deberia ser password
+    
+    printChain(headers[0]);
+    printChain(headers[password+1]); 
     return 0; 
 }
 
@@ -107,12 +119,12 @@ int unblockProcess(int pid, int password) {
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
     
     processControlBlock * p; 
-    blockHeaders[password] = unlinkProcess(blockHeaders[password], pid, &p); 
+    headers[password+1] = unlinkProcess(headers[password+1], pid, &p); 
 
     if (p == 0) return 1; 
-    pushProcess( &header, p); 
-    printChain(header);
-    printChain(blockHeaders[password]); 
+    pushProcess( &headers[0], p); 
+    printChain(headers[0]);
+    printChain(headers[password+1]); 
 
     return 0; 
 }
@@ -134,7 +146,7 @@ void nextTask(){
 
     } else {
         currentProcess->currentPushes = 0; 
-        currentProcess = ( currentProcess->tail == (processControlBlock *)(0) ? header : currentProcess->tail); 
+        currentProcess = ( currentProcess->tail == (processControlBlock *)(0) ? headers[0] : currentProcess->tail); 
     } 
 //     str[0] = '0'+ currentProcess->pid;
 //     ncPrint(str); 
@@ -167,41 +179,26 @@ int getCurrentPid(){
     return currentProcess->pid;
 }
 
-// Se podria mejorar. Conformarse con O(N) y despues lo mejoramos si alcanza el tiempo. 
-static processControlBlock * getProcessFromPID(int pid) {
+static int changeNicenessRec(processControlBlock * header, int pid, int deltaNice) {
+    
+    if (header == 0) 
+        return 1; 
 
-    processControlBlock * c = header; 
-    while ( c!=0 && c->pid != pid ) c = c->tail; 
-    return c; 
+    if (header->pid == pid) {
+        int aux = header->priority + deltaNice; 
+        if ( aux > WORSTPRIORITY ) aux = WORSTPRIORITY; 
+        else if ( aux < 0 ) aux = 0; 
+        header->priority = aux; 
+        return 0; 
+    }
+
+    return changeNicenessRec(header->tail, pid, deltaNice); 
     
 }
 
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
-
-    processControlBlock * p = getProcessFromPID(pid); 
-
-    if ( p == 0) return 1; 
-
-
-    // ncPrint("Vieja prioridad era: ");
-    // char c[] = { ActiveProcess[pid]->priority+'0', 0}; 
-    // ncPrint(c);
-    // ncPrint("\n");   
-
-
-    int aux = p->priority+deltaNice; 
-
-    //Si no anda sacar esto     
-    if ( aux > WORSTPRIORITY ) aux = WORSTPRIORITY; 
-    else if ( aux < 0 ) aux = 0; 
-
-    p->priority = aux; 
-
-    // ncPrint("Nueva prioridad es: ");
-    // char d[] = { ActiveProcess[pid]->priority+'0', 0}; 
-    // ncPrint(d);
-    // ncPrint("\n");   
-
-    // ActiveProcess[pid]->currentPushes = 0; // Podria traer inanicion. Me hago un deltaNice = 0 a mi mismo siempre y me los chicho a todos 
+    int f = 1; 
+    for (int i=0; i<QHEADERS && f; i++) 
+        f = changeNicenessRec(headers[i], pid, deltaNice); 
     return 0; 
 }
