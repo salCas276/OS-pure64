@@ -1,4 +1,5 @@
 #include "include/fileSystem.h"
+#include "include/string.h"
 
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
@@ -11,7 +12,7 @@ int createFile(char* name, int fileType){
     for(int i=0; i<MAX_FILES; i++){
         if(!inodeTable[i])
             candidate = candidate == -1 ? i : candidate;
-        else if(inodeTable[i]->name == name) return 1; //El archivo ya fue creado //TODO Mirar como comparar los strings
+        else if(strcmp(inodeTable[i]->name, name) == 0) return 1; //El archivo ya fue creado
     }
 
     if(candidate==-1)
@@ -19,7 +20,7 @@ int createFile(char* name, int fileType){
 
     inodeTable[candidate] = malloc(sizeof(inode));
 
-    inodeTable[candidate]->name = name; //TODO mirar si la asignacion se esta haciendo bien
+    inodeTable[candidate]->name = name;
     inodeTable[candidate]->block = malloc(BLOCK_SIZE);
     inodeTable[candidate]->openCount = 0;
     inodeTable[candidate]->writeOpenCount = 0;
@@ -73,9 +74,8 @@ int closeFile(int fd){
     //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
     if(auxInode->openCount == 0 && auxInode->forUnlink == 1)
         return freeInode(auxInode, auxInodeIndex);
-
-    if(!auxInode->writeOpenCount) //Miro si este es el ultimo lector abierto, en tal caso agrego un EOF
-       auxInode->block[auxInode->indexes[1]] = EOF; //TODO Mirar como manejar el EOF
+    
+    //No hace falta validar si estoy cerrando el ultimo escritor para agregar un EOF ya que este ultimo se deduce de writerCount == 0 y wIndex != -1
 
     return 0;
 }
@@ -105,17 +105,24 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
 int readFile(int fd, char* buf, int count){
     if(!openedFileTable[fd]) //El fd no apunta a una apertura existente
         return -1;
+
     if(openedFileTable[fd]->mode == 1) //La apertura no permite esta operacion
         return -1;
+
     inode* targetInode = openedFileTable[fd]->inode;
     int i;
+
     for(i=0; i<count; i++){
-        if((targetInode->indexes[0]+i)%BLOCK_SIZE == targetInode->indexes[1]){ //TODO mirar como implementar el EOF
-            //block reader
+        if((targetInode->indexes[0]+i)%BLOCK_SIZE == targetInode->indexes[1]){
+            if(targetInode->writeOpenCount == 0)
+                return 0; //Llegue al EOF
+            //TODO Block reader
         }
+
         buf[i]=targetInode->block[(targetInode->indexes[0]+i)%BLOCK_SIZE];
         targetInode->indexes[0]++;
     }
+    //TODO Unblock possible blocked writers
     return i;
 }
 
@@ -128,11 +135,12 @@ int writeFile(int fd, char* buf, int count){
     int i;
     for(i=0; i<count; i++){
         if((targetInode->indexes[1]+i)%BLOCK_SIZE == targetInode->indexes[0]){
-            //block writer
+            //TODO Block writer
         }
         targetInode->block[(targetInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
         targetInode->indexes[1]++;
     }
+    //TODO Unblock possible blocked readers
     return i;
 }
 
@@ -141,7 +149,7 @@ int writeFile(int fd, char* buf, int count){
 inode* getInode(char* name, int* inodeIndex){
     for(int i=0; i<MAX_FILES; i++){
         if(inodeTable[i]){
-            if(inodeTable[i]->name == name){ //TODO mirar como compara bien los strings
+            if(strcmp(inodeTable[i]->name, name) == 0){
                 *inodeIndex = i;
                 return inodeTable[i];
             }

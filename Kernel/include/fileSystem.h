@@ -1,3 +1,5 @@
+#ifndef __FILE_SYSTEM_H__
+#define __FILE_SUSTEM_H__
 
 #define MAX_FILES 40
 #define RD_ONLY 0
@@ -5,7 +7,6 @@
 #define RD_WRT 2
 #define MAX_OPEN_FILES 40
 #define BLOCK_SIZE 256
-#define EOF -1
 
 //Representa un archivo creado
 typedef struct inode{
@@ -37,3 +38,5 @@ int readFile(int fd, char* buf, int count);
 int writeFile(int fd, char* buf, int count);
 
 inode* getInode(char* name, int* inodeIndex);
+
+#endif
