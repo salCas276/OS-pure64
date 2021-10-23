@@ -238,10 +238,7 @@ getProcessesData:
     ret
 
 createProcessAsm:
-
-
-
-    mov rax , 5 
+     mov rax , 5 
     int 80h
     ret
 

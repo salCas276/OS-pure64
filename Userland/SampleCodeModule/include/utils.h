@@ -22,5 +22,6 @@ void printProcessesData(_ARGUMENTS);
 void printHola(_ARGUMENTS);
 void nicecmd(_ARGUMENTS); 
 void killcmd(_ARGUMENTS); 
-
+void test_sync();
+void test_no_sync();
 #endif

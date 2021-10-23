@@ -16,6 +16,7 @@ GLOBAL _irq05Handler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 GLOBAL _int80Handler
+GLOBAL timerTickInterrupt
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -234,6 +235,11 @@ _int80Handler:
 haltcpu:
 	cli
 	hlt
+	ret
+
+
+timerTickInterrupt:
+	int 20h
 	ret
 
 

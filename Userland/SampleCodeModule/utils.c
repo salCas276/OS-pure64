@@ -3,7 +3,7 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <ProcessAPI.h>
-
+#include <testSem.h>
 
 #define BUFFER_SIZE 16
 #define MAX_PROCS 5
@@ -204,17 +204,146 @@ void aux(void){
 void auxa(void){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"AAAA #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"AAAA #%d\n", i++);
     }
 }
 
 void auxb(void){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"BBBB #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"BBBB #%d\n", i++);
     }
 }
 
 
+
+//------------
+#define TOTAL_PAIR_PROCESSES 1
+#define SEM_ID "sem"
+#define N 10
+
+ int64_t global;  //shared memory
+
+void slowInc(int64_t *p, int64_t inc){
+  int64_t aux = *p;
+  aux += inc;
+  renounceUserland();
+  *p = aux;
+}
+
+
+
+
+void semincM1( ){
+  uint64_t i;
+
+
+ openSemaphore(SEM_ID, 1);
+
+
+  
+  for (i = 0; i < N; i++){
+    waitSemaphore(SEM_ID);
+    slowInc(&global, -1);
+    postSemaphore(SEM_ID);
+    renounceUserland();
+  }
+
+    waitSemaphore(SEM_ID);
+    print_f(1,"Final value: %d\n", global);
+    postSemaphore(SEM_ID);
+
+    closeSemaphore(SEM_ID);
+  
+  while(1){
+        
+    }
+}
+
+void seminc1(){
+  uint64_t i;
+
+ openSemaphore(SEM_ID, 1);
+ 
+
+  
+  for (i = 0; i < N; i++){
+    waitSemaphore(SEM_ID);
+    slowInc(&global, 1);
+    postSemaphore(SEM_ID);
+    renounceUserland();
+  }
+
+
+  
+     waitSemaphore(SEM_ID);
+     print_f(1,"Final value: %d\n", global);
+     postSemaphore(SEM_ID);
+
+
+  closeSemaphore(SEM_ID);
+
+    while(1){
+
+    }
+
+}
+
+void inc1(){
+  uint64_t i;
+
+ for (i = 0; i < N; i++){
+    slowInc(&global, 1);
+  }
+
+  print_f(1,"Final value: %d\n", global);
+
+  while(1){
+        
+    }
+}
+
+
+void incM1(){
+  uint64_t i;
+
+ for (i = 0; i < N; i++){
+   slowInc(&global, -1);
+  }
+
+  print_f(1,"Final value: %d\n", global);
+  while(1){
+        
+    }
+}
+
+
+void test_sync(){
+  uint64_t i;
+
+  global = 0;
+
+  print_f(1,"CREATING PROCESSES...(WITH SEM)\n");
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    createProcessUserland((uint64_t)&semincM1);
+    createProcessUserland((uint64_t)&seminc1);
+    }
+}
+
+void test_no_sync(){
+  uint64_t i;
+
+  global = 0;
+
+  print_f(1,"CREATING PROCESSES...(WITHOUT SEM)\n");
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    createProcessUserland((uint64_t)&inc1);
+    createProcessUserland( (uint64_t)& incM1);
+  }
+
+
+}

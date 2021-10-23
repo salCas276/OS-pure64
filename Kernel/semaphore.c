@@ -1,4 +1,5 @@
 #include <semaphore.h>
+#include "./interruptions/RoundRobin.h"
 
 #define LENGTH 20
 
@@ -50,16 +51,26 @@ uint64_t semWait(char * sem_id){
 
     semaphore *  currentSem = semaphores[semIndex];
 
-    acquire(&currentSem->lock);
-
-    if(currentSem->value > 0 )
-        currentSem->value--;
-    else{
-        release(&currentSem->lock);
-        //blockmyself(); //wait 
+    int loop = 1 ;
+    while(loop){
         acquire(&currentSem->lock);
-        currentSem->value--;
+        if(currentSem->value > 0 ){
+            currentSem->value--;
+            loop=0;
+        }else{
+            release(&currentSem->lock);
+            blockProcess(getCurrentPid(),1);
+            acquire(&currentSem->lock);
+            if(currentSem -> value > 0 ){
+                currentSem->value--;
+                loop=0;
+            }else{
+                release(&currentSem->lock);
+            }
+        }
     }
+
+    
     release(&currentSem->lock);
     return 0; //retorna uint64_t
 
@@ -67,14 +78,19 @@ uint64_t semWait(char * sem_id){
 
 uint64_t semPost(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
-        if(semIndex < 0){ //not found
+    if(semIndex < 0){ //not found
       return 0;
     }
     semaphore *  currentSem = semaphores[semIndex];
 
     acquire(&currentSem->lock);
     currentSem->value++;
+    if(currentSem->value==1)
+        popAndUnblock(1);
     release(&currentSem->lock);
+    
+    
+
     return 0; //retorna uint64_t
 
     

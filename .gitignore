@@ -19,3 +19,9 @@
 #History
 .bash_history
 .gdb_history
+
+#debugging 
+.gdbinit 
+run.bat
+runSinGdb.bat
+a.out

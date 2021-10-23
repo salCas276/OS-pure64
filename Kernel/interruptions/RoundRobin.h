@@ -9,6 +9,8 @@
 #define WORSTPRIORITY 40
 #define MAXBLOCKTYPES 10
 
+
+
 typedef struct processControlBlock {
     uint8_t pid;
     uint64_t taskRSP;
@@ -48,5 +50,7 @@ int killProcess(int pid);
 int blockProcess(int pid, int password);
 int unblockProcess(int pid, int password);
 int renounce(void); 
+
+void popAndUnblock(int password);
 
 #endif

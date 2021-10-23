@@ -17,6 +17,6 @@ uint64_t kill(int signal, int pid) {
     return killAsm(signal, pid); 
 }
 
-uint64_t renounce(void) {
+uint64_t renounceUserland(void) {
     return renounceAsm(); 
 } 

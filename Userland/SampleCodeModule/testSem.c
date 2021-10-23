@@ -10,10 +10,10 @@ uint64_t openSemaphore(char * sem_id , uint64_t initialValue ){
     return openSemAsm(sem_id,initialValue);
 }
 uint64_t waitSemaphore(char * sem_id  ){
-    return waitSemaphore(sem_id);
+    return waitSemAsm(sem_id);
 }
 uint64_t postSemaphore(char * sem_id  ){
-    return postSemaphore(sem_id);
+    return postSemAsm(sem_id);
 }
 uint64_t closeSemaphore(char * sem_id  ){
     return closeSemAsm(sem_id);

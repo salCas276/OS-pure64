@@ -60,8 +60,8 @@ _buildContext:
 
 InitFirstProcess: 
 	
-	mov rdi, 0 ; pasaje de parametro
-	call irqDispatcher
+	;mov rdi, 0 ; pasaje de parametro
+	;call irqDispatcher
 
 	call getCurrentRSP;
 	mov rsp , rax ;; cambio de contexto.

@@ -7,13 +7,17 @@
 #define QHEADERS MAXBLOCKTYPES+1
 static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
+static processControlBlock * next = (processControlBlock * ) 0;
+static processControlBlock * shell = (processControlBlock *)(0); 
 
 static processControlBlock * headers[QHEADERS] ={0}; // ColaS de bloqueados donde el id es el pswd
 
+void timerTickInterrupt();
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
 static void pushProcess( processControlBlock ** header, processControlBlock * process);
 static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
+void restartRoundRobin(processControlBlock * header);
 
 // Debugging
 static void printChain(processControlBlock * c) {
@@ -41,14 +45,12 @@ void addProcess(processControlBlock * process){
         headers[0] = process; 
         headers[0]->tail = (processControlBlock *)(0); 
         currentProcess = process; 
-        printChain(headers[0]); 
+        shell = process;
         return; 
     }
 
-    // push
     pushProcess(&headers[0], process);
 	processTotal++;
-    printChain(headers[0]); 
 
 }
 
@@ -68,6 +70,7 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
 
     if ( process->pid == pid) {
         processControlBlock * aux = process->tail;
+        process->tail = (void*)0; //para que no quede enganchado a la lista 
         (*p) = process;  
         return aux; 
     }
@@ -83,7 +86,7 @@ int killProcess(int pid) {
     processControlBlock * p = 0;
     int i = 0; 
     do { 
-        headers[i] = unlinkProcess(headers[i], pid, &p);
+        headers[i] = unlinkProcess(headers[i], pid, &p); 
         i++; 
     } while( p == 0 && i<QHEADERS); 
     
@@ -95,26 +98,35 @@ int killProcess(int pid) {
 
 int blockProcess(int pid, int password) {
 
-    printChain(headers[0]);
-    printChain(headers[password+1]); 
-
     if (pid == 0) return -1; // No puedes bloquear al primer proceso 
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 
+    if( next != (void*) 0 && next->pid == pid){ //si estan por bloquear al proximo.
+        next = next -> tail; 
+    }
+
     processControlBlock * p = 0; 
+
+    //lo saco de la lista de procesos listos 
     headers[0] = unlinkProcess(headers[0], pid, &p);
 
     if (p == 0) return 1; 
 
-    pushProcess( &headers[password+1], p); // Deberia ser password
-    
-    printChain(headers[0]);
-    printChain(headers[password+1]); 
+    pushProcess( &headers[password+1], p); 
+
+    if(pid == getCurrentPid()){
+        currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; 
+    }
+
+
+    timerTickInterrupt();
     return 0; 
 }
 
 int unblockProcess(int pid, int password) {
+
+
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
     
@@ -123,44 +135,65 @@ int unblockProcess(int pid, int password) {
 
     if (p == 0) return 1; 
     pushProcess( &headers[0], p); 
-    printChain(headers[0]);
-    printChain(headers[password+1]); 
 
+        
+    return 0; 
+}
+
+//salteño
+void restartRoundRobin(processControlBlock * header){
+    processControlBlock * current = header;
+    while(current != (void*) 0){
+        current->currentPushes=0;
+        current = current -> tail;
+    }
+}
+
+
+void popAndUnblock(int password) { 
+    //chequear password 
+     if (headers[password+1] == 0) return;
+
+     unblockProcess(headers[password+1]->pid, password);
+
+
+
+ }
+
+
+
+void nextTask(){
+
+
+   if ( currentProcess->currentPushes < WORSTPRIORITY + 1 - currentProcess->priority ) {
+       currentProcess->currentPushes ++; 
+   } else {
+        currentProcess->currentPushes = 0; 
+        if(next == (void*) 0 ){
+            restartRoundRobin(headers[0]);
+            currentProcess = headers[0];
+        }else 
+            currentProcess =  next; 
+    } 
+    next = currentProcess -> tail; 
+
+}
+
+
+
+int renounce() {
+    currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority;
+    timerTickInterrupt(); 
     return 0; 
 }
 
 
-void nextTask(){
-    //FOR DEBUGGING CHAMPAGNE
-    // char str[] = {'0', 0}; 
-    // ncPrint("CS "); 
-    // str[0] = '0'+currentProcess->pid;
-    // ncPrint(str); 
-    // ncPrint("("); 
-    // str[0] = '0' + currentProcess->priority; 
-    // ncPrint(str); 
-    // ncPrint(")->"); 
 
-    if ( currentProcess->currentPushes < WORSTPRIORITY + 1 - currentProcess->priority ) {
-        currentProcess->currentPushes ++; 
-
-    } else {
-        currentProcess->currentPushes = 0; 
-        currentProcess = ( currentProcess->tail == (processControlBlock *)(0) ? headers[0] : currentProcess->tail); 
-    } 
-//     str[0] = '0'+ currentProcess->pid;
-//     ncPrint(str); 
-//     ncPrint("\n"); 
-}
 
 processControlBlock * getCurrentTask(){
     return currentProcess;
 }
 
-int renounce() {
-    currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; 
-    return 0; 
-}
 
 
 void setCurrentRSP(uint64_t rsp) {
@@ -172,11 +205,12 @@ uint64_t getCurrentRSP(){
 }
 
 prompt_info * getCurrentPrompt() {
-    return &(getCurrentTask()->prompt);
+    return &shell->prompt; 
+//    return &(getCurrentTask()->prompt);
 }
 
 int getCurrentPid(){
-    return currentProcess->pid;
+    return getCurrentTask()->pid;
 }
 
 static int changeNicenessRec(processControlBlock * header, int pid, int deltaNice) {

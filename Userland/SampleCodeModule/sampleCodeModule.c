@@ -10,7 +10,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 11
+#define MODULES_SIZE 13
 
 typedef void (*commandType)(char argv[MAX_ARGC][MAX_COMMAND], int argc);
 
@@ -27,7 +27,9 @@ static char * commandStrings[MODULES_SIZE] = {
 	"printHola",
 	"ps", 
 	"nice", 
-	"kill"
+	"kill",
+	"testsync",
+	"testnosync"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -42,7 +44,9 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printHola,
 	printProcessesData,
 	nicecmd, 
-	killcmd
+	killcmd,
+	test_sync,
+	test_no_sync
 };
 
 void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
@@ -55,11 +59,13 @@ int main() {
 	//int32_t counter = 0;
 
 	// Queremos que nuestra shell tenga prioridad maxima 
-	nice(0, -20); 
-	nice(0, -20); 
+	//nice(0, -20); 
+	//nice(0, -20); 
 
 	print_f(1, "Estamos en userland.\n");
 	help(argv, 0);
+
+
 
 	while(1) {
 		print_f(2, "\n>> ");
@@ -69,7 +75,7 @@ int main() {
 			checkModule(argv, argc);
 		} else
 			print_f(1, "Comando no valido\n");
-	}
+	 }
 }
 
 void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc) {
