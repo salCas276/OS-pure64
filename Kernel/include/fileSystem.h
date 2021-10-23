@@ -14,6 +14,7 @@ typedef struct inode{
     int indexes[2]; //Indices de lectura (0) y escritura (1), son unicos para todo el archivo
     int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
     int fileType; //0 -> File, 1 -> Fifo
+    int forUnlink; //Flag que me indica si se le hizo un unlink
 }inode;
 
 //Representa la apertura de un archivo preexistente
@@ -28,6 +29,8 @@ int createFile(char* name, int fileType);
 int openFile(inode* inode, int inodeIndex, int mode);
 
 int closeFile(int fd);
+
+int unlinkFile(char* name);
 
 int readFile(int fd, char* buf, int count);
 

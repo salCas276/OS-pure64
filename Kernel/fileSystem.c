@@ -3,6 +3,8 @@
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
 
+static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex);
+
 int createFile(char* name, int fileType){
     int candidate = -1;
     
@@ -22,6 +24,7 @@ int createFile(char* name, int fileType){
     inodeTable[candidate]->openCount = 0;
     inodeTable[candidate]->writeOpenCount = 0;
     inodeTable[candidate]->fileType = fileType;
+    inodeTable[candidate]->forUnlink = 0;
     for(int i=0; i<2; i++) inodeTable[candidate]->indexes[i] = -1;
 
     return 0;
@@ -53,6 +56,9 @@ int openFile(inode* inode, int inodeIndex, int mode){
 }
 
 int closeFile(int fd){
+    if(!openedFileTable[fd])
+        return -1;
+
     inode* auxInode = openedFileTable[fd]->inode;
     int auxInodeIndex = openedFileTable[fd]->inodeIndex;
 
@@ -64,15 +70,30 @@ int closeFile(int fd){
     free(openedFileTable[fd]);
     openedFileTable[fd] = (openedFile*) 0;
 
-    //Miro si se cerraron todos las aperturas del archivo, en tal caso lo elimino de la lista de inodes
-    if(!auxInode->openCount){
-        free(auxInode->block);
-        free(auxInode);
-        inodeTable[auxInodeIndex] = (inode*) 0;
-    }
-    else if(!auxInode->writeOpenCount) //Miro si este es el ultimo lector abierto, en tal caso agrego un EOF
+    //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
+    if(auxInode->openCount == 0 && auxInode->forUnlink == 1)
+        return freeInode(auxInode, auxInodeIndex);
+
+    if(!auxInode->writeOpenCount) //Miro si este es el ultimo lector abierto, en tal caso agrego un EOF
        auxInode->block[auxInode->indexes[1]] = EOF; //TODO Mirar como manejar el EOF
 
+}
+
+int unlinkFile(char* name){
+    int targetInodeIndex;
+    inode* targetInode = getInode(name, &targetInodeIndex);
+    if(targetInodeIndex == -1) return -1;
+    if(targetInode->openCount == 0){
+        return freeInode(targetInode, targetInodeIndex);
+    }
+    targetInode->forUnlink = 1;
+}
+
+static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
+    free(onDeleteInode->block);
+    free(onDeleteInode);
+    inodeTable[onDeleteInodeIndex] = (inode*) 0;
+    return 0;
 }
 
 int readFile(int fd, char* buf, int count){
@@ -87,9 +108,11 @@ int writeFile(int fd, char* buf, int count){
 //En caso de que no existe un inode con ese nombre se devuelve -1
 inode* getInode(char* name, int* inodeIndex){
     for(int i=0; i<MAX_FILES; i++){
-        if(inodeTable[i]->name == name){ //TODO mirar como compara bien los strings
-            *inodeIndex = i;
-            return inodeTable[i];
+        if(inodeTable[i]){
+            if(inodeTable[i]->name == name){ //TODO mirar como compara bien los strings
+                *inodeIndex = i;
+                return inodeTable[i];
+            }
         }
     }
     *inodeIndex = -1;
