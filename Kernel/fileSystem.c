@@ -56,7 +56,7 @@ int openFile(inode* inode, int inodeIndex, int mode){
 }
 
 int closeFile(int fd){
-    if(!openedFileTable[fd])
+    if(!openedFileTable[fd]) //Ese fd no refiere a ningun archivo abierto
         return -1;
 
     inode* auxInode = openedFileTable[fd]->inode;
@@ -82,10 +82,14 @@ int closeFile(int fd){
 int unlinkFile(char* name){
     int targetInodeIndex;
     inode* targetInode = getInode(name, &targetInodeIndex);
-    if(targetInodeIndex == -1) return -1;
+
+    if(targetInodeIndex == -1)
+        return -1;
+
     if(targetInode->openCount == 0){
         return freeInode(targetInode, targetInodeIndex);
     }
+
     targetInode->forUnlink = 1;
 }
 
@@ -97,11 +101,37 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
 }
 
 int readFile(int fd, char* buf, int count){
-
+    if(!openedFileTable[fd]) //El fd no apunta a una apertura existente
+        return -1;
+    if(openedFileTable[fd]->mode == 1) //La apertura no permite esta operacion
+        return -1;
+    inode* targetInode = openedFileTable[fd]->inode;
+    int i;
+    for(i=0; i<count; i++){
+        if((targetInode->indexes[0]+i)%BLOCK_SIZE == targetInode->indexes[1]){ //TODO mirar como implementar el EOF
+            //block reader
+        }
+        buf[i]=targetInode->block[(targetInode->indexes[0]+i)%BLOCK_SIZE];
+        targetInode->indexes[0]++;
+    }
+    return i;
 }
 
 int writeFile(int fd, char* buf, int count){
-
+    if(!openedFileTable[fd]) //El fd no apunta a una apertura existente
+        return -1;
+    if(openedFileTable[fd]->mode == 0) //La apertura no permite esta operacion
+        return -1;
+    inode* targetInode = openedFileTable[fd]->inode;
+    int i;
+    for(i=0; i<count; i++){
+        if((targetInode->indexes[1]+i)%BLOCK_SIZE == targetInode->indexes[0]){
+            //block writer
+        }
+        targetInode->block[(targetInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
+        targetInode->indexes[1]++;
+    }
+    return i;
 }
 
 //Devuelve el inode con ese nombre y el indece de este en la tabla de inodes
