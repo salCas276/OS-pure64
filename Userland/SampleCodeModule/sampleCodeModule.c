@@ -63,7 +63,9 @@ int main() {
 	//nice(0, -20); 
 
 	print_f(1, "Estamos en userland.\n");
-	help(argv, 0);
+	//help(argv, 0);
+
+	//test_sync();
 
 
 

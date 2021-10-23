@@ -10,7 +10,7 @@ static processControlBlock * currentProcess = (processControlBlock *)(0);
 static processControlBlock * next = (processControlBlock * ) 0;
 static processControlBlock * shell = (processControlBlock *)(0); 
 
-static processControlBlock * headers[QHEADERS] ={0}; // ColaS de bloqueados donde el id es el pswd
+static processControlBlock * headers[QHEADERS] ={0}; 
 
 void timerTickInterrupt();
 
@@ -79,7 +79,10 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
     return process; 
 }
 
-// Te mata un proceso que esta en la cola de listos 
+
+
+
+// Te mata un proceso que esta en la cola de listos. Falta borrar de process.c
 int killProcess(int pid) {
 
     if (pid == 0) return -1; // No puedes matar al primer proceso!
@@ -91,8 +94,17 @@ int killProcess(int pid) {
     } while( p == 0 && i<QHEADERS); 
     
     if ( p == 0 ) return 1; 
-    free(p); // Efectivamente lo borra
+
+
+    free(( (uint64_t * ) p->baseRSP ) - 4095);
+    free(p);
     processTotal --; 
+    
+    if(pid == getCurrentPid()){
+        currentProcess = (void*) 0 ;
+        timerTickInterrupt();
+    }
+    
     return 0; 
 }
 
@@ -116,7 +128,7 @@ int blockProcess(int pid, int password) {
     pushProcess( &headers[password+1], p); 
 
     if(pid == getCurrentPid()){
-        currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; 
+        currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; //null
     }
 
 
@@ -162,10 +174,21 @@ void popAndUnblock(int password) {
 
 
 
+
+
+
 void nextTask(){
+    if(headers[0] == (void*)0)
+        printChain(headers[0]);
 
-
-   if ( currentProcess->currentPushes < WORSTPRIORITY + 1 - currentProcess->priority ) {
+    if(currentProcess == (void*)0){
+        if(next == (void*) 0 ){
+            restartRoundRobin(headers[0]);
+            currentProcess = headers[0];
+        }else 
+            currentProcess = next;
+    }
+    else if (currentProcess->currentPushes < WORSTPRIORITY + 1 - currentProcess->priority ) {
        currentProcess->currentPushes ++; 
    } else {
         currentProcess->currentPushes = 0; 
@@ -176,6 +199,11 @@ void nextTask(){
             currentProcess =  next; 
     } 
     next = currentProcess -> tail; 
+
+    if(currentProcess->quantityWaiting > 0){
+        currentProcess-> currentPushes = WORSTPRIORITY + 1 - currentProcess->priority;
+        nextTask();
+    }
 
 }
 
@@ -189,7 +217,6 @@ int renounce() {
 
 
 
-
 processControlBlock * getCurrentTask(){
     return currentProcess;
 }
@@ -197,21 +224,30 @@ processControlBlock * getCurrentTask(){
 
 
 void setCurrentRSP(uint64_t rsp) {
-    getCurrentTask()->taskRSP = rsp;
+    processControlBlock * current = getCurrentTask();
+    if(current != (void*)0 )
+        current->taskRSP = rsp;
+ 
 }
 
 uint64_t getCurrentRSP(){
-    return getCurrentTask()->taskRSP;
+    processControlBlock * current = getCurrentTask();
+    if(current != (void*)0 )
+        return current->taskRSP;
+    else return -1;
 }
 
 prompt_info * getCurrentPrompt() {
     return &shell->prompt; 
-//    return &(getCurrentTask()->prompt);
 }
 
 int getCurrentPid(){
-    return getCurrentTask()->pid;
+    processControlBlock * current = getCurrentTask();
+    if(current != (void*)0 )
+        return current->pid;
+    else return -1;
 }
+
 
 static int changeNicenessRec(processControlBlock * header, int pid, int deltaNice) {
     

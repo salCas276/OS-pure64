@@ -11,5 +11,8 @@ uint64_t kill(int signal, int pid);
 
 uint64_t renounceUserland(); 
 
+void exitUserland();
+
+void waitSon();
 
 #endif

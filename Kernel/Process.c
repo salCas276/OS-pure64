@@ -28,6 +28,7 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     processControlBlock * task= malloc(sizeof(processControlBlock));
     freePidsCounter--;
     task->pid=0;
+    task->quantityWaiting = 0; 
     task->prompt = Prompt;
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
@@ -52,6 +53,8 @@ uint64_t createProcess(uint64_t functionAddress){
     //if(foreground)
         task->prompt = Prompt;
     
+    task->parentPid = getCurrentPid(); //el padre es quien estaba ejecutando.
+    task->quantityWaiting = 0; 
     task->baseRSP = (uint64_t)&basePointer[4095] ; 
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
@@ -63,7 +66,6 @@ uint64_t createProcess(uint64_t functionAddress){
     task->tail = (processControlBlock *) 0; 
 
     addProcess(task); 
-
     return task->pid;  
 }
 
@@ -92,3 +94,28 @@ static int generateNextPid(){
     return lastPid;
 }
 
+
+
+int deleteProcess(int pid){
+    if(pid == 0 )
+        return 0; //la shell no puede eliminarse
+
+    allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
+    
+    allProcesses[pid]=(void*)0;
+    killProcess(pid);
+
+    return 1;
+}
+
+
+
+void exit(){
+    deleteProcess(getCurrentPid());
+}
+
+
+void wait(){
+    allProcesses[getCurrentPid()]->quantityWaiting++;
+    renounce();
+}

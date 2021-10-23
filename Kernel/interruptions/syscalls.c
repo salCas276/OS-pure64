@@ -26,6 +26,8 @@ uint64_t sysWaitSemaphore(uint64_t rdi );
 uint64_t sysPostSemaphore(uint64_t rdi );
 uint64_t sysCloseSemaphore(uint64_t rdi );
 uint64_t sys_kill(uint64_t code, uint64_t pid); 
+void sysExit();
+void sysWait();
 
 
 // TODO: Usar un arreglo y no switch case
@@ -44,12 +46,23 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 13 : return sysWaitSemaphore(rdi);
 		case 14 : return sysPostSemaphore(rdi);
 		case 15 : return sysCloseSemaphore(rdi);
+		case 17 :  sysExit(); break;
+		case 18 : sysWait();break;
 
 		case 10: return changeNicenessBy(rdi, rsi); 
 		case 11: return sys_kill(rdi, rsi);
-		case 12: return renounce();  
+		case 12: return renounce();break;  
 	}
 	return 0;
+}
+
+void sysWait(){
+	return wait();
+}
+
+
+void sysExit(){
+	return exit();
 }
 
 uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
@@ -135,7 +148,7 @@ uint64_t sysCloseSemaphore(uint64_t rdi ){
  
 uint64_t sys_kill(uint64_t code, uint64_t pid) {
 	switch(code) {
-		case 0: return killProcess(pid); 
+		case 0: return deleteProcess(pid); 
 		case 1: return blockProcess(pid, 0); 
 		case 2: return unblockProcess(pid, 0); 
 	}

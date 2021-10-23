@@ -17,7 +17,8 @@ GLOBAL closeSemAsm
 GLOBAL niceAsm
 GLOBAL killAsm
 GLOBAL renounceAsm
-
+GLOBAL exitAsm
+GLOBAL waitAsm
 
 EXTERN print_f
 
@@ -261,6 +262,15 @@ niceAsm:
     int 80h
     ret
 
+exitAsm:
+    mov rax, 17
+    int 80h
+    ret
+
+waitAsm:
+    mov rax, 18
+    int 80h
+    ret
 
 killAsm:
     mov rax, 11

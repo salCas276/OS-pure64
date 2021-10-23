@@ -257,9 +257,7 @@ void semincM1( ){
 
     closeSemaphore(SEM_ID);
   
-  while(1){
-        
-    }
+    exitUserland();
 }
 
 void seminc1(){
@@ -285,9 +283,8 @@ void seminc1(){
 
   closeSemaphore(SEM_ID);
 
-    while(1){
+    exitUserland();
 
-    }
 
 }
 
@@ -314,9 +311,9 @@ void incM1(){
   }
 
   print_f(1,"Final value: %d\n", global);
-  while(1){
-        
-    }
+    while(1){
+            
+        }
 }
 
 
@@ -331,6 +328,9 @@ void test_sync(){
     createProcessUserland((uint64_t)&semincM1);
     createProcessUserland((uint64_t)&seminc1);
     }
+   
+    waitSon();
+    waitSon();
 }
 
 void test_no_sync(){
