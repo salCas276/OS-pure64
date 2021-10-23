@@ -10,8 +10,8 @@ int createFile(char* name, int fileType){
     
     for(int i=0; i<MAX_FILES; i++){
         if(!inodeTable[i])
-            candidate = i;
-        else if(inodeTable[i]->name == name) 1; //El archivo ya fue creado //TODO Mirar como comparar los strings
+            candidate = candidate == -1 ? i : candidate;
+        else if(inodeTable[i]->name == name) return 1; //El archivo ya fue creado //TODO Mirar como comparar los strings
     }
 
     if(candidate==-1)
@@ -77,6 +77,7 @@ int closeFile(int fd){
     if(!auxInode->writeOpenCount) //Miro si este es el ultimo lector abierto, en tal caso agrego un EOF
        auxInode->block[auxInode->indexes[1]] = EOF; //TODO Mirar como manejar el EOF
 
+    return 0;
 }
 
 int unlinkFile(char* name){
@@ -91,6 +92,7 @@ int unlinkFile(char* name){
     }
 
     targetInode->forUnlink = 1;
+    return 0;
 }
 
 static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
