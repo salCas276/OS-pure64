@@ -32,7 +32,8 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
     task->tail = (processControlBlock *) 0; 
-
+    for(int i=0; i<3; i++)
+        task->processFileDescriptors[i] = i;
     // Processes are created with the worst possible priority.
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0; 

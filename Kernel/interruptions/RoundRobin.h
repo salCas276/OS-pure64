@@ -8,6 +8,7 @@
 
 #define WORSTPRIORITY 40
 #define MAXBLOCKTYPES 10
+#define MAX_PFD 40
 
 typedef struct processControlBlock {
     uint8_t pid;
@@ -18,8 +19,7 @@ typedef struct processControlBlock {
     char currentPushes; 
     prompt_info prompt;
     struct processControlBlock * tail; 
-
-    
+    int processFileDescriptors[MAX_PFD];
 } processControlBlock;
 
 typedef struct processDescriptor{
