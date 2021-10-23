@@ -3,7 +3,7 @@
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
 
-int createFile(char* name){
+int createFile(char* name, int fileType){
     int candidate = -1;
     
     for(int i=0; i<MAX_FILES; i++){
@@ -17,48 +17,39 @@ int createFile(char* name){
 
     inodeTable[candidate] = malloc(sizeof(inode));
 
-    inodeTable[candidate]->name = name;
+    inodeTable[candidate]->name = name; //TODO mirar si la asignacion se esta haciendo bien
     inodeTable[candidate]->block = malloc(BLOCK_SIZE);
     inodeTable[candidate]->openCount = 0;
     inodeTable[candidate]->writeOpenCount = 0;
+    inodeTable[candidate]->fileType = fileType;
     for(int i=0; i<2; i++) inodeTable[candidate]->indexes[i] = -1;
 
     return 0;
 }
 
 
-int openFile(char* name, int mode){
+int openFile(inode* inode, int inodeIndex, int mode){
 
-    for(int i=0; i<MAX_FILES; i++){
-        if(inodeTable[i]->name == name){ //TODO Mirar como comparar los strings
+    for(int j=0; j<MAX_OPEN_FILES; j++){
+        if(!openedFileTable[j]){
 
-            for(int j=0; j<MAX_OPEN_FILES; j++){
-                if(!openedFileTable[j]){
+            openedFileTable[j] = malloc(sizeof(openedFile));
 
-                    openedFileTable[j] = malloc(sizeof(openedFile));
-
-                    if(inodeTable[i]->indexes[mode] == -1)
-                        inodeTable[i]->indexes[mode] = 0;
+            if(inode->indexes[mode] == -1)
+                inode->indexes[mode] = 0;
                     
+            openedFileTable[j]->mode = mode;
+            openedFileTable[j]->inode = inode;
+            openedFileTable[j]->inodeIndex = inodeIndex;
 
-                    openedFileTable[j]->mode = mode; //TODO Te bloqueo si sos el unico escribiendo?
-                    openedFileTable[j]->inode = inodeTable[i];
-                    openedFileTable[j]->inodeIndex = i;
-
-                    if(mode == 1)
-                        inodeTable[i]->writeOpenCount++;
-                    inodeTable[i]->openCount++;
+            if(mode == 1 || mode==2)
+                inode->writeOpenCount++;
+            inode->openCount++;
                     
-
-                    return j; //Devuelvo la posicion de este objeto en la openedFileTable
-                }
-            }
-
-            return -2; //El archivo fue creado pero no hay espacio para abriar un archivo
+            return j; //Devuelvo la posicion de este objeto en la openedFileTable
         }
     }
-
-    return -1; //El archivo buscado no fue creado
+    return -2; //El inode correspondiente existe pero no hay espacio para abriar un archivo
 }
 
 int closeFile(int fd){
@@ -90,4 +81,17 @@ int readFile(int fd, char* buf, int count){
 
 int writeFile(int fd, char* buf, int count){
 
+}
+
+//Devuelve el inode con ese nombre y el indece de este en la tabla de inodes
+//En caso de que no existe un inode con ese nombre se devuelve -1
+inode* getInode(char* name, int* inodeIndex){
+    for(int i=0; i<MAX_FILES; i++){
+        if(inodeTable[i]->name == name){ //TODO mirar como compara bien los strings
+            *inodeIndex = i;
+            return inodeTable[i];
+        }
+    }
+    *inodeIndex = -1;
+    return (inode*) -1; 
 }

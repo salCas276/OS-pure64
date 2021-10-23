@@ -13,22 +13,24 @@ typedef struct inode{
     char* block; //Esta es la memoria almacenada por el archivo
     int indexes[2]; //Indices de lectura (0) y escritura (1), son unicos para todo el archivo
     int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
+    int fileType; //0 -> File, 1 -> Fifo
 }inode;
 
 //Representa la apertura de un archivo preexistente
 typedef struct openedFile{
     int mode;
     inode* inode;
-    int inodeIndex; //TODO Estaria bueno solo quedarnos con el indice, el cual necesito siquiero elimiar el inode
+    int inodeIndex; 
 }openedFile;
 
+int createFile(char* name, int fileType);
 
-int createFile(char* name);
-
-int openFile(char* name, int mode);
+int openFile(inode* inode, int inodeIndex, int mode);
 
 int closeFile(int fd);
 
 int readFile(int fd, char* buf, int count);
 
 int writeFile(int fd, char* buf, int count);
+
+inode* getInode(char* name, int* inodeIndex);
