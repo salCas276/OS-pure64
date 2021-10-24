@@ -42,6 +42,8 @@ prompt_info * getCurrentPrompt();
 
 int getCurrentPid();
 
+int getCurrentMinFd();
+
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 
 int killProcess(int pid);

@@ -1,4 +1,5 @@
 #include "include/fileSystem.h"
+#include "interruptions/RoundRobin.h"
 #include "include/string.h"
 
 inode* inodeTable[MAX_FILES];
@@ -144,6 +145,23 @@ int writeFile(int fd, char* buf, int count){
     //TODO Unblock possible blocked readers
     targetInode->indexes[1] = targetInode->indexes[1]+i;
     return i;
+}
+
+int dup(int oldfd){
+    processControlBlock* currentProcess = getCurrentTask();
+    if(currentProcess->processFileDescriptors[oldfd] == -1)
+        return -1;
+    int newfd = getCurrentMinFd();
+    currentProcess->processFileDescriptors[newfd] = currentProcess->processFileDescriptors[oldfd];
+    return newfd;
+}
+
+int dup2(int oldfd, int newfd){
+    processControlBlock* currentProcess = getCurrentTask();
+    if(currentProcess->processFileDescriptors[oldfd] == -1)
+        return -1;
+    currentProcess->processFileDescriptors[newfd] = currentProcess->processFileDescriptors[oldfd];
+    return newfd;
 }
 
 //Devuelve el inode con ese nombre y el indece de este en la tabla de inodes

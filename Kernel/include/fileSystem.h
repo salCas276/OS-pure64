@@ -37,6 +37,10 @@ int readFile(int fd, char* buf, int count);
 
 int writeFile(int fd, char* buf, int count);
 
+int dup(int oldfd);
+
+int dup2(int oldfd, int newfd);
+
 inode* getInode(char* name, int* inodeIndex);
 
 #endif

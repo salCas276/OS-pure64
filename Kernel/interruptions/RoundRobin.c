@@ -179,6 +179,14 @@ int getCurrentPid(){
     return currentProcess->pid;
 }
 
+int getCurrentMinFd(){
+    for(int i=0; i<MAX_PFD; i++){
+        if(getCurrentTask()->processFileDescriptors[i] == -1)
+            return i;
+    }
+    return -1;
+}
+
 static int changeNicenessRec(processControlBlock * header, int pid, int deltaNice) {
     
     if (header == 0) 
