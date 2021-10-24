@@ -2,7 +2,7 @@
 #define __UTILS_H__
 
 #define BYTES_TO_READ 32
-#define MAX_COMMAND 19 // Habria que achicarlo
+#define MAX_COMMAND 100 // Habria que achicarlo
 #define MAX_ARGC 5 // El nombre del comando es un parametro... 
 #define _ARGUMENTS int argc , char * argv[]
 #include <stdint.h>

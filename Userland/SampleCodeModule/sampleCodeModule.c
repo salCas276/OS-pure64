@@ -52,7 +52,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
 // static int parseArgv(char * buffer, char argv[MAX_ARGC][MAX_COMMAND]); 
-static int parseArgvPtr(char * buffer , char *argv[MAX_COMMAND+1]);
+static int parseArgvPtr(char * buffer , char *argv[MAX_ARGC+1]);
 void checkModulePtr(char *argv[], int argc,int foreground);
 
 
@@ -74,14 +74,21 @@ int main() {
 
 
 
+
+
+
+
 	while(1) {
 		print_f(2, "\n>> ");
 		int64_t ans = get_s(buffer, MAX_COMMAND);
 		if (ans != -1) {
-			char ** argv = (char**) memalloc(MAX_ARGC * sizeof(char*));	
+			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	
 			int argc = parseArgvPtr(buffer, argv);
 			if(argc < 0 ){
 				print_f(1,"Cantidad de parámetros inválida");
+				for(int i = 0 ; i < MAX_ARGC+1;i++)
+					memfree(argv[i]);
+				memfree(argv);
 				continue;
 			}
 			int foreground = 1 ; 
@@ -92,6 +99,7 @@ int main() {
 		} else
 			print_f(1, "Comando no valido\n");
 	 }
+
 }
 
 
@@ -126,16 +134,15 @@ static int parseArgvPtr(char * buffer , char *argv[]){
 	    if(buffer[currentBuffPos]!=0)
   			currentBuffPos++;
     
-		if(index == MAX_ARGC) //cantidad de parametros invalida.
-			return -1;
-
-		
-		
-		
 		if(inside){
     	 	aux[current]=0;
 			argv[index++]=aux;
     	}
+
+		if(index == MAX_ARGC + 1) //cantidad de parametros invalida.
+			return -1;
+
+
 	}
 
 	return index;
