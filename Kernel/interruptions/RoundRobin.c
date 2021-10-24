@@ -180,8 +180,9 @@ int getCurrentPid(){
 }
 
 int getCurrentMinFd(){
+    processControlBlock* process = getCurrentTask();
     for(int i=0; i<MAX_PFD; i++){
-        if(getCurrentTask()->processFileDescriptors[i] == -1)
+        if(process->processFileDescriptors[i] == -1)
             return i;
     }
     return -1;
