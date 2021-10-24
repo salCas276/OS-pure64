@@ -1,6 +1,7 @@
 #include "include/fileSystem.h"
 #include "interruptions/RoundRobin.h"
 #include "include/string.h"
+#include "memoryManager.h"
 
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];

@@ -41,7 +41,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 10: return changeNicenessBy(rdi, rsi); 
 		case 11: return sys_kill(rdi, rsi);
 		case 12: return renounce();  
-		case 20: return sys_createFile(rdi)
+		case 20: return sys_createFile(rdi);
 		case 21: return sys_createFifo(rdi);
 		case 22: return sys_open(rdi, rsi);
 	}
@@ -119,23 +119,24 @@ uint64_t sys_kill(uint64_t code, uint64_t pid) {
 }
 
 uint64_t sys_createFile(uint64_t name){
-	createFile(name, 0);
+	return createFile((char*) name, 0);
 }
 
 uint64_t sys_createFifo(uint64_t name){
-	createFile(name, 1);
+	return createFile((char*) name, 1);
 }
 
 uint64_t sys_open(uint64_t name, uint64_t mode){
 	int inodeIndex;
-	inode* openedInode = getInode(name, &inodeIndex);
-	if(openedInode == -1) return -1;
+	inode* openedInode = getInode((char*) name, &inodeIndex);
+	if(openedInode == (inode*)-1) return -1;
 	switch(openedInode->fileType){
 		case 0: //File
-			return openFile(openedInode, *inodeIndex, mode);
+			return openFile(openedInode, inodeIndex, mode);
 		case 1: //Fifo (named pipe)
 			if(mode > 1)
 				return -1;
-			return openFifo(openedInode, *inodeIndex, mode);
+			return openFifo(openedInode, inodeIndex, mode);
 	}
+	return 0;
 }

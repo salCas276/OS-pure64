@@ -1,5 +1,5 @@
 #ifndef __FILE_SYSTEM_H__
-#define __FILE_SUSTEM_H__
+#define __FILE_SYSTEM_H__
 
 #define MAX_FILES 40
 #define RD_ONLY 0

@@ -24,5 +24,5 @@ int openFifo(inode* inode, int inodeIndex, int mode){
                 break;
         }
     }
-    return 0; //En este caso no hubo ni que bloquear ni desbloquear a nadie
+    return flag; //En este caso no hubo ni que bloquear ni desbloquear a nadie
 }
