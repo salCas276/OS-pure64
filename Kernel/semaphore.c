@@ -1,6 +1,8 @@
 #include <semaphore.h>
 #include "./interruptions/RoundRobin.h"
 
+#define SEMAPHORE_PASSWORD 2
+
 #define LENGTH 20
 
 typedef struct semaphore {
@@ -59,7 +61,7 @@ uint64_t semWait(char * sem_id){
             loop=0;
         }else{
             release(&currentSem->lock);
-            blockProcess(getCurrentPid(),1);
+            blockProcess(getCurrentPid(),SEMAPHORE_PASSWORD + semIndex);
             acquire(&currentSem->lock);
             if(currentSem -> value > 0 ){
                 currentSem->value--;
@@ -86,7 +88,7 @@ uint64_t semPost(char * sem_id){
     acquire(&currentSem->lock);
     currentSem->value++;
     if(currentSem->value==1)
-        popAndUnblock(1);
+        popAndUnblock(SEMAPHORE_PASSWORD + semIndex);
     release(&currentSem->lock);
     
     

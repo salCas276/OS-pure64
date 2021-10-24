@@ -8,6 +8,8 @@
 #include <Process.h>
 #include <semaphore.h>
 
+#define SYSCALL_BLOCK_PASSWORD 0 
+
 //#include <process.h>
 
 typedef struct dateType {
@@ -149,8 +151,8 @@ uint64_t sysCloseSemaphore(uint64_t rdi ){
 uint64_t sys_kill(uint64_t code, uint64_t pid) {
 	switch(code) {
 		case 0: return deleteProcess(pid); 
-		case 1: return blockProcess(pid, 0); 
-		case 2: return unblockProcess(pid, 0); 
+		case 1: return blockProcess(pid, SYSCALL_BLOCK_PASSWORD); 
+		case 2: return unblockProcess(pid, SYSCALL_BLOCK_PASSWORD); 
 	}
 	return -1; 
 }

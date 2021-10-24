@@ -183,9 +183,6 @@ _irq00Handler:
 ;Keyboard
 _irq01Handler:
 	pushState ; 
-	;;<-- Save rsp
-	;;mov rdi, rsp
-	;;call setCurrentRSP
 
 	mov rdi, 1 ; pasaje de parametro
 	call irqDispatcher
@@ -194,8 +191,6 @@ _irq01Handler:
 	mov al, 20h
 	out 20h, al
 
-	;;call getCurrentRSP
-	;;mov rsp, rax
 
 	popState
 	iretq

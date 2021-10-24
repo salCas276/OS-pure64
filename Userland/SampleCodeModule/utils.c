@@ -189,7 +189,7 @@ void printProcessesData(_ARGUMENTS){
     }
     memfree(descriptorArray);
 }
-
+//--------------------------------------------------------------
 void printHola(_ARGUMENTS,int foreground){
 
     createProcessUserland( (uint64_t) &auxa,argc,argv,foreground);
@@ -201,14 +201,6 @@ void printHola(_ARGUMENTS,int foreground){
     }
 }
 
-
-
-
-// void aux(void){
-//     while(1) {
-//         print_f(1,"hola\n");
-//     }
-// }
 
 void auxa(int argc,char * argv[]){
     int i = 0; 
@@ -226,133 +218,116 @@ void auxb(int argc,char * argv[]){
     }
 }
 
+//------------------------------------------------------------------------------------------
 
 
-// //------------
-// #define TOTAL_PAIR_PROCESSES 1
-// #define SEM_ID "sem"
-// #define N 10
+static uint32_t m_z = 362436069;
+static uint32_t m_w = 521288629;
 
-//  int64_t global;  //shared memory
+uint32_t GetUint(){
+  m_z = 36969 * (m_z & 65535) + (m_z >> 16);
+  m_w = 18000 * (m_w & 65535) + (m_w >> 16);
+  return (m_z << 16) + m_w;
+}
 
-// void slowInc(int64_t *p, int64_t inc){
-//   int64_t aux = *p;
-//   aux += inc;
-//   renounceUserland();
-//   *p = aux;
-// }
-
-
+uint32_t GetUniform(uint32_t max){
+  uint32_t u = GetUint();
+  return (u + 1.0) * 2.328306435454494e-10 * max;
+}
 
 
-// void semincM1( ){
-//   uint64_t i;
+//TO BE INCLUDED
+void endless_loop(){
+  while(1);
+}
 
+#define MAX_PROCESSES 16 //Should be around 80% of the the processes handled by the kernel
 
-//  openSemaphore(SEM_ID, 1);
+enum State {ERROR, RUNNING, BLOCKED, KILLED};
 
+typedef struct P_rq{
+  uint32_t pid;
+  enum State state;
+}p_rq;
 
+void test_processes(_ARGUMENTS,int foreground){
+  p_rq p_rqs[MAX_PROCESSES];
+  uint8_t rq;
+  uint8_t alive = 0;
+  uint8_t action;
+
+  while (1){
+
+    // Create MAX_PROCESSES processes
+    for(rq = 0; rq < MAX_PROCESSES; rq++){
+      p_rqs[rq].pid = createProcessUserland( (uint64_t) &endless_loop, argc , argv ,foreground);  // TODO: Port this call as required
+
+      if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
+        print_f(1,"Error creating process\n");               // TODO: Port this as required
+        return;
+      }else{
+        p_rqs[rq].state = RUNNING;
+        alive++;
+      }
+    }
+
+    // Randomly kills, blocks or unblocks processes until every one has been killed
+    while (alive > 0){
+
+      for(rq = 0; rq < MAX_PROCESSES; rq++){
+        action = GetUniform(2) % 2; 
+
+        switch(action){
+          case 0:
+            if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
+              if (kill(0,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error killing process\n");        // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = KILLED; 
+              alive--;
+              renounceUserland();
+            }
+            break;
+
+          case 1:
+            if (p_rqs[rq].state == RUNNING){
+              if(kill(1,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error blocking process\n");       // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = BLOCKED; 
+            }
+            break;
+        }
+      }
+
+      // Randomly unblocks processes
+      for(rq = 0; rq < MAX_PROCESSES; rq++)
+        if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
+          if(kill(2,p_rqs[rq].pid) == -1){            // TODO: Port this as required
+            print_f(1,"Error unblocking process\n");         // TODO: Port this as required
+            return;
+          }
+          p_rqs[rq].state = RUNNING; 
+        }
+    } 
+  }
+
+exitUserland();
+
+}
+
+int test_processes_wrapper(_ARGUMENTS,int foreground){
   
-//   for (i = 0; i < N; i++){
-//     waitSemaphore(SEM_ID);
-//     slowInc(&global, -1);
-//     postSemaphore(SEM_ID);
-//     renounceUserland();
-//   }
-
-//     waitSemaphore(SEM_ID);
-//     print_f(1,"Final value: %d\n", global);
-//     postSemaphore(SEM_ID);
-
-//     closeSemaphore(SEM_ID);
   
-//     exitUserland();
-// }
+int pid = createProcessUserland((uint64_t)&test_processes , 0 , (char**)0 , 0);
 
-// void seminc1(){
-//   uint64_t i;
+nice(pid , -3);
+//nice(pid , -20);
 
-//  openSemaphore(SEM_ID, 1);
- 
+  if(foreground)
+      waitSon(); 
 
-  
-//   for (i = 0; i < N; i++){
-//     waitSemaphore(SEM_ID);
-//     slowInc(&global, 1);
-//     postSemaphore(SEM_ID);
-//     renounceUserland();
-//   }
-
-
-  
-//      waitSemaphore(SEM_ID);
-//      print_f(1,"Final value: %d\n", global);
-//      postSemaphore(SEM_ID);
-
-
-//   closeSemaphore(SEM_ID);
-
-//     exitUserland();
-
-
-// }
-
-// void inc1(){
-//   uint64_t i;
-
-//  for (i = 0; i < N; i++){
-//     slowInc(&global, 1);
-//   }
-
-//   print_f(1,"Final value: %d\n", global);
-
-//   while(1){
-        
-//     }
-// }
-
-
-// void incM1(){
-//   uint64_t i;
-
-//  for (i = 0; i < N; i++){
-//    slowInc(&global, -1);
-//   }
-
-//   print_f(1,"Final value: %d\n", global);
-//     while(1){
-            
-//         }
-// }
-
-
-// void test_sync(){
-//   uint64_t i;
-
-//   global = 0;
-
-//   print_f(1,"CREATING PROCESSES...(WITH SEM)\n");
-
-//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-//     createProcessUserland((uint64_t)&semincM1);
-//     createProcessUserland((uint64_t)&seminc1);
-//     }
-   
-//     waitSon();
-//     waitSon();
-// }
-
-// void test_no_sync(){
-//   uint64_t i;
-
-//   global = 0;
-
-//   print_f(1,"CREATING PROCESSES...(WITHOUT SEM)\n");
-
-//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-//     createProcessUserland((uint64_t)&inc1);
-//     createProcessUserland( (uint64_t)& incM1);
-//   }
-
-
-// }
+  return 0;
+}

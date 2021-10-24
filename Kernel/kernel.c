@@ -8,7 +8,6 @@
 #include "./include/memoryManager.h"
 #include <Process.h>
 
-#include "./include/test_util.h"
 
 extern uint8_t text;
 extern uint8_t rodata;

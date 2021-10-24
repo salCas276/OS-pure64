@@ -78,7 +78,7 @@ int getProcessesData(uint64_t descriptorArray){
     if(freePidsCounter==MAX_PIDS) return j;
     processDescriptor * descriptorArrayAux = (processDescriptor *) descriptorArray;
     for(int i=0; i<MAX_PIDS; i++){
-        if(allProcesses[i]){
+        if(allProcesses[i] != (void*)0 ){
             (descriptorArrayAux+j)->pid=allProcesses[i]->pid;
             j++;
         }
@@ -89,9 +89,10 @@ int getProcessesData(uint64_t descriptorArray){
 //Busca ciclicamente el proximo (partiendo del ultimo) pid disponible
 //Si no hay pids disponibles retorna -1
 static int generateNextPid(){
+    lastPid = 0 ; 
     if(!freePidsCounter) return -1;
     freePidsCounter--;
-    while(allProcesses[lastPid])
+    while(allProcesses[lastPid] != (void*)0 )
         lastPid = (lastPid+1)%MAX_PIDS;
     return lastPid;
 }

@@ -8,6 +8,8 @@
 
 #define WORSTPRIORITY 40
 #define MAXBLOCKTYPES 10
+#define _ARGUMENTS  int argc,char **argv
+
 
 
 

@@ -5,14 +5,21 @@
 
 #define SIZE 20
 #define QHEADERS MAXBLOCKTYPES+1
+#define KEYBOARD_PASSWORD 1
+
 static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
 static processControlBlock * next = (processControlBlock * ) 0;
 static processControlBlock * shell = (processControlBlock *)(0); 
+static processControlBlock * idle = (processControlBlock*)(0);
+
+
 
 static processControlBlock * headers[QHEADERS] ={0}; 
 
 void timerTickInterrupt();
+void _hlt();
+uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENTS );
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
 static void pushProcess( processControlBlock ** header, processControlBlock * process);
@@ -20,7 +27,7 @@ static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
 void restartRoundRobin(processControlBlock * header);
 
 // Debugging
-static void printChain(processControlBlock * c) {
+void printChain(processControlBlock * c) {
    
    if ( c ==0 ) {
        ncPrint("[EOP]\n"); 
@@ -34,6 +41,15 @@ static void printChain(processControlBlock * c) {
    printChain(c->tail); 
 }
 
+void idleProcessFunction(){
+    while (1)
+    {
+        _hlt();
+    }
+    
+}
+
+
 
 // El agregado de procesos se hace al estilo stack, se lo pushea en una lista simplemente encadenada de procesos 
 // En la iteracion de la lista, si llegue al final, vuelvo a empezar (RR)
@@ -46,6 +62,13 @@ void addProcess(processControlBlock * process){
         headers[0]->tail = (processControlBlock *)(0); 
         currentProcess = process; 
         shell = process;
+
+        uint64_t * basePointerIdle = malloc(256 * sizeof(uint64_t));
+        processControlBlock * idleProcess = malloc(sizeof(processControlBlock));
+        idleProcess->baseRSP = (uint64_t)&basePointerIdle[255] ;
+        idleProcess->functionAddress= (uint64_t)&idleProcessFunction;
+        idleProcess->taskRSP = _buildContext(idleProcess->baseRSP, idleProcess->functionAddress,0,0);
+        idle=idleProcess;
         return; 
     }
 
@@ -110,7 +133,7 @@ int killProcess(int pid) {
 
 int blockProcess(int pid, int password) {
 
-    if (pid == 0) return -1; // No puedes bloquear al primer proceso 
+    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 
@@ -129,17 +152,16 @@ int blockProcess(int pid, int password) {
 
     if(pid == getCurrentPid()){
         currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; //null
+        timerTickInterrupt();
+
     }
 
 
-    timerTickInterrupt();
     return 0; 
 }
 
 int unblockProcess(int pid, int password) {
-
-
-
+    
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
     
     processControlBlock * p; 
@@ -167,10 +189,7 @@ void popAndUnblock(int password) {
      if (headers[password+1] == 0) return;
 
      unblockProcess(headers[password+1]->pid, password);
-
-
-
- }
+}
 
 
 
@@ -178,8 +197,13 @@ void popAndUnblock(int password) {
 
 
 void nextTask(){
-    if(headers[0] == (void*)0)
-        printChain(headers[0]);
+    if(headers[0] == (void*)0){
+        currentProcess = idle ; 
+        next=(void*)0;
+        return;
+    }
+    else if(currentProcess == idle && headers[0]!=(void*)0 )
+        currentProcess = (void*)0;
 
     if(currentProcess == (void*)0){
         if(next == (void*) 0 ){

@@ -6,6 +6,7 @@
 #define MAX_ARGC 5 // El nombre del comando es un parametro... 
 #define _ARGUMENTS int argc , char * argv[]
 #include <stdint.h>
+//#include <test_util.h>
 
 
 typedef struct processDescriptor{
@@ -22,6 +23,5 @@ void printProcessesData(_ARGUMENTS);
 void printHola(_ARGUMENTS,int foreground);
 void nicecmd(_ARGUMENTS); 
 void killcmd(_ARGUMENTS); 
-void test_sync();
-void test_no_sync();
+int test_processes_wrapper(_ARGUMENTS,int foreground);
 #endif

@@ -5,7 +5,6 @@
 #include "../include/video.h"
 #include "../include/memoryManager.h"
 
-#define _ARGUMENTS  int argc,char **argv
 
 
 void firstProcess(uint64_t functionAddress, prompt_info prompt);
