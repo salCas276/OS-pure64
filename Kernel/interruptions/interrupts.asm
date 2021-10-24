@@ -227,6 +227,7 @@ _exception6Handler:
 
 _int80Handler:
 	pushStateWithoutAX
+	mov r8 , rcx
 	mov rcx, rax
 	call syscallDispatcher
 	popStateWithoutAX

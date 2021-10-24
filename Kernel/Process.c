@@ -7,7 +7,7 @@ static prompt_info Prompt;
 
 int64_t functionAddress;
 void InitFirstProcess();
-uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress );
+uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENTS );
 
 
 #define MAX_PIDS 20
@@ -16,7 +16,6 @@ static int freePidsCounter = MAX_PIDS;
 processControlBlock * allProcesses[MAX_PIDS]; 
 
 
-uint64_t _buildContext(uint64_t baseRSP, uint64_t functionAddress);
 static int generateNextPid();
 
 //First process created by the kernel.
@@ -32,7 +31,7 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->prompt = Prompt;
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
-    task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+    task->taskRSP = _buildContext(task->baseRSP, functionAddress,0,0);
     task->tail = (processControlBlock *) 0; 
 
     // Processes are created with the worst possible priority.
@@ -45,19 +44,22 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     InitFirstProcess();
 }
 
-uint64_t createProcess(uint64_t functionAddress){
+uint64_t createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     uint64_t * basePointer = malloc(4096 * sizeof(uint64_t));
 
     processControlBlock * task= malloc(sizeof(processControlBlock));
     task->pid=generateNextPid();
-    //if(foreground)
-        task->prompt = Prompt;
+    task->prompt = Prompt;
     
-    task->parentPid = getCurrentPid(); //el padre es quien estaba ejecutando.
+    if(foreground)
+        task->parentPid = getCurrentPid();
+    else 
+        task->parentPid = -1; 
+
     task->quantityWaiting = 0; 
     task->baseRSP = (uint64_t)&basePointer[4095] ; 
     task->functionAddress = functionAddress;
-    task->taskRSP = _buildContext(task->baseRSP, functionAddress);
+    task->taskRSP = _buildContext(task->baseRSP, functionAddress,argc,argv);
     allProcesses[task->pid] = task;
 
     // Processes are created with the worst possible priority 
@@ -100,7 +102,8 @@ int deleteProcess(int pid){
     if(pid == 0 )
         return 0; //la shell no puede eliminarse
 
-    allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
+    if(allProcesses[pid]->parentPid > 0 ) //si no estaba en background , nadie le hace un wait.
+        allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
     
     allProcesses[pid]=(void*)0;
     killProcess(pid);

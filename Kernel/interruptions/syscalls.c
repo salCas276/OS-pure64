@@ -31,13 +31,13 @@ void sysWait();
 
 
 // TODO: Usar un arreglo y no switch case
-uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
+uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
 	switch(rcx) {
 		case 1: return sys_write(rdi, (char*)rsi, rdx);
 		case 2: return sys_read();
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
-		case 5 : return createProcess(rdi);
+		case 5 : return createProcess(rdi,rsi,(char**)rdx,foreground);
 		case 6 : return getProcessesData(rdi);
 		case 7 : return getCurrentPid();
 		case 8: return sys_malloc(rdi); 

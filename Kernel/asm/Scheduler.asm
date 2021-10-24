@@ -49,6 +49,9 @@ _buildContext:
     push 0x206  ; RFLAGS
     push 0x8    ; CS
     push rsi    ; RIP
+
+	mov rdi , rdx
+	mov rsi , rcx
     pushState
 
     mov rax, rsp

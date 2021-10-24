@@ -13,7 +13,7 @@
 
 typedef struct processControlBlock {
     uint8_t pid;
-    uint8_t parentPid;
+    int parentPid;
     int quantityWaiting;
     uint64_t taskRSP;
     uint64_t functionAddress; //no deberia ser necesario

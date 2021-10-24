@@ -141,8 +141,8 @@ void echo(_ARGUMENTS) {
 
 void aux(void);
 
-void auxa(void);
-void auxb(void);
+void auxa(int argc,char* argv[]);
+void auxb(int argc,char * argv[]);
 
 
 void nicecmd(_ARGUMENTS) {
@@ -179,10 +179,6 @@ void killcmd(_ARGUMENTS) {
 }
 
 
-void printHola(_ARGUMENTS){
-    createProcessUserland( (uint64_t) &auxa);
-    createProcessUserland( (uint64_t) &auxb);
-}
 
 void printProcessesData(_ARGUMENTS){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
@@ -194,156 +190,169 @@ void printProcessesData(_ARGUMENTS){
     memfree(descriptorArray);
 }
 
+void printHola(_ARGUMENTS,int foreground){
 
-void aux(void){
-    while(1) {
-        print_f(1,"hola\n");
+    createProcessUserland( (uint64_t) &auxa,argc,argv,foreground);
+    createProcessUserland( (uint64_t) &auxb,argc,argv,foreground);
+
+    if(foreground){
+        waitSon();
+        waitSon();
     }
 }
 
-void auxa(void){
+
+
+
+// void aux(void){
+//     while(1) {
+//         print_f(1,"hola\n");
+//     }
+// }
+
+void auxa(int argc,char * argv[]){
     int i = 0; 
     while(1) {
          for(int i=0; i<10000000; i++); 
-         print_f(1,"AAAA #%d\n", i++);
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
-void auxb(void){
+void auxb(int argc,char * argv[]){
     int i = 0; 
     while(1) {
          for(int i=0; i<10000000; i++); 
-         print_f(1,"BBBB #%d\n", i++);
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
 
 
-//------------
-#define TOTAL_PAIR_PROCESSES 1
-#define SEM_ID "sem"
-#define N 10
+// //------------
+// #define TOTAL_PAIR_PROCESSES 1
+// #define SEM_ID "sem"
+// #define N 10
 
- int64_t global;  //shared memory
+//  int64_t global;  //shared memory
 
-void slowInc(int64_t *p, int64_t inc){
-  int64_t aux = *p;
-  aux += inc;
-  renounceUserland();
-  *p = aux;
-}
-
-
+// void slowInc(int64_t *p, int64_t inc){
+//   int64_t aux = *p;
+//   aux += inc;
+//   renounceUserland();
+//   *p = aux;
+// }
 
 
-void semincM1( ){
-  uint64_t i;
 
 
- openSemaphore(SEM_ID, 1);
+// void semincM1( ){
+//   uint64_t i;
+
+
+//  openSemaphore(SEM_ID, 1);
 
 
   
-  for (i = 0; i < N; i++){
-    waitSemaphore(SEM_ID);
-    slowInc(&global, -1);
-    postSemaphore(SEM_ID);
-    renounceUserland();
-  }
+//   for (i = 0; i < N; i++){
+//     waitSemaphore(SEM_ID);
+//     slowInc(&global, -1);
+//     postSemaphore(SEM_ID);
+//     renounceUserland();
+//   }
 
-    waitSemaphore(SEM_ID);
-    print_f(1,"Final value: %d\n", global);
-    postSemaphore(SEM_ID);
+//     waitSemaphore(SEM_ID);
+//     print_f(1,"Final value: %d\n", global);
+//     postSemaphore(SEM_ID);
 
-    closeSemaphore(SEM_ID);
+//     closeSemaphore(SEM_ID);
   
-    exitUserland();
-}
+//     exitUserland();
+// }
 
-void seminc1(){
-  uint64_t i;
+// void seminc1(){
+//   uint64_t i;
 
- openSemaphore(SEM_ID, 1);
+//  openSemaphore(SEM_ID, 1);
  
 
   
-  for (i = 0; i < N; i++){
-    waitSemaphore(SEM_ID);
-    slowInc(&global, 1);
-    postSemaphore(SEM_ID);
-    renounceUserland();
-  }
+//   for (i = 0; i < N; i++){
+//     waitSemaphore(SEM_ID);
+//     slowInc(&global, 1);
+//     postSemaphore(SEM_ID);
+//     renounceUserland();
+//   }
 
 
   
-     waitSemaphore(SEM_ID);
-     print_f(1,"Final value: %d\n", global);
-     postSemaphore(SEM_ID);
+//      waitSemaphore(SEM_ID);
+//      print_f(1,"Final value: %d\n", global);
+//      postSemaphore(SEM_ID);
 
 
-  closeSemaphore(SEM_ID);
+//   closeSemaphore(SEM_ID);
 
-    exitUserland();
+//     exitUserland();
 
 
-}
+// }
 
-void inc1(){
-  uint64_t i;
+// void inc1(){
+//   uint64_t i;
 
- for (i = 0; i < N; i++){
-    slowInc(&global, 1);
-  }
+//  for (i = 0; i < N; i++){
+//     slowInc(&global, 1);
+//   }
 
-  print_f(1,"Final value: %d\n", global);
+//   print_f(1,"Final value: %d\n", global);
 
-  while(1){
+//   while(1){
         
-    }
-}
+//     }
+// }
 
 
-void incM1(){
-  uint64_t i;
+// void incM1(){
+//   uint64_t i;
 
- for (i = 0; i < N; i++){
-   slowInc(&global, -1);
-  }
+//  for (i = 0; i < N; i++){
+//    slowInc(&global, -1);
+//   }
 
-  print_f(1,"Final value: %d\n", global);
-    while(1){
+//   print_f(1,"Final value: %d\n", global);
+//     while(1){
             
-        }
-}
+//         }
+// }
 
 
-void test_sync(){
-  uint64_t i;
+// void test_sync(){
+//   uint64_t i;
 
-  global = 0;
+//   global = 0;
 
-  print_f(1,"CREATING PROCESSES...(WITH SEM)\n");
+//   print_f(1,"CREATING PROCESSES...(WITH SEM)\n");
 
-  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-    createProcessUserland((uint64_t)&semincM1);
-    createProcessUserland((uint64_t)&seminc1);
-    }
+//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+//     createProcessUserland((uint64_t)&semincM1);
+//     createProcessUserland((uint64_t)&seminc1);
+//     }
    
-    waitSon();
-    waitSon();
-}
+//     waitSon();
+//     waitSon();
+// }
 
-void test_no_sync(){
-  uint64_t i;
+// void test_no_sync(){
+//   uint64_t i;
 
-  global = 0;
+//   global = 0;
 
-  print_f(1,"CREATING PROCESSES...(WITHOUT SEM)\n");
+//   print_f(1,"CREATING PROCESSES...(WITHOUT SEM)\n");
 
-  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-    createProcessUserland((uint64_t)&inc1);
-    createProcessUserland( (uint64_t)& incM1);
-  }
+//   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+//     createProcessUserland((uint64_t)&inc1);
+//     createProcessUserland( (uint64_t)& incM1);
+//   }
 
 
-}
+// }
