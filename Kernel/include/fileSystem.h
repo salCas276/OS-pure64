@@ -27,7 +27,9 @@ typedef struct openedFile{
 
 int createFile(char* name, int fileType);
 
-int openFile(inode* inode, int inodeIndex, int mode);
+int openFile(char* name, int mode);
+
+int openFileFromInode(inode* inode, int inodeIndex, int mode);
 
 int closeFile(int fd);
 

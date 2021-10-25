@@ -4,6 +4,10 @@
 #include "fileSystem.h"
 
 
-int openFifo(inode* inode, int inodeIndex, int mode);
+int openFifoFromInode(inode* inode, int inodeIndex, int mode);
+
+int readFifo(int fd, char* buf, int count);
+
+int writeFifo(int fd, char* buf, int count);
 
 #endif

@@ -1,5 +1,5 @@
 #include <process.h>
-
+#include "include/fileSystem.h"
 
 static prompt_info Prompt;
 
@@ -32,15 +32,22 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress);
     task->tail = (processControlBlock *) 0; 
-    for(int i=0; i<3; i++)
-        task->processFileDescriptors[i] = i;
+    for(int i=0; i<MAX_PIDS; i++)
+        task->processFileDescriptors[i] = i < 3 ? i : -1;
+
+    createFile("console", 0);
+    int stdin = sys_open("console", 0);
+    int stdout = sys_open("console", 1);
+    int stderr = sys_open("console", 2);
+    unlinkFile("console");
     // Processes are created with the worst possible priority.
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0; 
     
     allProcesses[task->pid] = task;
 
-    addProcess(task); 
+    addProcess(task);
+
     InitFirstProcess();
 }
 

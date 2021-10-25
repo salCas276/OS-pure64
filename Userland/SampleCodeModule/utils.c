@@ -2,7 +2,7 @@
 #include <lib.h>
 #include <cpuid.h>
 #include <cpuidflags.h>
-#include <ProcessAPI.h>
+#include <processApi.h>
 
 
 #define BUFFER_SIZE 16

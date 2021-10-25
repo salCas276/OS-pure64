@@ -1,7 +1,9 @@
 #include "include/fileSystem.h"
-#include "interruptions/RoundRobin.h"
+#include <roundRobin.h>
 #include "include/string.h"
 #include "memoryManager.h"
+#include "include/naiveConsole.h"
+#include "include/libfifo.h"
 
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
@@ -34,7 +36,7 @@ int createFile(char* name, int fileType){
 }
 
 
-int openFile(inode* inode, int inodeIndex, int mode){
+int openFileFromInode(inode* inode, int inodeIndex, int mode){
 
     for(int j=0; j<MAX_OPEN_FILES; j++){
         if(!openedFileTable[j]){
@@ -56,6 +58,21 @@ int openFile(inode* inode, int inodeIndex, int mode){
         }
     }
     return -2; //El inode correspondiente existe pero no hay espacio para abriar un archivo
+}
+
+int openFile(char* name, int mode){
+    int inodeIndex;
+	inode* openedInode = getInode((char*) name, &inodeIndex);
+	if(openedInode == (inode*)-1) return -1;
+	switch(openedInode->fileType){
+		case 0: //File
+			return openFileFromInode(openedInode, inodeIndex, mode);
+		case 1: //Fifo (named pipe)
+			if(mode > 1)
+				return -1;
+			return openFifoFromInode(openedInode, inodeIndex, mode);
+	}
+	return 0;
 }
 
 int closeFile(int fd){
@@ -120,12 +137,10 @@ int readFile(int fd, char* buf, int count){
                 targetInode->indexes[0] = targetInode->indexes[0]+i;
                 return 0; //Llegue al EOF
             }
-            //TODO Block reader
         }
 
         buf[i]=targetInode->block[(targetInode->indexes[0]+i)%BLOCK_SIZE];
     }
-    //TODO Unblock possible blocked writers
     targetInode->indexes[0] = targetInode->indexes[0]+i;
     return i;
 }
@@ -138,12 +153,10 @@ int writeFile(int fd, char* buf, int count){
     inode* targetInode = openedFileTable[fd]->inode;
     int i;
     for(i=0; i<count; i++){
-        if((targetInode->indexes[1]+i)%BLOCK_SIZE == targetInode->indexes[0]){
-            //TODO Block writer
-        }
         targetInode->block[(targetInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
+        if(fd < 3)
+            ncPrintCharAtt(buf[i], fd == 1 ? &WHITE : &RED, &BLACK);
     }
-    //TODO Unblock possible blocked readers
     targetInode->indexes[1] = targetInode->indexes[1]+i;
     return i;
 }

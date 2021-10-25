@@ -52,6 +52,7 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 	if (buffer == 0 || count <= 0)
 		return -1;
 		
+	/*
 	if (fd > 2)
 		return -1;
 
@@ -61,6 +62,8 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 		ncPrintCharAtt(buffer[i], fontColor, &BLACK);
 	
 	return count;
+	*/
+	return writeFile(fd, buffer, count);
 }
 
 int64_t sys_read(void) {
@@ -127,16 +130,5 @@ uint64_t sys_createFifo(uint64_t name){
 }
 
 uint64_t sys_open(uint64_t name, uint64_t mode){
-	int inodeIndex;
-	inode* openedInode = getInode((char*) name, &inodeIndex);
-	if(openedInode == (inode*)-1) return -1;
-	switch(openedInode->fileType){
-		case 0: //File
-			return openFile(openedInode, inodeIndex, mode);
-		case 1: //Fifo (named pipe)
-			if(mode > 1)
-				return -1;
-			return openFifo(openedInode, inodeIndex, mode);
-	}
-	return 0;
+	return openFile(name, mode);
 }
