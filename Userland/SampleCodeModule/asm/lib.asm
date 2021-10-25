@@ -19,6 +19,7 @@ GLOBAL killAsm
 GLOBAL renounceAsm
 GLOBAL exitAsm
 GLOBAL waitAsm
+GLOBAL printSemaphoreAsm
 
 EXTERN print_f
 
@@ -87,6 +88,13 @@ _quadratic:
     mov rsp, rbp
     pop rbp
     ret
+
+printSemaphoreAsm:
+    mov rax , 19
+    int 80h
+    ret
+
+
 
 print:
     mov rax, 1

@@ -11,7 +11,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 12
+#define MODULES_SIZE 13
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 
@@ -29,7 +29,8 @@ static char * commandStrings[MODULES_SIZE] = {
 	"ps", 
 	"nice", 
 	"kill",
-	"testProcess"
+	"testProcess",
+	"sem"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -46,6 +47,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	nicecmd, 
 	killcmd,
 	test_processes_wrapper,
+	sem
 	// test_sync,
 	// test_no_sync
 };
@@ -70,6 +72,9 @@ int main() {
 
 	//help(argv, 0);
 
+	
+
+	sem(0,(char**)0,0);
 
 	while(1) {
 		print_f(2, "\n>> ");

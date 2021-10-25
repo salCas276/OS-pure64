@@ -57,5 +57,7 @@ int renounce(void);
 
 void popAndUnblock(int password);
 
+void printBlockedBy(int password);
+
 
 #endif

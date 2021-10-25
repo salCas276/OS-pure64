@@ -30,7 +30,7 @@ uint64_t sysCloseSemaphore(uint64_t rdi );
 uint64_t sys_kill(uint64_t code, uint64_t pid); 
 void sysExit();
 void sysWait();
-
+void printSemaphore();
 
 // TODO: Usar un arreglo y no switch case
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
@@ -50,6 +50,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 15 : return sysCloseSemaphore(rdi);
 		case 17 :  sysExit(); break;
 		case 18 : sysWait();break;
+		case 19 : printSemaphore();break;
 
 		case 10: return changeNicenessBy(rdi, rsi); 
 		case 11: return sys_kill(rdi, rsi);

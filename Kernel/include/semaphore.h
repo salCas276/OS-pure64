@@ -13,6 +13,7 @@ uint64_t semPost(char * sem_id);
 
 uint64_t semClose(char * sem_id);
 
+void printSemaphore();
 
 
 

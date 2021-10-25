@@ -41,6 +41,14 @@ void printChain(processControlBlock * c) {
    printChain(c->tail); 
 }
 
+
+
+void printBlockedBy(int password){
+    printChain(headers[password+1]);
+}
+
+
+
 void idleProcessFunction(){
     while (1)
     {

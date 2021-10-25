@@ -331,3 +331,12 @@ nice(pid , -3);
 
   return 0;
 }
+
+
+//-------------
+
+void sem(_ARGUMENTS,int foreground){
+
+  printSemaphore();
+
+}
