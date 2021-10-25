@@ -33,14 +33,23 @@ uint64_t semOpen(char * sem_id, uint64_t initialValue){
 
 
     int emptyIndex = searchEmptySlot();
+    if(emptyIndex < 0 ){
+        return -1;
+    }
 
-    semaphores[emptyIndex] = malloc(sizeof(semaphore));
+
+
+    semaphores[emptyIndex] = malloc(sizeof(semaphore)); //falla de malloc
+
+    if(semaphores[emptyIndex] == (void* )0)
+        return -1;
+
     semaphores[emptyIndex]->id=sem_id;
     semaphores[emptyIndex]->lock = 0 ; 
     semaphores[emptyIndex]->attachedProcess = 1 ; 
     semaphores[emptyIndex]->value = initialValue;
 
-    return 0; //retorna uint64_t
+    return 0; 
  
 
 }

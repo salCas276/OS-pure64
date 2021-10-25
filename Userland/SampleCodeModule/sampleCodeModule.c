@@ -74,7 +74,6 @@ int main() {
 
 	
 
-	sem(0,(char**)0,0);
 
 	while(1) {
 		print_f(2, "\n>> ");
