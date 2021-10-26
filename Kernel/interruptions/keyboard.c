@@ -1,12 +1,15 @@
 #include <keyboard.h>
 #include <lib.h>
 #include <naiveConsole.h>
+#include <RoundRobin.h>
 
 #define LEFT_SHIFT  0x2A
 #define LEFT_SHIFT_FLAG 0b00000001
 #define RIGHT_SHIFT 0x36
 #define RIGHT_SHIFT_FLAG 0b00000010
 #define LEFT_ALT 0x38
+
+#define KEYBOARD_PASSWORD 1 
 
 #define BUFFER_SIZE 128
 
@@ -81,14 +84,26 @@ void keyboard_handler() {
       else if (scancode == RIGHT_SHIFT) 
         flags &= ~RIGHT_SHIFT_FLAG;
     }
+
+    popAndUnblock(KEYBOARD_PASSWORD);
 }
 
 int64_t getChar(void) {
-  if (head != tail) {
-    char ans = buffer[tail++];
-    if (tail == BUFFER_SIZE)
-      tail = 0;
-      return ans == 0 ? -1 : ans;
+  
+  char ans = 0 ;
+  while(1){
+    if(head != tail ){
+      ans = buffer[tail++];
+      if (tail == BUFFER_SIZE)
+        tail = 0;
+    }
+    else if(head == tail || ans == 0){
+      blockProcess(getCurrentPid(),KEYBOARD_PASSWORD);
+      continue;
+    }
+
+    break;
   }
-  return -1;
+  return ans;   
+  
 }

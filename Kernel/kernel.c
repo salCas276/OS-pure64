@@ -8,7 +8,6 @@
 #include "./include/memoryManager.h"
 #include <process.h>
 
-#include "./include/test_util.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -71,13 +70,13 @@ void * initializeKernelBinary()
 	clearBSS(&bss, &endOfKernel - &bss);
 
 
-	char *c = malloc( 20000 * sizeof(char));
+	//char *c = malloc( 20000 * sizeof(char));
 	// char *d = malloc( 20000 * sizeof(char));
 	// char *e = malloc( 20000 * sizeof(char));
-	int summer = 0; 
+	// int summer = 0; 
 
-	for (int i=0; i<20000; i++)
-		c[i] = 1; 
+	// for (int i=0; i<20000; i++)
+	// 	c[i] = 1; 
 
 	// for (int i=0; i<20000; i++)
 	// 	d[i] = 2; 

@@ -10,6 +10,10 @@ GLOBAL memfree
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getpid
+GLOBAL openSemAsm
+GLOBAL waitSemAsm
+GLOBAL postSemAsm
+GLOBAL closeSemAsm
 GLOBAL niceAsm
 GLOBAL killAsm
 GLOBAL renounceAsm
@@ -22,7 +26,9 @@ GLOBAL getFileContent
 GLOBAL getFileInfo
 GLOBAL dupAsm
 GLOBAL dup2Asm
-
+GLOBAL exitAsm
+GLOBAL waitAsm
+GLOBAL printSemaphoreAsm
 
 EXTERN print_f
 
@@ -91,6 +97,13 @@ _quadratic:
     mov rsp, rbp
     pop rbp
     ret
+
+printSemaphoreAsm:
+    mov rax , 19
+    int 80h
+    ret
+
+
 
 print:
     mov rax, 1
@@ -252,11 +265,29 @@ getpid:
     int 80h
     ret
 
+openSemAsm:
+    mov rax , 16
+    int 80h
+    ret 
+
+waitSemAsm:
+    mov rax , 13
+    int 80h
+    ret 
 niceAsm:
     mov rax, 10
     int 80h
     ret
 
+exitAsm:
+    mov rax, 17
+    int 80h
+    ret
+
+waitAsm:
+    mov rax, 18
+    int 80h
+    ret
 
 killAsm:
     mov rax, 11
@@ -277,6 +308,15 @@ createFifoAsm:
     mov rax, 21
     int 80h
     ret
+postSemAsm:
+    mov rax , 14
+    int 80h
+    ret
+
+closeSemAsm:
+    mov rax , 15
+    int 80h
+    ret 
 
 openAsm:
     mov rax, 22

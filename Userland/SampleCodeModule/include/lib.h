@@ -11,7 +11,7 @@
 #define ISLOWER(x) IN_RANGE(x, 'a', 'z')
 #define ISALPHA(x) (ISUPPER(x) || ISLOWER(x))
 #define ISDIGIT(x) IN_RANGE(x, '0', '9')
-#define _ARGUMENTS char argv[MAX_ARGC][MAX_COMMAND], int argc
+//#define _ARGUMENTS int argc, char * argv[]
 
 typedef struct dateType {
 	uint8_t year, month, day;
@@ -31,7 +31,7 @@ int64_t get_s(char * buffer, uint64_t maxLength);
 void print(uint8_t fd, char * s, uint64_t count);
 void setReg(void);
 uint64_t fillDate(dateType * pDate);
-void inforeg(_ARGUMENTS);
+void inforeg(/*_ARGUMENTS*/);
 int64_t fillMem(uint64_t src, uint8_t * dst, uint8_t size);
 int64_t getChar(void);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);

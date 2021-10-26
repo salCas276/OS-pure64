@@ -4,6 +4,7 @@
 #include <cpuidflags.h>
 #include <processApi.h>
 
+#include <testSem.h>
 
 #define BUFFER_SIZE 16
 #define MAX_PROCS 5
@@ -149,8 +150,8 @@ void echo(_ARGUMENTS) {
 
 void aux(void);
 
-void auxa(void);
-void auxb(void);
+void auxa(int argc,char* argv[]);
+void auxb(int argc,char * argv[]);
 
 
 void nicecmd(_ARGUMENTS) {
@@ -187,10 +188,6 @@ void killcmd(_ARGUMENTS) {
 }
 
 
-void printHola(_ARGUMENTS){
-    createProcessUserland( (uint64_t) &auxa);
-    createProcessUserland( (uint64_t) &auxb);
-}
 
 void printProcessesData(_ARGUMENTS){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
@@ -201,27 +198,32 @@ void printProcessesData(_ARGUMENTS){
     }
     memfree(descriptorArray);
 }
+//--------------------------------------------------------------
+void printHola(_ARGUMENTS,int foreground){
 
+    createProcessUserland( (uint64_t) &auxa,argc,argv,foreground);
+    createProcessUserland( (uint64_t) &auxb,argc,argv,foreground);
 
-void aux(void){
-    while(1) {
-        print_f(1,"hola\n");
+    if(foreground){
+        waitSon();
+        waitSon();
     }
 }
 
-void auxa(void){
+
+void auxa(int argc,char * argv[]){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"AAAA #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
-void auxb(void){
+void auxb(int argc,char * argv[]){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"BBBB #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
@@ -336,4 +338,126 @@ static void askAndRead(char* buffer, char* text){
         print_f(1, "%s\n", text);
         ans = get_s(buffer, BUFFER_SIZE);
     } while (ans == -1);
+}
+//------------------------------------------------------------------------------------------
+
+
+static uint32_t m_z = 362436069;
+static uint32_t m_w = 521288629;
+
+uint32_t GetUint(){
+  m_z = 36969 * (m_z & 65535) + (m_z >> 16);
+  m_w = 18000 * (m_w & 65535) + (m_w >> 16);
+  return (m_z << 16) + m_w;
+}
+
+uint32_t GetUniform(uint32_t max){
+  uint32_t u = GetUint();
+  return (u + 1.0) * 2.328306435454494e-10 * max;
+}
+
+
+//TO BE INCLUDED
+void endless_loop(){
+  while(1);
+}
+
+#define MAX_PROCESSES 16 //Should be around 80% of the the processes handled by the kernel
+
+enum State {ERROR, RUNNING, BLOCKED, KILLED};
+
+typedef struct P_rq{
+  uint32_t pid;
+  enum State state;
+}p_rq;
+
+void test_processes(_ARGUMENTS,int foreground){
+  p_rq p_rqs[MAX_PROCESSES];
+  uint8_t rq;
+  uint8_t alive = 0;
+  uint8_t action;
+
+  while (1){
+
+    // Create MAX_PROCESSES processes
+    for(rq = 0; rq < MAX_PROCESSES; rq++){
+      p_rqs[rq].pid = createProcessUserland( (uint64_t) &endless_loop, argc , argv ,foreground);  // TODO: Port this call as required
+
+      if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
+        print_f(1,"Error creating process\n");               // TODO: Port this as required
+        return;
+      }else{
+        p_rqs[rq].state = RUNNING;
+        alive++;
+      }
+    }
+
+    // Randomly kills, blocks or unblocks processes until every one has been killed
+    while (alive > 0){
+
+      for(rq = 0; rq < MAX_PROCESSES; rq++){
+        action = GetUniform(2) % 2; 
+
+        switch(action){
+          case 0:
+            if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
+              if (kill(0,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error killing process\n");        // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = KILLED; 
+              alive--;
+              renounceUserland();
+            }
+            break;
+
+          case 1:
+            if (p_rqs[rq].state == RUNNING){
+              if(kill(1,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error blocking process\n");       // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = BLOCKED; 
+            }
+            break;
+        }
+      }
+
+      // Randomly unblocks processes
+      for(rq = 0; rq < MAX_PROCESSES; rq++)
+        if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
+          if(kill(2,p_rqs[rq].pid) == -1){            // TODO: Port this as required
+            print_f(1,"Error unblocking process\n");         // TODO: Port this as required
+            return;
+          }
+          p_rqs[rq].state = RUNNING; 
+        }
+    } 
+  }
+
+exitUserland();
+
+}
+
+int test_processes_wrapper(_ARGUMENTS,int foreground){
+  
+  
+int pid = createProcessUserland((uint64_t)&test_processes , 0 , (char**)0 , 0);
+
+nice(pid , -3);
+//nice(pid , -20);
+
+  if(foreground)
+      waitSon(); 
+
+  return 0;
+}
+
+
+//-------------
+
+void sem(_ARGUMENTS,int foreground){
+
+  printSemaphore();
+
 }
