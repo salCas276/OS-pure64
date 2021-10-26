@@ -42,6 +42,8 @@ int getpid();
 int createFileAsm(char* name);
 int createFifoAsm(char* name);
 int openAsm(char* name, int mode);
+int closeAsm(int fd);
+int unlinkAsm(char* name);
 int getFileContent(char* name, char* buf);
 int getFileInfo(char* name, fileInfo* buf);
 

@@ -16,6 +16,8 @@ GLOBAL renounceAsm
 GLOBAL createFileAsm
 GLOBAL createFifoAsm
 GLOBAL openAsm
+GLOBAL closeAsm
+GLOBAL unlinkAsm
 GLOBAL getFileContent
 GLOBAL getFileInfo
 
@@ -276,6 +278,16 @@ createFifoAsm:
 
 openAsm:
     mov rax, 22
+    int 80h
+    ret
+
+closeAsm:
+    mov rax, 23
+    int 80h
+    ret
+
+unlinkAsm:
+    mov rax, 24
     int 80h
     ret
 

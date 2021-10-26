@@ -170,9 +170,9 @@ uint64_t sys_getFileInfo(uint64_t name, uint64_t inodeBuf){
 }
 
 uint64_t sys_close(uint64_t fd){
-
+	return closeFile((int) fd);
 }
 
 uint64_t sys_unlink(uint64_t name){
-
+	return unlinkFile((char*) name);
 }

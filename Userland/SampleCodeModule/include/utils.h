@@ -34,5 +34,8 @@ void createFifo(_ARGUMENTS);
 void createFile(_ARGUMENTS);
 void printFileContent(_ARGUMENTS);
 void printFileInfo(_ARGUMENTS);
+void printClose(_ARGUMENTS);
+void printUnlink(_ARGUMENTS);
+void printOpen(_ARGUMENTS);
 
 #endif

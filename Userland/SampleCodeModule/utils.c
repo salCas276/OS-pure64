@@ -9,7 +9,7 @@
 #define MAX_PROCS 5
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
-
+static void askAndRead(char* buffer, char* text);
 
 void printDate(_ARGUMENTS) {
 	dateType currDate;
@@ -36,10 +36,13 @@ void help(_ARGUMENTS) {
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
     print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n ");
-    print_f(1, " - mkfifo: crea un pipe con nombre en el file system\n");
-    print_f(1, " - mkfile: crea un file en el file system\n");
-    print_f(1, " - printFileContent: obtengo el contenido escrito en un elemento del file system\n");
-    print_f(1, " - printFileInfo: obtengo la informacion del inode de un elemento del file system\n");
+    print_f(1, " - mkfifo: Crea un pipe con nombre en el file system\n");
+    print_f(1, " - mkfile: Crea un file en el file system\n");
+    print_f(1, " - printFileContent: Obtengo el contenido escrito en un elemento del file system\n");
+    print_f(1, " - printFileInfo: Obtengo la informacion del inode de un elemento del file system\n");
+    print_f(1, " - open: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
+    print_f(1, " - close: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - unlink: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
 
 
 }
@@ -236,19 +239,21 @@ void createFifo(_ARGUMENTS){
 }
 
 void printFileContent(_ARGUMENTS){
-   char* buf = memalloc(MAX_SIZE_BLOCK); 
-   getFileContent(argv[1], buf);
-   print_f(1, "%s\n", buf);
-   memfree(buf);
+    char name[BUFFER_SIZE];
+    askAndRead(name, "Ingrese el nombre del archivo:\n");
+    char* buf = memalloc(MAX_SIZE_BLOCK); 
+    if(getFileContent(name, buf) == -1){
+        print_f(1, "No existe archivo con ese nombre\n");
+        memfree(buf);
+        return;
+    }
+    print_f(1, "%s\n", buf);
+    memfree(buf);
 }
 
 void printFileInfo(_ARGUMENTS){
     char name[BUFFER_SIZE];
-    int ans;
-     do {
-        print_f(1, "Ingrese el nombre del archivo:\n");
-        ans = get_s(name, BUFFER_SIZE);
-    } while (ans == -1);
+    askAndRead(name, "Ingrese el nombre del archivo:\n");
     fileInfo* buf = memalloc(sizeof(fileInfo));
     if(getFileInfo(name, buf) == -1){
         print_f(1, "No existe archivo con ese nombre\n");
@@ -264,4 +269,44 @@ void printFileInfo(_ARGUMENTS){
     print_f(1, "For unlink: %d\n", buf->forUnlink);
 
     memfree(buf);
+}
+
+void printOpen(_ARGUMENTS){
+    char name[BUFFER_SIZE], mode[BUFFER_SIZE];
+    askAndRead(name, "Ingrese el nombre del archivo:\n");
+    askAndRead(mode, "Ingese 0 para read only, 1 para write only y 2 para read & write");
+    int fd = openAsm(name, strtoint(mode, NULL, 10));
+    if(fd == -1){
+        print_f(1, "Hubo un error en la creacion\n");
+        return;
+    }
+    print_f(1, "El fd correspondiente es: %d", fd);
+}
+
+void printClose(_ARGUMENTS){
+    char fd[BUFFER_SIZE];
+    askAndRead(fd, "Ingrese el fd a cerrar:\n");
+    if(closeAsm(strtoint(fd, NULL, 10)) == -1){
+        print_f(1, "Hubo un error con el cerrado\n");
+        return;
+    }
+}
+
+void printUnlink(_ARGUMENTS){
+    char name[BUFFER_SIZE];
+    askAndRead(name, "Ingrese el nombre del archivo a desvincular:\n");
+    if(unlinkAsm(name) == -1){
+        print_f(1, "Hubo en error desvinculando el archivo\n");
+        return;
+    }
+    print_f(1, "Este sera desvinculado cuando todas sus aperturas se hayan cerrado\n");
+}
+
+
+static void askAndRead(char* buffer, char* text){
+    int ans;
+     do {
+        print_f(1, "%s\n", text);
+        ans = get_s(buffer, BUFFER_SIZE);
+    } while (ans == -1);
 }

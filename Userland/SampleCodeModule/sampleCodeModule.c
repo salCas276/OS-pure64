@@ -10,7 +10,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 15
+#define MODULES_SIZE 18
 
 typedef void (*commandType)(char argv[MAX_ARGC][MAX_COMMAND], int argc);
 
@@ -31,7 +31,10 @@ static char * commandStrings[MODULES_SIZE] = {
 	"mkfifo",
 	"mkfile",
 	"printFileContent",
-	"printFileInfo"
+	"printFileInfo",
+	"open",
+	"close",
+	"unlink"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -50,7 +53,10 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	createFifo,
 	createFile,
 	printFileContent,
-	printFileInfo
+	printFileInfo,
+	printOpen,
+	printClose,
+	printUnlink
 };
 
 void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 

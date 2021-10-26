@@ -63,7 +63,8 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
 int openFile(char* name, int mode){
     int inodeIndex;
 	inode* openedInode = getInode((char*) name, &inodeIndex);
-	if(openedInode == (inode*)-1) return -1;
+	if(openedInode == inodeIndex)
+        return -1;
 	switch(openedInode->fileType){
 		case 0: //File
 			return openFileFromInode(openedInode, inodeIndex, mode);
@@ -103,8 +104,10 @@ int unlinkFile(char* name){
     int targetInodeIndex;
     inode* targetInode = getInode(name, &targetInodeIndex);
 
-    if(targetInodeIndex == -1)
+    if(targetInodeIndex == -1){
+        writeFile(1, "errrror\n", 8);
         return -1;
+    }
 
     if(targetInode->openCount == 0){
         return freeInode(targetInode, targetInodeIndex);
