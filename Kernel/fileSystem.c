@@ -119,7 +119,6 @@ int unlinkFile(char* name){
     inode* targetInode = getInode(name, &targetInodeIndex);
 
     if(targetInodeIndex == -1){
-        writeFile(1, "errrror\n", 8);
         return -1;
     }
 
