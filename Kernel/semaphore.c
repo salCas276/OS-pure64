@@ -1,5 +1,5 @@
 #include <semaphore.h>
-#include "./interruptions/RoundRobin.h"
+#include "./interruptions/roundRobin.h"
 
 #define SEMAPHORE_PASSWORD 2
 

@@ -231,7 +231,7 @@ uint64_t sys_unlink(uint64_t name){
 
 //TODO sacar los prints del testeo en los dups
 uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
-	int* fdBuf = (char*) buf;
+	int* fdBuf = (int*) buf;
 	int newVirtualFd = dup((int) oldVirtualFd);
 	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
 	int i;
@@ -242,7 +242,7 @@ uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
 }
 
 uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count){
-	int* fdBuf = (char*) buf;
+	int* fdBuf = (int*) buf;
 	int ret = dup2((int) oldVirtualFd, (int) newVirtualFd);
 	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
 	int i;
