@@ -36,6 +36,10 @@ void help(_ARGUMENTS) {
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
     print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n ");
+    print_f(1, " - mkfifo: crea un pipe con nombre en el file system\n");
+    print_f(1, " - mkfile: crea un file en el file system\n");
+    print_f(1, " - printFileContent: obtengo el contenido escrito en un elemento del file system\n");
+    print_f(1, " - printFileInfo: obtengo la informacion del inode de un elemento del file system\n");
 
 
 }
@@ -217,4 +221,47 @@ void auxb(void){
     }
 }
 
+void createFile(_ARGUMENTS){
+    char name[BUFFER_SIZE];
+    int ans;
+     do {
+        print_f(1, "Ingrese el nombre del archivo:\n");
+        ans = get_s(name, BUFFER_SIZE);
+    } while (ans == -1);
+    createFileAsm(name);
+}
 
+void createFifo(_ARGUMENTS){
+    createFifoAsm(argv[1]);
+}
+
+void printFileContent(_ARGUMENTS){
+   char* buf = memalloc(MAX_SIZE_BLOCK); 
+   getFileContent(argv[1], buf);
+   print_f(1, "%s\n", buf);
+   memfree(buf);
+}
+
+void printFileInfo(_ARGUMENTS){
+    char name[BUFFER_SIZE];
+    int ans;
+     do {
+        print_f(1, "Ingrese el nombre del archivo:\n");
+        ans = get_s(name, BUFFER_SIZE);
+    } while (ans == -1);
+    fileInfo* buf = memalloc(sizeof(fileInfo));
+    if(getFileInfo(name, buf) == -1){
+        print_f(1, "No existe archivo con ese nombre\n");
+        memfree(buf);
+        return;
+    }
+    print_f(1, "------------%s-----------\n", name);
+    print_f(1, "Read Index: %d\n", buf->indexes[0]);
+    print_f(1, "Write Index: %d\n", buf->indexes[1]);
+    print_f(1, "Opening Number: %d\n", buf->openCount);
+    print_f(1, "Writer Number: %d\n", buf->writeOpenCount);
+    print_f(1, "File Type: %d\n", buf->fileType);
+    print_f(1, "For unlink: %d\n", buf->forUnlink);
+
+    memfree(buf);
+}

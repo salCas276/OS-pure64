@@ -24,6 +24,10 @@ uint64_t sys_kill(uint64_t code, uint64_t pid);
 uint64_t sys_createFile(uint64_t name);
 uint64_t sys_createFifo(uint64_t name);
 uint64_t sys_open(uint64_t name, uint64_t mode);
+uint64_t sys_getFileContent(uint64_t name, uint64_t buf);
+uint64_t sys_getFileInfo(uint64_t name, uint64_t buf);
+uint64_t sys_close(uint64_t fd);
+uint64_t sys_unlink(uint64_t name);
 
 
 // TODO: Usar un arreglo y no switch case
@@ -44,6 +48,10 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 20: return sys_createFile(rdi);
 		case 21: return sys_createFifo(rdi);
 		case 22: return sys_open(rdi, rsi);
+		case 23: return sys_close(rdi);
+		case 24: return sys_unlink(rdi);
+		case 25: return sys_getFileContent(rdi, rsi);
+		case 26: return sys_getFileInfo(rdi, rsi);
 	}
 	return 0;
 }
@@ -130,5 +138,41 @@ uint64_t sys_createFifo(uint64_t name){
 }
 
 uint64_t sys_open(uint64_t name, uint64_t mode){
-	return openFile(name, mode);
+	return openFile((char*) name, (int) mode);
+}
+
+uint64_t sys_getFileContent(uint64_t name, uint64_t buf){
+	int inodeIndex;
+	char * auxBuf = (char*) buf;
+	inode* targetInode = getInode((char*)name, &inodeIndex);
+	if(targetInode == (inode*)-1)
+		return -1;
+	int i;
+	for(i=0; i<=targetInode->indexes[1]; i++)
+		auxBuf[i] = targetInode->block[targetInode->indexes[0]+i];
+	return i;	
+}
+
+uint64_t sys_getFileInfo(uint64_t name, uint64_t inodeBuf){
+	int inodeIndex;
+	inode* targetInode = getInode((char*)name, &inodeIndex);
+	if(inodeIndex == -1){
+		return -1;
+	}
+	fileInfo* auxInodeBuf = (fileInfo*) inodeBuf;
+	auxInodeBuf->fileType = targetInode->fileType;
+	auxInodeBuf->forUnlink = targetInode->forUnlink;
+	auxInodeBuf->indexes[0] = targetInode->indexes[0];
+	auxInodeBuf->indexes[1] = targetInode->indexes[1];
+	auxInodeBuf->openCount = targetInode->openCount;
+	auxInodeBuf->writeOpenCount = targetInode->writeOpenCount;
+	return 0;
+}
+
+uint64_t sys_close(uint64_t fd){
+
+}
+
+uint64_t sys_unlink(uint64_t name){
+
 }

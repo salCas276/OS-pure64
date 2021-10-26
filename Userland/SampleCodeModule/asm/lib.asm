@@ -13,6 +13,11 @@ GLOBAL getpid
 GLOBAL niceAsm
 GLOBAL killAsm
 GLOBAL renounceAsm
+GLOBAL createFileAsm
+GLOBAL createFifoAsm
+GLOBAL openAsm
+GLOBAL getFileContent
+GLOBAL getFileInfo
 
 
 EXTERN print_f
@@ -259,10 +264,30 @@ renounceAsm:
     int 80h
     ret
 
+createFileAsm:
+    mov rax, 20
+    int 80h
+    ret
 
+createFifoAsm:
+    mov rax, 21
+    int 80h
+    ret
 
+openAsm:
+    mov rax, 22
+    int 80h
+    ret
 
-
+getFileContent:
+    mov rax, 25
+    int 80h
+    ret
+    
+getFileInfo:
+    mov rax, 26
+    int 80h
+    ret
 
 
 section .data

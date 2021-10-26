@@ -36,9 +36,9 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
         task->processFileDescriptors[i] = i < 3 ? i : -1;
 
     createFile("console", 0);
-    int stdin = sys_open("console", 0);
-    int stdout = sys_open("console", 1);
-    int stderr = sys_open("console", 2);
+    openFile("console", 0);
+    openFile("console", 1);
+    openFile("console", 2);
     unlinkFile("console");
     // Processes are created with the worst possible priority.
     task->priority = WORSTPRIORITY; 

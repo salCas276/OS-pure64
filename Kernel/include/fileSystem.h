@@ -18,6 +18,14 @@ typedef struct inode{
     int forUnlink; //Flag que me indica si se le hizo un unlink
 }inode;
 
+
+typedef struct fileInfo{
+    int indexes[2]; //Indices de lectura (0) y escritura (1), son unicos para todo el archivo
+    int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
+    int fileType; //0 -> File, 1 -> Fifo
+    int forUnlink; //Flag que me indica si se le hizo un unlink
+}fileInfo;
+
 //Representa la apertura de un archivo preexistente
 typedef struct openedFile{
     int mode;

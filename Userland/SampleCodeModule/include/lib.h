@@ -39,5 +39,10 @@ void * memalloc(uint64_t size);
 void memfree(void * pv); 
 int getProcessesData(processDescriptor * despriptorArray);
 int getpid();
+int createFileAsm(char* name);
+int createFifoAsm(char* name);
+int openAsm(char* name, int mode);
+int getFileContent(char* name, char* buf);
+int getFileInfo(char* name, fileInfo* buf);
 
 #endif
