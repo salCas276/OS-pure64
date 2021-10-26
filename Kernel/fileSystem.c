@@ -43,8 +43,12 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
 
             openedFileTable[j] = malloc(sizeof(openedFile));
 
-            if(inode->indexes[mode] == -1)
-                inode->indexes[mode] = 0;
+
+            if(inode->indexes[0] == -1 && (mode == 0 || mode == 2))
+                inode->indexes[0] = 0;
+            
+            if(inode->indexes[1] == -1 && (mode == 1 || mode == 2))
+                inode->indexes[1] = 0;
                     
             openedFileTable[j]->mode = mode;
             openedFileTable[j]->inode = inode;
@@ -53,8 +57,11 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
             if(mode == 1 || mode == 2)
                 inode->writeOpenCount++;
             inode->openCount++;
-                    
-            return j; //Devuelvo la posicion de este objeto en la openedFileTable
+
+            int virtualFd = getCurrentMinFd();
+            getCurrentTask()->processFileDescriptors[virtualFd] = j;                    
+
+            return virtualFd; //Devuelvo la posicion de este objeto en la openedFileTable
         }
     }
     return -2; //El inode correspondiente existe pero no hay espacio para abriar un archivo
@@ -76,8 +83,10 @@ int openFile(char* name, int mode){
 	return 0;
 }
 
-int closeFile(int fd){
-    if(!openedFileTable[fd]) //Ese fd no refiere a ningun archivo abierto
+int closeFile(int virtualFd){
+    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+
+    if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
 
     inode* auxInode = openedFileTable[fd]->inode;
@@ -90,6 +99,8 @@ int closeFile(int fd){
 
     free(openedFileTable[fd]);
     openedFileTable[fd] = (openedFile*) 0;
+
+    getCurrentTask()->processFileDescriptors[virtualFd] = -1;
 
     //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
     if(auxInode->openCount == 0 && auxInode->forUnlink == 1)
@@ -124,8 +135,10 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
     return 0;
 }
 
-int readFile(int fd, char* buf, int count){
-    if(!openedFileTable[fd]) //El fd no apunta a una apertura existente
+int readFile(int virtualFd, char* buf, int count){
+    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+
+    if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
 
     if(openedFileTable[fd]->mode == 1) //La apertura no permite esta operacion
@@ -148,15 +161,21 @@ int readFile(int fd, char* buf, int count){
     return i;
 }
 
-int writeFile(int fd, char* buf, int count){
-    if(!openedFileTable[fd]) //El fd no apunta a una apertura existente
+int writeFile(int virtualFd, char* buf, int count){
+    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+
+    if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
+
     if(openedFileTable[fd]->mode == 0) //La apertura no permite esta operacion
         return -1;
+
     inode* targetInode = openedFileTable[fd]->inode;
     int i;
+
     for(i=0; i<count; i++){
         targetInode->block[(targetInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
+
         if(fd < 3)
             ncPrintCharAtt(buf[i], fd == 1 ? &WHITE : &RED, &BLACK);
     }
@@ -164,21 +183,31 @@ int writeFile(int fd, char* buf, int count){
     return i;
 }
 
-int dup(int oldfd){
+int dup(int oldVirtualFd){
     processControlBlock* currentProcess = getCurrentTask();
-    if(currentProcess->processFileDescriptors[oldfd] == -1)
+    if(currentProcess->processFileDescriptors[oldVirtualFd] == -1)
         return -1;
-    int newfd = getCurrentMinFd();
-    currentProcess->processFileDescriptors[newfd] = currentProcess->processFileDescriptors[oldfd];
-    return newfd;
+
+    int newVirtualFd = getCurrentMinFd();
+
+    if(newVirtualFd == -1)
+        return -1;
+
+    currentProcess->processFileDescriptors[newVirtualFd] = currentProcess->processFileDescriptors[oldVirtualFd];
+    return newVirtualFd;
 }
 
-int dup2(int oldfd, int newfd){
+int dup2(int oldVirtualFd, int newVirtualFd){
     processControlBlock* currentProcess = getCurrentTask();
-    if(currentProcess->processFileDescriptors[oldfd] == -1)
+
+    if(currentProcess->processFileDescriptors[oldVirtualFd] == -1)
         return -1;
-    currentProcess->processFileDescriptors[newfd] = currentProcess->processFileDescriptors[oldfd];
-    return newfd;
+
+    if(newVirtualFd > MAX_PFD)
+        return -1;
+
+    currentProcess->processFileDescriptors[newVirtualFd] = currentProcess->processFileDescriptors[oldVirtualFd];
+    return newVirtualFd;
 }
 
 //Devuelve el inode con ese nombre y el indece de este en la tabla de inodes

@@ -265,8 +265,8 @@ void printFileInfo(_ARGUMENTS){
     print_f(1, "Write Index: %d\n", buf->indexes[1]);
     print_f(1, "Opening Number: %d\n", buf->openCount);
     print_f(1, "Writer Number: %d\n", buf->writeOpenCount);
-    print_f(1, "File Type: %d\n", buf->fileType);
-    print_f(1, "For unlink: %d\n", buf->forUnlink);
+    print_f(1, "File Type: %s\n", buf->fileType ? "Fifo" : "File");
+    print_f(1, "For unlink: %s\n", buf->forUnlink ? "True" : "False");
 
     memfree(buf);
 }
