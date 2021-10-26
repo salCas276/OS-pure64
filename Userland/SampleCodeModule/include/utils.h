@@ -37,5 +37,7 @@ void printFileInfo(_ARGUMENTS);
 void printClose(_ARGUMENTS);
 void printUnlink(_ARGUMENTS);
 void printOpen(_ARGUMENTS);
+void dup(_ARGUMENTS);
+void dup2(_ARGUMENTS);
 
 #endif

@@ -20,6 +20,8 @@ GLOBAL closeAsm
 GLOBAL unlinkAsm
 GLOBAL getFileContent
 GLOBAL getFileInfo
+GLOBAL dupAsm
+GLOBAL dup2Asm
 
 
 EXTERN print_f
@@ -301,6 +303,15 @@ getFileInfo:
     int 80h
     ret
 
+dupAsm:
+    mov rax, 27
+    int 80h
+    ret
+
+dup2Asm:
+    mov rax, 28
+    int 80h
+    ret
 
 section .data
 fmt db "%s: %xh", 10, 0

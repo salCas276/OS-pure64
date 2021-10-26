@@ -68,8 +68,8 @@ uint64_t createProcess(uint64_t functionAddress){
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0;
     task->tail = (processControlBlock *) 0; 
-    for(int i=0; i<3; i++)
-        task->processFileDescriptors[i] = i;
+    for(int i=0; i<MAX_PIDS; i++)
+        task->processFileDescriptors[i] = i < 3 ? i : -1;
 
     addProcess(task); 
 

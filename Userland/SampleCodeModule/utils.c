@@ -35,7 +35,7 @@ void help(_ARGUMENTS) {
     print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
-    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n ");
+    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n");
     print_f(1, " - mkfifo: Crea un pipe con nombre en el file system\n");
     print_f(1, " - mkfile: Crea un file en el file system\n");
     print_f(1, " - printFileContent: Obtengo el contenido escrito en un elemento del file system\n");
@@ -43,7 +43,8 @@ void help(_ARGUMENTS) {
     print_f(1, " - open: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
     print_f(1, " - close: Cierra un archivo previamente abierto del file system\n");
     print_f(1, " - unlink: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
-
+    print_f(1, " - dup: toma un fd y crea otro nuevo que apunta a la misma apertura\n");
+    print_f(1, " - dup2: toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
 
 }
 
@@ -302,6 +303,36 @@ void printUnlink(_ARGUMENTS){
     print_f(1, "Este sera desvinculado cuando todas sus aperturas se hayan cerrado\n");
 }
 
+void dup(_ARGUMENTS){
+    char oldVirtualFd[BUFFER_SIZE];
+    int buf[40], count;
+    askAndRead(oldVirtualFd, "Ingrese el fd viejo");
+    int ret = dupAsm(strtoint(oldVirtualFd, NULL, 10), buf, &count);
+    if(ret == -1){
+        print_f(1, "Hubo un error");
+        return;
+    }
+    print_f(1, "V|R\n");
+    for(int i=0; i<8; i++){
+        print_f(1, "%d|%d\n", i, buf[i]);
+    }
+}
+
+void dup2(_ARGUMENTS){
+    char oldVirtualFd[BUFFER_SIZE], newVirtualFd[BUFFER_SIZE];
+    int buf[40], count;
+    askAndRead(oldVirtualFd, "Ingrese el fd viejo");
+    askAndRead(newVirtualFd, "Ingrese el nuevo file descriptor");
+    int ret = dup2Asm(strtoint(oldVirtualFd, NULL, 10), strtoint(newVirtualFd, NULL, 10), buf, &count);
+    if(ret == -1){
+        print_f(1, "Hubo un error");
+        return;
+    }
+    print_f(1, "V|R\n");
+    for(int i=0; i<8; i++){
+        print_f(1, "%d|%d\n", i, buf[i]);
+    }
+}
 
 static void askAndRead(char* buffer, char* text){
     int ans;

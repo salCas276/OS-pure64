@@ -46,5 +46,7 @@ int closeAsm(int fd);
 int unlinkAsm(char* name);
 int getFileContent(char* name, char* buf);
 int getFileInfo(char* name, fileInfo* buf);
+int dupAsm(int oldVirtualFd, int* buf, int* count);
+int dup2Asm(int oldVirtualFd, int newVirtualFd, int*buf, int* count);
 
 #endif

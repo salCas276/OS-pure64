@@ -28,6 +28,8 @@ uint64_t sys_getFileContent(uint64_t name, uint64_t buf);
 uint64_t sys_getFileInfo(uint64_t name, uint64_t buf);
 uint64_t sys_close(uint64_t fd);
 uint64_t sys_unlink(uint64_t name);
+uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count);
+uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count);
 
 
 // TODO: Usar un arreglo y no switch case
@@ -52,6 +54,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
 		case 24: return sys_unlink(rdi);
 		case 25: return sys_getFileContent(rdi, rsi);
 		case 26: return sys_getFileInfo(rdi, rsi);
+		case 27: return sys_dup(rdi, rsi, (int*) rdx);
+		case 28: return sys_dup2(rdi, rsi, rdx, (int*) rcx);
 	}
 	return 0;
 }
@@ -175,4 +179,26 @@ uint64_t sys_close(uint64_t fd){
 
 uint64_t sys_unlink(uint64_t name){
 	return unlinkFile((char*) name);
+}
+
+uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
+	int* fdBuf = (char*) buf;
+	int newVirtualFd = dup((int) oldVirtualFd);
+	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
+	int i;
+	for(i=0; i<MAX_PFD; i++)
+		fdBuf[i] = currentFdVirtualTable[i];
+	*count = i;
+	return newVirtualFd;
+}
+
+uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count){
+	int* fdBuf = (char*) buf;
+	int ret = dup2((int) oldVirtualFd, (int) newVirtualFd);
+	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
+	int i;
+	for(i=0; i<MAX_PFD; i++)
+		fdBuf[i] = currentFdVirtualTable[i];
+	*count = i;
+	return ret;
 }
