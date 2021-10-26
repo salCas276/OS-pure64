@@ -181,6 +181,7 @@ uint64_t sys_unlink(uint64_t name){
 	return unlinkFile((char*) name);
 }
 
+//TODO sacar los prints del testeo en los dups
 uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
 	int* fdBuf = (char*) buf;
 	int newVirtualFd = dup((int) oldVirtualFd);

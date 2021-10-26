@@ -1,6 +1,6 @@
 #include <string.h>
 
-int8_t strcmp (const char *p1, const char *p2) {
+uint8_t strcmp (const char *p1, const char *p2) {
   const unsigned char *s1 = (const unsigned char *) p1;
   const unsigned char *s2 = (const unsigned char *) p2;
   unsigned char c1, c2;
@@ -17,4 +17,13 @@ uint8_t strlen(const char *str) {
 	const char *s;
 	for (s = str; *s; ++s);
 	return (s - str);
+}
+
+int strcpy(const char* src, char* dest){
+  int i = 0;
+  while(*(src+i)){
+    dest[i] = src[i];
+    i++;
+  }
+  return i;
 }

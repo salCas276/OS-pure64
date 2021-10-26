@@ -227,11 +227,7 @@ void auxb(void){
 
 void createFile(_ARGUMENTS){
     char name[BUFFER_SIZE];
-    int ans;
-     do {
-        print_f(1, "Ingrese el nombre del archivo:\n");
-        ans = get_s(name, BUFFER_SIZE);
-    } while (ans == -1);
+    askAndRead(name, "Ingrese el nombre del nuevo archivo:");
     createFileAsm(name);
 }
 
@@ -241,7 +237,7 @@ void createFifo(_ARGUMENTS){
 
 void printFileContent(_ARGUMENTS){
     char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:\n");
+    askAndRead(name, "Ingrese el nombre del archivo:");
     char* buf = memalloc(MAX_SIZE_BLOCK); 
     if(getFileContent(name, buf) == -1){
         print_f(1, "No existe archivo con ese nombre\n");
@@ -254,7 +250,7 @@ void printFileContent(_ARGUMENTS){
 
 void printFileInfo(_ARGUMENTS){
     char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:\n");
+    askAndRead(name, "Ingrese el nombre del archivo:");
     fileInfo* buf = memalloc(sizeof(fileInfo));
     if(getFileInfo(name, buf) == -1){
         print_f(1, "No existe archivo con ese nombre\n");
@@ -274,7 +270,7 @@ void printFileInfo(_ARGUMENTS){
 
 void printOpen(_ARGUMENTS){
     char name[BUFFER_SIZE], mode[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:\n");
+    askAndRead(name, "Ingrese el nombre del archivo:");
     askAndRead(mode, "Ingese 0 para read only, 1 para write only y 2 para read & write");
     int fd = openAsm(name, strtoint(mode, NULL, 10));
     if(fd == -1){
@@ -286,7 +282,7 @@ void printOpen(_ARGUMENTS){
 
 void printClose(_ARGUMENTS){
     char fd[BUFFER_SIZE];
-    askAndRead(fd, "Ingrese el fd a cerrar:\n");
+    askAndRead(fd, "Ingrese el fd a cerrar:");
     if(closeAsm(strtoint(fd, NULL, 10)) == -1){
         print_f(1, "Hubo un error con el cerrado\n");
         return;
@@ -295,7 +291,7 @@ void printClose(_ARGUMENTS){
 
 void printUnlink(_ARGUMENTS){
     char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo a desvincular:\n");
+    askAndRead(name, "Ingrese el nombre del archivo a desvincular:");
     if(unlinkAsm(name) == -1){
         print_f(1, "Hubo en error desvinculando el archivo\n");
         return;

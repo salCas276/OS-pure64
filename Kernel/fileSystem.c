@@ -24,7 +24,7 @@ int createFile(char* name, int fileType){
 
     inodeTable[candidate] = malloc(sizeof(inode));
 
-    inodeTable[candidate]->name = name;
+    strcpy(name, inodeTable[candidate]->name);
     inodeTable[candidate]->block = malloc(BLOCK_SIZE);
     inodeTable[candidate]->openCount = 0;
     inodeTable[candidate]->writeOpenCount = 0;
@@ -70,7 +70,7 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
 int openFile(char* name, int mode){
     int inodeIndex;
 	inode* openedInode = getInode((char*) name, &inodeIndex);
-	if(openedInode == inodeIndex)
+	if(openedInode == (inode*)inodeIndex)
         return -1;
 	switch(openedInode->fileType){
 		case 0: //File
@@ -100,7 +100,10 @@ int closeFile(int virtualFd){
     free(openedFileTable[fd]);
     openedFileTable[fd] = (openedFile*) 0;
 
-    getCurrentTask()->processFileDescriptors[virtualFd] = -1;
+    for(int i=0; i<MAX_PFD; i++){
+        if(getCurrentTask()->processFileDescriptors[i] == fd)
+            getCurrentTask()->processFileDescriptors[i] = -1;
+    }
 
     //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
     if(auxInode->openCount == 0 && auxInode->forUnlink == 1)

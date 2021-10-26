@@ -7,10 +7,11 @@
 #define RD_WRT 2
 #define MAX_OPEN_FILES 40
 #define BLOCK_SIZE 256
+#define MAX_NAME 64
 
 //Representa un archivo creado
 typedef struct inode{
-    char* name; //Se usa un nombre para poder abrir el archivo desde diferentes procesos
+    char name[MAX_NAME]; //Se usa un nombre para poder abrir el archivo desde diferentes procesos
     char* block; //Esta es la memoria almacenada por el archivo
     int indexes[2]; //Indices de lectura (0) y escritura (1), son unicos para todo el archivo
     int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
