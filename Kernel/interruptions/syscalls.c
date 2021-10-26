@@ -152,8 +152,8 @@ uint64_t sys_getFileContent(uint64_t name, uint64_t buf){
 	if(targetInode == (inode*)-1)
 		return -1;
 	int i;
-	for(i=0; i<=targetInode->indexes[1]; i++)
-		auxBuf[i] = targetInode->block[targetInode->indexes[0]+i];
+	for(i=0; i<256; i++)
+		auxBuf[i] = targetInode->block[i];
 	return i;	
 }
 
