@@ -7,7 +7,7 @@
 #include "../include/video.h"
 
 #define WORSTPRIORITY 40
-#define MAXBLOCKTYPES 10
+#define MAXBLOCKTYPES 40
 #define MAX_PFD 40
 #define _ARGUMENTS  int argc,char **argv
 
@@ -50,13 +50,19 @@ int getCurrentMinFd();
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 
 int killProcess(int pid);
+
 int blockProcess(int pid, int password);
+
+int blockMyself(int password);
+
 int unblockProcess(int pid, int password);
+
 int renounce(void); 
 
 void popAndUnblock(int password);
 
 void printBlockedBy(int password);
 
+int getAvailablePassword();
 
 #endif

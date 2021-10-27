@@ -48,5 +48,7 @@ int getFileContent(char* name, char* buf);
 int getFileInfo(char* name, fileInfo* buf);
 int dupAsm(int oldVirtualFd, int* buf, int* count);
 int dup2Asm(int oldVirtualFd, int newVirtualFd, int*buf, int* count);
+int writeFifoAsm(int fd, char* buf, int count);
+int readFifoAsm(int fd, char* buf, int count);
 
 #endif

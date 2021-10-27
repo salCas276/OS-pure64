@@ -18,6 +18,6 @@ int openConsole(inode* openedInode, int inodeIndex, int mode){
 }
 
 //Este va a ser un print_s pero con un semaforo
-int writeConsole(){
+int writeConsole(inode* writtenInode, char* buf, int count){
 
 }

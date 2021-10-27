@@ -29,6 +29,8 @@ GLOBAL dup2Asm
 GLOBAL exitAsm
 GLOBAL waitAsm
 GLOBAL printSemaphoreAsm
+GLOBAL writeFifoAsm 
+GLOBAL readFifoAsm 
 
 EXTERN print_f
 
@@ -350,6 +352,16 @@ dupAsm:
 
 dup2Asm:
     mov rax, 28
+    int 80h
+    ret
+
+writeFifoAsm:
+    mov rax, 29
+    int 80h
+    ret
+
+readFifoAsm:
+    mov rax, 30
     int 80h
     ret
 

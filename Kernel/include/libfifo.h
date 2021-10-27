@@ -7,8 +7,8 @@ int createFifo(inode* createdInode);
 
 int openFifo(inode* inode, int inodeIndex, int mode);
 
-int readFifo(int fd, char* buf, int count);
+int readFifo(inode* readInode, char* buf, int count);
 
-int writeFifo(int fd, char* buf, int count);
+int writeFifo(inode* writtenInode, char* buf, int count);
 
 #endif

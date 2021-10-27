@@ -1,7 +1,6 @@
 #include "include/fileSystem.h"
 #include <roundRobin.h>
 #include "include/string.h"
-#include "memoryManager.h"
 #include "include/naiveConsole.h"
 #include "include/libfifo.h"
 #include "include/libconsfile.h"
@@ -156,22 +155,20 @@ int readFile(int virtualFd, char* buf, int count){
     if(openedFileTable[fd]->mode == 1) //La apertura no permite esta operacion
         return -1;
 
-    inode* targetInode = openedFileTable[fd]->inode;
-    int i;
+    inode* readInode = openedFileTable[fd]->inode;
 
-    for(i=0; i<count; i++){
-        if((targetInode->indexes[0]+i)%BLOCK_SIZE == targetInode->indexes[1]){
-            if(targetInode->writeOpenCount == 0){
-                targetInode->indexes[0] = targetInode->indexes[0]+i;
-                return 0; //Llegue al EOF
-            }
-            //Te bloqueo
-        }
-
-        buf[i]=targetInode->block[(targetInode->indexes[0]+i)%BLOCK_SIZE];
+    switch (readInode->fileType)
+    {
+    case 0:
+        return readKeyboard(readInode, buf, count);
+    case 1:
+        return -1;
+    case 2:
+        return readRegular(readInode, buf, count); 
+    case 3:
+        return readFifo(readInode, buf, count);
     }
-    targetInode->indexes[0] = targetInode->indexes[0]+i;
-    return i;
+    return -1;
 }
 
 int writeFile(int virtualFd, char* buf, int count){
@@ -183,17 +180,20 @@ int writeFile(int virtualFd, char* buf, int count){
     if(openedFileTable[fd]->mode == 0) //La apertura no permite esta operacion
         return -1;
 
-    inode* targetInode = openedFileTable[fd]->inode;
-    int i;
+    inode* writtenInode = openedFileTable[fd]->inode;
 
-    for(i=0; i<count; i++){
-        targetInode->block[(targetInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
-
-        if(fd < 3)
-            ncPrintCharAtt(buf[i], fd == 1 ? &WHITE : &RED, &BLACK);
+    switch (writtenInode->fileType)
+    {
+    case 0:
+        return -1;
+    case 1:
+        return writeConsole(writtenInode, buf, count);
+    case 2:
+        return writeRegular(writtenInode, buf, count); 
+    case 3:
+        return writeFifo(writtenInode, buf, count);
     }
-    targetInode->indexes[1] = (targetInode->indexes[1]+i)%BLOCK_SIZE;
-    return i;
+    return -1;
 }
 
 int dup(int oldVirtualFd){

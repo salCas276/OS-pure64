@@ -28,3 +28,10 @@ int strcpy(const char* src, char* dest){
   dest[i] = 0;
   return i;
 }
+
+int strcat(const char* src, char* dest){
+  int i = 0, j = 0;
+  while(*(dest+i)) i++;
+  while(*(src+j)) dest[i++] = src[j++];
+  dest[i] = 0;
+}

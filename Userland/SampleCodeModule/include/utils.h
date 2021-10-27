@@ -40,6 +40,8 @@ void printUnlink(_ARGUMENTS);
 void printOpen(_ARGUMENTS);
 void dup(_ARGUMENTS);
 void dup2(_ARGUMENTS);
+void writeFifo(_ARGUMENTS);
+void printReadFifo(_ARGUMENTS);
 int test_processes_wrapper(_ARGUMENTS,int foreground);
 void sem(_ARGUMENTS,int foreground);
 #endif

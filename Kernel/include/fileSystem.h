@@ -1,6 +1,8 @@
 #ifndef __FILE_SYSTEM_H__
 #define __FILE_SYSTEM_H__
 
+#include "memoryManager.h"
+
 #define MAX_FILES 40
 #define RD_ONLY 0
 #define WRT_ONLY 1
@@ -17,6 +19,8 @@ typedef struct inode{
     int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
     int fileType; //0 -> File, 1 -> Fifo
     int forUnlink; //Flag que me indica si se le hizo un unlink
+    int rPassword, wPassword;
+    char rSemId[MAX_NAME+1], wSemId[MAX_NAME+1];
 }inode;
 
 

@@ -19,7 +19,34 @@ int openKeyboard(inode* openedInode, int inodeIndex, int mode){
 }
 
 //Este metdodo va a ser basicamente un read_s con un semaforo
-int readKeyboard(){
+int readKeyboard(inode* inode, char* buf, int count){
+    int32_t counter = 0;
+    int64_t c;
+    //Si le paso count=-1 va a leer hasta el \n
+    while((c = getChar()) != '\n'){
+        if(counter < count || count == -1){
+            if(c == '\b'){
+                if(counter == 0)
+                    continue;
+                counter--;
+            } else {
+                buf[counter++] = c;
+            }
+        }
+        else{
+            if(c == '\b')
+                counter--;
+            else
+                counter++;
 
+        }
+        //put_char(1, c);
+    }
+
+    if(counter <= count || count == -1){
+        buf[counter] = 0;
+        return counter;
+    }
+    buf[count] = 0;
+    return count;
 }
-

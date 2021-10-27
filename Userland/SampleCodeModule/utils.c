@@ -3,7 +3,7 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <processApi.h>
-
+#include <string.h>
 #include <testSem.h>
 
 #define BUFFER_SIZE 16
@@ -350,6 +350,27 @@ void dup2(_ARGUMENTS){
     for(int i=0; i<8; i++){
         print_f(1, "%d|%d\n", i, buf[i]);
     }
+}
+
+void writeFifo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    char* buf = "Este es un mensaje secreto";
+    if(writeFifoAsm(strtoint(argv[1], NULL, 10), buf, strlen(buf)+1) == -1){
+        print_f(1, "No se pudo escribir correctamente\n");
+        return;
+    }
+}
+
+void printReadFifo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    char buf[30];
+    if(readFifoAsm(strtoint(argv[1], NULL, 10), buf, 28) == -1){
+        print_f(1, "No se pudo leer correctamente\n");
+        return;
+    }
+    print_f(1, "%s\n", buf);
 }
 
 static void askAndRead(char* buffer, char* text){

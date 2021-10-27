@@ -7,8 +7,8 @@ int createRegular(inode* createdInode);
 
 int openRegular(inode* openedInode, int inodeIndex, int mode);
 
-int writeRegular();
+int writeRegular(inode* writtenInode, char* buf, int count);
 
-int readRegular();
+int readRegular(inode* readInode, char* buf, int count);
 
 #endif

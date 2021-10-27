@@ -13,7 +13,7 @@ static processControlBlock * next = (processControlBlock * ) 0;
 static processControlBlock * shell = (processControlBlock *)(0); 
 static processControlBlock * idle = (processControlBlock*)(0);
 
-
+static int passIndex = 30;
 
 static processControlBlock * headers[QHEADERS] ={0}; 
 
@@ -139,9 +139,13 @@ int killProcess(int pid) {
     return 0; 
 }
 
+int blockMyself(int password){
+    return blockProcess(getCurrentPid(), password);
+}
+
 int blockProcess(int pid, int password) {
 
-    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
+//    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 
@@ -311,4 +315,8 @@ int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
     for (int i=0; i<QHEADERS && f; i++) 
         f = changeNicenessRec(headers[i], pid, deltaNice); 
     return 0; 
+}
+
+int getAvailablePassword(){
+    return passIndex++;
 }
