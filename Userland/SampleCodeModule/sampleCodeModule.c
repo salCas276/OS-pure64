@@ -5,7 +5,6 @@
 #include <exceptions.h>
 #include "include/processApi.h"
 #include <string.h>
-
 #include <stdio.h>
 //#include <stdlib.h>
 #include <stdarg.h>
@@ -60,6 +59,33 @@ int main() {
 
 	print_f(1, "Estamos en userland.\n");
 	help(argv, 0);
+
+	
+	// int i = 0; 
+	// char * allocs[32] = {0};
+	// while ( (allocs[i] = buddymalloc(32768-25)) != NULL) i ++; 
+
+
+	// for (int i=0; i<32; i++)
+	// 	print_f(1, "Alloc #%d 0x%x\n", i, allocs[i]); 
+
+
+	// for (int i=0; i<32; i++) {
+	// 	buddyfree(allocs[i]); 
+	// }
+
+	// print_f(2, "------------\n"); 
+
+	// int j = 0; 
+	// char * allocs2[32] = {0}; 
+	// while ( (allocs2[j] = buddymalloc( (32768-25)*2)) != NULL) j++; 
+
+	// for (int i=0; i<32; i++)
+	// 	print_f(1, "Alloc 0x%x\n", allocs2[i]); 
+
+
+
+	// print_f(2, "OK!\n"); 
 
 	while(1) {
 		print_f(2, "\n>> ");

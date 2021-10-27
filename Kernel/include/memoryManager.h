@@ -5,7 +5,9 @@
 #include <stdint.h>
 #include <unistd.h>
 
-void *malloc(unsigned int size);
+#define MEMBASE 0x900000 
+
+void *malloc(size_t size);
 void free(void *pv);
 
 #endif
