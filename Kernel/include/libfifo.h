@@ -3,8 +3,9 @@
 
 #include "fileSystem.h"
 
+int createFifo(inode* createdInode);
 
-int openFifoFromInode(inode* inode, int inodeIndex, int mode);
+int openFifo(inode* inode, int inodeIndex, int mode);
 
 int readFifo(int fd, char* buf, int count);
 

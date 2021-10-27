@@ -4,6 +4,9 @@
 #include "memoryManager.h"
 #include "include/naiveConsole.h"
 #include "include/libfifo.h"
+#include "include/libconsfile.h"
+#include "include/libregfile.h"
+#include "include/libkbfile.h"
 
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
@@ -23,16 +26,20 @@ int createFile(char* name, int fileType){
         return -2; //No hay espacio para crear un nuevo archivo
 
     inodeTable[candidate] = malloc(sizeof(inode));
-
     strcpy(name, inodeTable[candidate]->name);
-    inodeTable[candidate]->block = malloc(BLOCK_SIZE);
-    inodeTable[candidate]->openCount = 0;
-    inodeTable[candidate]->writeOpenCount = 0;
-    inodeTable[candidate]->fileType = fileType;
-    inodeTable[candidate]->forUnlink = 0;
-    for(int i=0; i<2; i++) inodeTable[candidate]->indexes[i] = -1;
 
-    return 0;
+    switch (fileType)
+    {
+    case 0:
+        return createKeyboard(inodeTable[candidate]);
+    case 1:
+        return createConsole(inodeTable[candidate]);
+    case 2:
+        return createRegular(inodeTable[candidate]);
+    case 3:
+        return createFifo(inodeTable[candidate]);
+    }
+    return -1;
 }
 
 
@@ -42,7 +49,6 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
         if(!openedFileTable[j]){
 
             openedFileTable[j] = malloc(sizeof(openedFile));
-
 
             if(inode->indexes[0] == -1 && (mode == 0 || mode == 2))
                 inode->indexes[0] = 0;
@@ -70,17 +76,21 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
 int openFile(char* name, int mode){
     int inodeIndex;
 	inode* openedInode = getInode((char*) name, &inodeIndex);
+
 	if(openedInode == (inode*)inodeIndex)
         return -1;
+
 	switch(openedInode->fileType){
-		case 0: //File
-			return openFileFromInode(openedInode, inodeIndex, mode);
-		case 1: //Fifo (named pipe)
-			if(mode > 1)
-				return -1;
-			return openFifoFromInode(openedInode, inodeIndex, mode);
+        case 0:
+            return openKeyboard(openedInode, inodeIndex, mode);
+        case 1:
+            return openConsole(openedInode, inodeIndex, mode);
+		case 2:
+			return openRegular(openedInode, inodeIndex, mode);
+		case 3:
+			return openFifo(openedInode, inodeIndex, mode);
 	}
-	return 0;
+	return -1;
 }
 
 int closeFile(int virtualFd){
@@ -155,6 +165,7 @@ int readFile(int virtualFd, char* buf, int count){
                 targetInode->indexes[0] = targetInode->indexes[0]+i;
                 return 0; //Llegue al EOF
             }
+            //Te bloqueo
         }
 
         buf[i]=targetInode->block[(targetInode->indexes[0]+i)%BLOCK_SIZE];
@@ -181,7 +192,7 @@ int writeFile(int virtualFd, char* buf, int count){
         if(fd < 3)
             ncPrintCharAtt(buf[i], fd == 1 ? &WHITE : &RED, &BLACK);
     }
-    targetInode->indexes[1] = targetInode->indexes[1]+i;
+    targetInode->indexes[1] = (targetInode->indexes[1]+i)%BLOCK_SIZE;
     return i;
 }
 

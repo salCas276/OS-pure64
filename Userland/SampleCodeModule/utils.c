@@ -234,7 +234,9 @@ void createFile(_ARGUMENTS){
 }
 
 void createFifo(_ARGUMENTS){
-    createFifoAsm(argv[1]);
+    char name[BUFFER_SIZE];
+    askAndRead(name, "Ingrese el nombre del nuevo archivo:");
+    createFifoAsm(name);
 }
 
 void printFileContent(_ARGUMENTS){
