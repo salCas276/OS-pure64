@@ -145,7 +145,7 @@ int blockMyself(int password){
 
 int blockProcess(int pid, int password) {
 
-//    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
+    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 

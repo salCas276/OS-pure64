@@ -37,7 +37,7 @@ int openFifo(inode* inode, int inodeIndex, int mode){
 
     if(fd == -1)
         return -1;
-
+    /*
     if(inode->writeOpenCount == 0){ //No hay escritores
         switch(mode){
             case 0: //Llega un lector
@@ -59,7 +59,7 @@ int openFifo(inode* inode, int inodeIndex, int mode){
                 break;
         }
     }
-
+    */
     return fd; //En este caso no hubo ni que bloquear ni desbloquear a nadie
 }
 
@@ -71,8 +71,8 @@ int readFifo(inode* readInode, char* buf, int count){
 
     int i;
     for(i=0; i<count; i++){
-        if((readInode->indexes[0]+i)%BLOCK_SIZE == readInode->indexes[1]){
-            if(readInode->writeOpenCount == 0){
+        if((readInode->indexes[0]+i)%BLOCK_SIZE == readInode->indexes[1] || readInode->indexes[1] == -1){
+            if(readInode->writeOpenCount == 0 && readInode->indexes[1] != -1){
                 readInode->indexes[0] = readInode->indexes[0]+i;
                 return 0; //Llegue al EOF
             }
@@ -99,8 +99,8 @@ int writeFifo(inode* writtenInode, char* buf, int count){
 
     int i;
     for(i=0; i<count; i++){
-        if((writtenInode->indexes[1]+i)%BLOCK_SIZE == writtenInode->indexes[0]){
-            if(writtenInode->openCount == writtenInode->writeOpenCount){
+        if((writtenInode->indexes[1]+i)%BLOCK_SIZE == writtenInode->indexes[0] || writtenInode->indexes[0] == -1){
+            if(writtenInode->openCount == writtenInode->writeOpenCount && writtenInode->indexes[0] != -1){
                 writtenInode->indexes[1] = writtenInode->indexes[1]+i;
                 return 0; //Llegue al EOF
             }

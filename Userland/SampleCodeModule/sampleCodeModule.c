@@ -11,7 +11,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 22
+#define MODULES_SIZE 24
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 
