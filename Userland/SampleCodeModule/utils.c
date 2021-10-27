@@ -37,15 +37,15 @@ void help(_ARGUMENTS) {
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
     print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n");
-    print_f(1, " - mkfifo: Crea un pipe con nombre en el file system\n");
-    print_f(1, " - mkfile: Crea un file en el file system\n");
-    print_f(1, " - printFileContent: Obtengo el contenido escrito en un elemento del file system\n");
-    print_f(1, " - printFileInfo: Obtengo la informacion del inode de un elemento del file system\n");
-    print_f(1, " - open: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
-    print_f(1, " - close: Cierra un archivo previamente abierto del file system\n");
-    print_f(1, " - unlink: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
-    print_f(1, " - dup: toma un fd y crea otro nuevo que apunta a la misma apertura\n");
-    print_f(1, " - dup2: toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
+    print_f(1, " - mkfifo <filename>: Crea un pipe con nombre en el file system\n");
+    print_f(1, " - mkfile <filename>: Crea un file en el file system\n");
+    print_f(1, " - printFileContent <filename>: Obtengo el contenido escrito en un elemento del file system\n");
+    print_f(1, " - printFileInfo <filename>: Obtengo la informacion del inode de un elemento del file system\n");
+    print_f(1, " - open <-m> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
+    print_f(1, " - close <fd>: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - unlink <filename>: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
+    print_f(1, " - dup <oldfd>: toma un fd y crea otro nuevo que apunta a la misma apertura\n");
+    print_f(1, " - dup2 <oldfd> <newfd>: toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
 
 }
 
@@ -141,10 +141,10 @@ void echo(_ARGUMENTS) {
         if ( argv[1][1] == 'm' ) {
             for (int i=0; argv[2][i]; i++)
                 if (argv[2][i] >= 'a' && argv[2][i] <= 'z') argv[2][i] += 'A'-'a'; 
-            print_f(0, "%s", argv[2]);
+            print_f(1, "%s", argv[2]);
         } 
     } else if (argc >= 2)
-        print_f(0, "%s", argv[1]); 
+        print_f(1, "%s", argv[1]); 
 }
 
 
@@ -228,55 +228,74 @@ void auxb(int argc,char * argv[]){
 }
 
 void createFile(_ARGUMENTS){
-    char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del nuevo archivo:");
-    createFileAsm(name);
+    if(argc != 2)
+        return;
+    createFileAsm(argv[1]);
 }
 
 void createFifo(_ARGUMENTS){
-    char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del nuevo archivo:");
-    createFifoAsm(name);
+    if(argc != 2)
+        return;
+    createFifoAsm(argv[1]);
 }
 
 void printFileContent(_ARGUMENTS){
-    char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:");
+    if(argc != 2)
+        return;
+
     char* buf = memalloc(MAX_SIZE_BLOCK); 
-    if(getFileContent(name, buf) == -1){
+    if(getFileContent(argv[1], buf) == -1){
         print_f(1, "No existe archivo con ese nombre\n");
         memfree(buf);
         return;
     }
+
     print_f(1, "%s\n", buf);
     memfree(buf);
 }
 
 void printFileInfo(_ARGUMENTS){
-    char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:");
+    if(argc != 2)
+        return;
     fileInfo* buf = memalloc(sizeof(fileInfo));
-    if(getFileInfo(name, buf) == -1){
+    if(getFileInfo(argv[1], buf) == -1){
         print_f(1, "No existe archivo con ese nombre\n");
         memfree(buf);
         return;
     }
-    print_f(1, "------------%s-----------\n", name);
+
+    char* auxFileType;
+    switch (buf->fileType)
+    {
+    case 0:
+        auxFileType = "keyboard";
+        break;
+    case 1:
+        auxFileType = "console";
+        break;
+    case 2:
+        auxFileType = "regular";
+        break;
+    case 3:
+        auxFileType = "fifo";
+        break;
+    }
+
+    print_f(1, "------------%s-----------\n", argv[1]);
     print_f(1, "Read Index: %d\n", buf->indexes[0]);
     print_f(1, "Write Index: %d\n", buf->indexes[1]);
     print_f(1, "Opening Number: %d\n", buf->openCount);
     print_f(1, "Writer Number: %d\n", buf->writeOpenCount);
-    print_f(1, "File Type: %s\n", buf->fileType ? "Fifo" : "File");
+    print_f(1, "File Type: %s\n", auxFileType);
     print_f(1, "For unlink: %s\n", buf->forUnlink ? "True" : "False");
 
     memfree(buf);
 }
 
 void printOpen(_ARGUMENTS){
-    char name[BUFFER_SIZE], mode[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo:");
-    askAndRead(mode, "Ingese 0 para read only, 1 para write only y 2 para read & write");
-    int fd = openAsm(name, strtoint(mode, NULL, 10));
+    if(argc != 3 || argv[1][0] != '-' || argv[1][1] != 'm' || argv[1][2]!='=')
+        return;
+    int fd = openAsm(argv[2], strtoint(&argv[1][3], NULL, 10));
     if(fd == -1){
         print_f(1, "Hubo un error en la creacion\n");
         return;
@@ -285,18 +304,18 @@ void printOpen(_ARGUMENTS){
 }
 
 void printClose(_ARGUMENTS){
-    char fd[BUFFER_SIZE];
-    askAndRead(fd, "Ingrese el fd a cerrar:");
-    if(closeAsm(strtoint(fd, NULL, 10)) == -1){
+    if(argc != 2)
+        return;
+    if(closeAsm(strtoint(argv[1], NULL, 10)) == -1){
         print_f(1, "Hubo un error con el cerrado\n");
         return;
     }
 }
 
 void printUnlink(_ARGUMENTS){
-    char name[BUFFER_SIZE];
-    askAndRead(name, "Ingrese el nombre del archivo a desvincular:");
-    if(unlinkAsm(name) == -1){
+    if(argc != 2)
+        return;
+    if(unlinkAsm(argv[1] == -1)){
         print_f(1, "Hubo en error desvinculando el archivo\n");
         return;
     }
@@ -304,10 +323,10 @@ void printUnlink(_ARGUMENTS){
 }
 
 void dup(_ARGUMENTS){
-    char oldVirtualFd[BUFFER_SIZE];
+    if(argc != 2)
+        return;
     int buf[40], count;
-    askAndRead(oldVirtualFd, "Ingrese el fd viejo");
-    int ret = dupAsm(strtoint(oldVirtualFd, NULL, 10), buf, &count);
+    int ret = dupAsm(strtoint(argv[1], NULL, 10), buf, &count);
     if(ret == -1){
         print_f(1, "Hubo un error");
         return;
@@ -319,11 +338,10 @@ void dup(_ARGUMENTS){
 }
 
 void dup2(_ARGUMENTS){
-    char oldVirtualFd[BUFFER_SIZE], newVirtualFd[BUFFER_SIZE];
+    if(argc != 3)
+        return;
     int buf[40], count;
-    askAndRead(oldVirtualFd, "Ingrese el fd viejo");
-    askAndRead(newVirtualFd, "Ingrese el nuevo file descriptor");
-    int ret = dup2Asm(strtoint(oldVirtualFd, NULL, 10), strtoint(newVirtualFd, NULL, 10), buf, &count);
+    int ret = dup2Asm(strtoint(argv[1], NULL, 10), strtoint(argv[2], NULL, 10), buf, &count);
     if(ret == -1){
         print_f(1, "Hubo un error");
         return;

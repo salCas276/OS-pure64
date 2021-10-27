@@ -36,10 +36,12 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     for(int i=0; i<MAX_PIDS; i++)
         task->processFileDescriptors[i] = i < 3 ? i : -1;
 
-    createFile("console", 0);
-    openFile("console", 0);
+    createFile("keyboard", 0);
+    createFile("console", 1);
+    openFile("keyboard", 0);
     openFile("console", 1);
-    openFile("console", 2);
+    openFile("console", 1);
+    unlinkFile("keyboard");
     unlinkFile("console");
     // Processes are created with the worst possible priority.
     task->priority = WORSTPRIORITY; 
@@ -76,6 +78,10 @@ uint64_t createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     task->tail = (processControlBlock *) 0; 
     for(int i=0; i<MAX_PIDS; i++)
         task->processFileDescriptors[i] = i < 3 ? i : -1;
+    
+    openFile("keyboard", 0);
+    openFile("console", 1);
+    openFile("console", 1);
 
     addProcess(task); 
     return task->pid;  
