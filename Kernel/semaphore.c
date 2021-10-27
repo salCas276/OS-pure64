@@ -19,14 +19,13 @@ void release(uint64_t * lock);
 
 static int searchEmptySlot();
 static int searchSemaphore(char * sem_id);
-static int strcmp(char * string1 , char * string2);
-
+static int8_t strcmp (const char *p1, const char *p2);
 
 
 uint64_t semOpen(char * sem_id, uint64_t initialValue){
  
     int isYet = searchSemaphore(sem_id);
-    if(isYet > 0){
+    if(isYet >= 0){
         semaphores[isYet]->attachedProcess++;
         return 0;
     }
@@ -149,19 +148,22 @@ static int searchEmptySlot(){
 
 static int searchSemaphore(char * sem_id){
     for(int i = 0 ; i < LENGTH ; i ++ )
-        if(semaphores[i]!=(void*)0 && strcmp(sem_id,semaphores[i]->id))
+        if(semaphores[i]!=(void*)0 && !strcmp(sem_id,semaphores[i]->id))
             return i ; 
     return -1;//not found
 }
 
 
-static int strcmp(char * string1 , char * string2){
-    int i = 0 ; 
-    while(string1[i]!=0 && string2[i]!=0 && string2[i]==string1[i]){
-        i++;
-    }
-   if(string1[i]==0 && string2[i]==0)    
-        return 1;
-    else 
-        return 0 ; 
+
+static int8_t strcmp (const char *p1, const char *p2) {
+  const unsigned char *s1 = (const unsigned char *) p1;
+  const unsigned char *s2 = (const unsigned char *) p2;
+  unsigned char c1, c2;
+  do {
+      c1 = (unsigned char) *s1++;
+      c2 = (unsigned char) *s2++;
+      if (c1 == '\0')
+        return c1 - c2;
+    } while (c1 == c2);
+  return c1 - c2;
 }

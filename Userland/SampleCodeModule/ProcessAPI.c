@@ -32,3 +32,8 @@ void exitUserland(){
 void waitSon(){
     waitAsm();
 }
+
+
+uint64_t getPid(){
+    return getPidAsm();
+}

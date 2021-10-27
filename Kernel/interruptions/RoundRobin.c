@@ -24,8 +24,7 @@ uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENT
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
 static void pushProcess( processControlBlock ** header, processControlBlock * process);
 static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
-void restartRoundRobin(processControlBlock * header);
-
+static void restartRoundRobin(processControlBlock * header);
 // Debugging
 void printChain(processControlBlock * c) {
    
@@ -183,7 +182,7 @@ int unblockProcess(int pid, int password) {
 }
 
 //salteño
-void restartRoundRobin(processControlBlock * header){
+static void restartRoundRobin(processControlBlock * header){
     processControlBlock * current = header;
     while(current != (void*) 0){
         current->currentPushes=0;
@@ -198,9 +197,6 @@ void popAndUnblock(int password) {
 
      unblockProcess(headers[password+1]->pid, password);
 }
-
-
-
 
 
 
@@ -234,7 +230,7 @@ void nextTask(){
 
     if(currentProcess->quantityWaiting > 0){
         currentProcess-> currentPushes = WORSTPRIORITY + 1 - currentProcess->priority;
-        nextTask();
+            nextTask();
     }
 
 }

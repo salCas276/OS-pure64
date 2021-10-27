@@ -103,7 +103,7 @@ int deleteProcess(int pid){
     if(pid == 0 )
         return 0; //la shell no puede eliminarse
 
-    if(allProcesses[pid]->parentPid > 0 ) //si no estaba en background , nadie le hace un wait.
+    if(allProcesses[pid]->parentPid >= 0 ) //si no estaba en background , nadie le hace un wait.
         allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
     
     allProcesses[pid]=(void*)0;

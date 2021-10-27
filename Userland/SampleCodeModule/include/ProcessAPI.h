@@ -16,4 +16,6 @@ void exitUserland();
 
 void waitSon();
 
+uint64_t getPid();
+
 #endif

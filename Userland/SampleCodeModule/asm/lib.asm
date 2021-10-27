@@ -9,7 +9,7 @@ GLOBAL memalloc
 GLOBAL memfree
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
-GLOBAL getpid
+GLOBAL getPidAsm
 GLOBAL openSemAsm
 GLOBAL waitSemAsm
 GLOBAL postSemAsm
@@ -251,7 +251,7 @@ createProcessAsm:
     int 80h
     ret
 
-getpid:
+getPidAsm:
     mov rax, 7
     int 80h
     ret

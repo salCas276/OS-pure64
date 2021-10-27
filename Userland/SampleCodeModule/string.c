@@ -18,3 +18,13 @@ uint8_t strlen(const char *str) {
 	for (s = str; *s; ++s);
 	return (s - str);
 }
+
+char * strcpy(char *strDest, const char *strSrc)
+{
+   if(strDest == 0 || strSrc == 0 )
+    return (char*) 0 ;   
+
+    char *temp = strDest;
+    while(*strDest++ = *strSrc++); // or while((*strDest++=*strSrc++) != '\0');
+    return temp;
+}

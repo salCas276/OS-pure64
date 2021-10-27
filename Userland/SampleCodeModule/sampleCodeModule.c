@@ -11,7 +11,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 13
+#define MODULES_SIZE 17
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 
@@ -30,7 +30,11 @@ static char * commandStrings[MODULES_SIZE] = {
 	"nice", 
 	"kill",
 	"testProcess",
-	"sem"
+	"sem",
+	"testSync",
+	"testNoSync",
+	"testMM",
+	"testPriority"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -47,9 +51,12 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	nicecmd, 
 	killcmd,
 	test_processes_wrapper,
-	sem
-	// test_sync,
-	// test_no_sync
+	sem,
+	test_sync_wrapper,
+	test_no_sync_wrapper,
+	test_mm_wrapper,
+	test_prio_wrapper
+
 };
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
@@ -64,11 +71,14 @@ int main() {
 	//int32_t counter = 0;
 
 	// Queremos que nuestra shell tenga prioridad maxima 
-	nice(0, -5); 
+	// nice(0, -5); 
 	// nice(0, -20); 
 
 
 	print_f(1, "Estamos en userland.\n");
+
+	//test_sync_wrapper(0,0,1);
+	// test_no_sync_wrapper(0,0,1);
 
 	//help(argv, 0);
 

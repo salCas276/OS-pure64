@@ -4,11 +4,13 @@
 #include <cpuidflags.h>
 #include <ProcessAPI.h>
 #include <testSem.h>
+#include <string.h>
 
 #define BUFFER_SIZE 16
 #define MAX_PROCS 5
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
+void * memset(void*destiation,int32_t c, uint64_t length);
 
 
 void printDate(_ARGUMENTS) {
@@ -235,6 +237,17 @@ uint32_t GetUniform(uint32_t max){
   return (u + 1.0) * 2.328306435454494e-10 * max;
 }
 
+uint8_t memcheck(void *start, uint8_t value, uint32_t size){
+  uint8_t *p = (uint8_t *) start;
+  uint32_t i;
+
+  for (i = 0; i < size; i++, p++)
+    if (*p != value)
+      return 0;
+
+  return 1;
+}
+
 
 //TO BE INCLUDED
 void endless_loop(){
@@ -340,3 +353,299 @@ void sem(_ARGUMENTS,int foreground){
   printSemaphore();
 
 }
+
+
+//-------------
+
+#define TOTAL_PAIR_PROCESSES 2
+#define N 1000000
+#define SEM_ID "sem"
+
+int64_t global;  //shared memory
+
+void slowInc(int64_t *p, int64_t inc){
+  int64_t aux = *p;
+  aux += inc;
+  renounceUserland();
+  *p = aux;
+}
+
+void inc(_ARGUMENTS){
+  uint64_t i;
+  uint64_t sem , value ; 
+
+  sem = strtoint(argv[1],0,10);
+  value = strtoint(argv[2],0,10);
+
+
+  if (sem && openSemaphore(SEM_ID, 1) < 0 ){
+    print_f(1,"ERROR OPENING SEM\n");
+    return;
+  }
+  
+  for (i = 0; i < N; i++){
+    if (sem) waitSemaphore(SEM_ID);
+    slowInc(&global, value);
+    if (sem) postSemaphore(SEM_ID);
+  }
+
+  if (sem) closeSemaphore(SEM_ID);
+
+  exitUserland();
+  
+}
+
+void test_sync(_ARGUMENTS ){
+  uint64_t i;
+
+  global = 0;
+
+  char * buffer ; 
+
+  if(!strcmp(argv[1],"1"))
+    print_f(1,"CREATING PROCESSES...(WITH SEM)\n" );
+  else 
+    print_f(1,"CREATING PROCESSES...(WITH NO SEM)\n" );
+
+  char * arg1 = memalloc(2*sizeof(char));
+  buffer = "1";
+  strcpy(arg1,buffer);
+
+  char * arg2 = memalloc(3*sizeof(char));
+  buffer = "-1";
+  strcpy(arg2,buffer);
+
+
+  char * argP1[3]={"inc",argv[1],arg1};
+  char * argP2[3] ={"inc",argv[1],arg2};
+
+  for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
+    createProcessUserland((uint64_t)&inc, 4,argP1,1);
+    createProcessUserland((uint64_t)&inc, 4, argP2,1);
+  }
+
+   for(int i = 0 ; i < (TOTAL_PAIR_PROCESSES * 2) ; i++)
+     waitSon();
+
+  print_f(1,"Final value: %d\n",global);
+
+
+  memfree(argv);
+  exitUserland();
+
+}
+
+
+void test_sync_wrapper(_ARGUMENTS , int foreground ){
+
+  char * buffer ; 
+  char * sem = memalloc(2*sizeof(char));
+  buffer = "1";
+  strcpy(sem,buffer);
+
+  char ** arguments = (char**) memalloc(2*sizeof(char*));
+  arguments[0] = "testSync";
+  arguments[1]= sem;
+
+
+  createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground );
+
+  if(foreground)
+    waitSon();
+  
+}
+
+
+int test_no_sync_wrapper(_ARGUMENTS , int foreground ){
+
+  char * buffer ; 
+  char * sem = memalloc(2*sizeof(char));
+  buffer = "0";
+  strcpy(sem,buffer);
+
+  char ** arguments = (char**) memalloc(2*sizeof(char*));
+  arguments[0] = "testSync";
+  arguments[1]= sem;
+
+  createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground );
+
+  if(foreground)
+    waitSon();
+  
+
+  return 0;
+}
+
+
+//-------------------------------------------------------------------------------------
+
+
+
+#define MAX_BLOCKS 128
+#define MAX_MEMORY 838861
+
+typedef struct MM_rq{
+  void *address;
+  uint32_t size;
+}mm_rq;
+
+void test_mm(){
+  mm_rq mm_rqs[MAX_BLOCKS];
+  uint8_t rq;
+  uint32_t total;
+
+  while (1){
+    rq = 0;
+    total = 0;
+
+    // Request as many blocks as we can
+    while(rq < MAX_BLOCKS && total < MAX_MEMORY){
+      mm_rqs[rq].size = GetUniform(MAX_MEMORY - total - 1) + 1;
+      mm_rqs[rq].address = memalloc(mm_rqs[rq].size); 
+      if(!mm_rqs[rq].address)
+          break;
+      total += mm_rqs[rq].size;
+      rq++;
+    }
+
+    // Set
+    uint32_t i;
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        memset(mm_rqs[i].address, i, mm_rqs[i].size); 
+    // Check
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        if(!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) 
+          print_f(1,"ERROR!\n"); 
+
+    // Free
+    for (i = 0; i < rq; i++)
+      if (mm_rqs[i].address != NULL)
+        memfree(mm_rqs[i].address); 
+  }
+
+}
+
+void test_mm_wrapper(_ARGUMENTS,int foreground){
+
+  createProcessUserland((uint64_t)&test_mm,0,0,0);
+
+ if(foreground)
+  waitSon();
+ 
+}
+
+
+
+//--------------------------------------------------------------------
+
+#define MINOR_WAIT 10000000// TODO: To prevent a process from flooding the screen
+#define WAIT      100000// TODO: Long enough to see theese processes beeing run at least twice
+
+
+void bussy_wait(uint64_t n){
+  uint64_t i;
+  for (i = 0; i < n; i++);
+  }
+
+void endless_loopPid(){
+  uint64_t pid = getPid();
+
+  while(1){
+    print_f(1,"%d ",pid);
+    bussy_wait(MINOR_WAIT);
+  }
+}
+
+#define TOTAL_PROCESSES 3
+
+void test_prio(_ARGUMENTS){
+  uint64_t pids[TOTAL_PROCESSES];
+  uint64_t i;
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    pids[i] = createProcessUserland((uint64_t)&endless_loopPid,0,0,0);
+
+    for (i = 0; i < 10000; i++);
+      renounceUserland();
+
+  print_f(1,"\nCHANGING PRIORITIES...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++){
+    switch (i % 3){
+      case 0:
+         //lowest priority , by default 
+        break;
+      case 1:
+        nice(pids[i], -20); //medium priority
+        break;
+      case 2:
+        nice(pids[i], -20); //highest priority
+        nice(pids[i], -20); 
+        break;
+    }
+  }
+
+
+    for (i = 0; i < 10000; i++);
+      renounceUserland();
+  bussy_wait(WAIT);
+  print_f(1,"\nBLOCKING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    kill(1,pids[i]);
+  
+  
+    for (i = 0; i < 10000; i++);
+      renounceUserland();
+  bussy_wait(WAIT);
+  print_f(1,"CHANGING PRIORITIES WHILE BLOCKED...\n");
+ 
+  for(i = 0; i < TOTAL_PROCESSES; i++){
+    switch (i % 3){
+      case 0:
+        nice(pids[i],20);
+        nice(pids[i],20);
+        nice(pids[i],-20);
+        break;
+      case 1:
+        nice(pids[i],20);
+        nice(pids[i],20);
+        nice(pids[i],-20);
+        break;
+      case 2:
+        nice(pids[i],20);
+        nice(pids[i],20);
+        nice(pids[i],-20);
+        break;
+    }
+  }
+
+  print_f(1,"UNBLOCKING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    kill(2,pids[i]);
+
+  
+  for (i = 0; i < 10000; i++);
+    renounceUserland();
+  bussy_wait(WAIT);
+  print_f(1,"\nKILLING...\n");
+
+  for(i = 0; i < TOTAL_PROCESSES; i++)
+    kill(0,pids[i]);
+
+  exitUserland();
+}
+
+void test_prio_wrapper(_ARGUMENTS,int foreground){
+
+  createProcessUserland((uint64_t)&test_prio,0,0,foreground);
+
+  if(foreground)
+    waitSon();
+  
+}
+
+
