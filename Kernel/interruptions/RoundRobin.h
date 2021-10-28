@@ -24,12 +24,16 @@ typedef struct processControlBlock {
     char currentPushes; 
     prompt_info prompt;
     struct processControlBlock * tail; 
+    char * name;
 
     
 } processControlBlock;
 
 typedef struct processDescriptor{
+    char * name ;
     uint8_t pid;
+    uint8_t priority;
+    uint8_t foreground;
 } processDescriptor;
 
 void addProcess(processControlBlock * process);

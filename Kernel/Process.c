@@ -1,6 +1,8 @@
 #include <process.h>
+//#include "../../Userland/SampleCodeModule/include/string.h"
 
-
+//C:\Users\Usuario\Desktop\OS-pure64\Kernel\Process.c
+//C:\Users\Usuario\Desktop\OS-pure64\Userland\SampleCodeModule\include\string.h
 static prompt_info Prompt;
 
 
@@ -8,6 +10,10 @@ static prompt_info Prompt;
 int64_t functionAddress;
 void InitFirstProcess();
 uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENTS );
+
+ uint8_t strlen(const char *str);
+ char * strcpy(char *strDest, const char *strSrc);
+
 
 
 #define MAX_PIDS 20
@@ -27,6 +33,7 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     if(!task || ! basePointer)
         return ; 
 
+    task->name = "Shell";
     Prompt = prompt;
     freePidsCounter--;
     task->pid=0;
@@ -50,11 +57,13 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
 int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     uint64_t * basePointer = (uint64_t*)malloc(4096 * sizeof(uint64_t));
     processControlBlock * task= (processControlBlock*) malloc(sizeof(processControlBlock));
+    char * nameAux = malloc(strlen(argv[0]));
 
-      if(!task || !basePointer)
-        return -1; 
+    if(!task || !basePointer || !nameAux)
+    return -1; 
     
-    
+    strcpy(nameAux,argv[0]);
+    task->name = nameAux;
     task->pid=generateNextPid();
     if(task->pid < 0 )
         return -1; 
@@ -90,7 +99,10 @@ int getProcessesData(uint64_t descriptorArray){
     processDescriptor * descriptorArrayAux = (processDescriptor *) descriptorArray;
     for(int i=0; i<MAX_PIDS; i++){
         if(allProcesses[i] != (void*)0 ){
+            (descriptorArrayAux+j)->name=allProcesses[i]->name;
             (descriptorArrayAux+j)->pid=allProcesses[i]->pid;
+            (descriptorArrayAux+j)->priority=allProcesses[i]->priority;
+            (descriptorArrayAux+j)->foreground=( allProcesses[i]->parentPid > 0 );
             j++;
         }
     }
