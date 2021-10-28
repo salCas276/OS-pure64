@@ -315,7 +315,7 @@ void printClose(_ARGUMENTS){
 void printUnlink(_ARGUMENTS){
     if(argc != 2)
         return;
-    if(unlinkAsm(argv[1] == -1)){
+    if(unlinkAsm(argv[1]) == -1){
         print_f(1, "Hubo en error desvinculando el archivo\n");
         return;
     }
@@ -366,7 +366,7 @@ void printReadFifo(_ARGUMENTS){
     if(argc != 2)
         return;
     char buf[30];
-    if(readFifoAsm(strtoint(argv[1], NULL, 10), buf, 28) == -1){
+    if(readFifoAsm(strtoint(argv[1], NULL, 10), buf, 27) == -1){
         print_f(1, "No se pudo leer correctamente\n");
         return;
     }
