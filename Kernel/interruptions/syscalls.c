@@ -27,13 +27,13 @@ uint64_t sysOpenSemaphore(uint64_t rdi , uint64_t rsi );
 uint64_t sysWaitSemaphore(uint64_t rdi );
 uint64_t sysPostSemaphore(uint64_t rdi );
 uint64_t sysCloseSemaphore(uint64_t rdi );
-uint64_t sys_kill(uint64_t code, uint64_t pid); 
+int sys_kill(uint64_t code, uint64_t pid); 
 void sysExit();
 void sysWait();
 void printSemaphore();
 
 // TODO: Usar un arreglo y no switch case
-uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
+int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
 	switch(rcx) {
 		case 1: return sys_write(rdi, (char*)rsi, rdx);
 		case 2: return sys_read();
@@ -149,7 +149,7 @@ uint64_t sysCloseSemaphore(uint64_t rdi ){
 	return semClose( (char*) rdi);
 }
  
-uint64_t sys_kill(uint64_t code, uint64_t pid) {
+int sys_kill(uint64_t code, uint64_t pid) {
 	switch(code) {
 		case 0: return deleteProcess(pid); 
 		case 1: return blockProcess(pid, SYSCALL_BLOCK_PASSWORD); 

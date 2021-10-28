@@ -82,7 +82,8 @@ int main() {
 
 	//help(argv, 0);
 
-	
+
+
 
 
 	while(1) {
@@ -90,9 +91,16 @@ int main() {
 		int64_t ans = get_s(buffer, MAX_COMMAND);
 		if (ans != -1) {
 			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	
+		
+			if(argv == 0 ) {
+				print_f(1,"El sistema no tiene memoria disponible");
+				break;
+			}
+
 			int argc = parseArgvPtr(buffer, argv);
+		
 			if(argc < 0 ){
-				print_f(1,"Cantidad de parámetros inválida");
+				print_f(1,"El sistema fallo parseando su comando : a)Cantidad de parametros invalida b)El sistema no tiene memoria disponible\n");
 				for(int i = 0 ; i < MAX_ARGC+1;i++)
 					memfree(argv[i]);
 				memfree(argv);
@@ -105,6 +113,7 @@ int main() {
 			checkModulePtr(argv, argc, foreground);
 		} else
 			print_f(1, "Comando no valido\n");
+
 	 }
 
 }
@@ -130,6 +139,9 @@ static int parseArgvPtr(char * buffer , char *argv[]){
   	int inside = 0 ;
 	while( buffer[currentBuffPos]!=0){
 		char * aux = (char*)memalloc( (MAX_COMMAND+1) * sizeof(char));
+		if(aux == 0)
+			return -1;
+
 		int current = 0 ; 
 	    inside = 0 ; 
 

@@ -4,7 +4,7 @@
 #include "utils.h"
 #include <stdint.h>
 
-uint64_t createProcessUserland(uint64_t function,_ARGUMENTS,int foreground);
+int createProcessUserland(uint64_t function,_ARGUMENTS,int foreground);
 
 uint64_t nice(int pid, int deltaNice); 
 

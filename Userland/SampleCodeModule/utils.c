@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define BUFFER_SIZE 16
-#define MAX_PROCS 5
+#define MAX_PROCS 20
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
 void * memset(void*destiation,int32_t c, uint64_t length);
@@ -184,6 +184,12 @@ void killcmd(_ARGUMENTS) {
 
 void printProcessesData(_ARGUMENTS){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
+    
+    if(!descriptorArray){
+      print_f(1,"El sistema no tiene memoria disponible");
+      return;
+    }
+
     int count = getProcessesData(descriptorArray);
     print_f(1, "  PID\n\n");
     for(int i = 0; i < count; i++){
@@ -248,13 +254,13 @@ uint8_t memcheck(void *start, uint8_t value, uint32_t size){
   return 1;
 }
 
+//------------------------------------------------------------------
 
-//TO BE INCLUDED
-void endless_loop(){
+void endless_loop(_ARGUMENTS){
   while(1);
 }
 
-#define MAX_PROCESSES 16 //Should be around 80% of the the processes handled by the kernel
+#define MAX_PROCESSES 14 
 
 enum State {ERROR, RUNNING, BLOCKED, KILLED};
 
@@ -263,7 +269,8 @@ typedef struct P_rq{
   enum State state;
 }p_rq;
 
-void test_processes(_ARGUMENTS,int foreground){
+void test_processes(_ARGUMENTS){
+
   p_rq p_rqs[MAX_PROCESSES];
   uint8_t rq;
   uint8_t alive = 0;
@@ -273,14 +280,15 @@ void test_processes(_ARGUMENTS,int foreground){
 
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
-      p_rqs[rq].pid = createProcessUserland( (uint64_t) &endless_loop, argc , argv ,foreground);  // TODO: Port this call as required
+      p_rqs[rq].pid = createProcessUserland( (uint64_t) &endless_loop, argc , argv ,0);  
 
-      if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
-        print_f(1,"Error creating process\n");               // TODO: Port this as required
-        return;
+      if (p_rqs[rq].pid == -1){                           
+        print_f(1,"El sistema no tiene memoria disponible\n");               
+        exitUserland();
       }else{
         p_rqs[rq].state = RUNNING;
         alive++;
+        renounceUserland();
       }
     }
 
@@ -288,14 +296,14 @@ void test_processes(_ARGUMENTS,int foreground){
     while (alive > 0){
 
       for(rq = 0; rq < MAX_PROCESSES; rq++){
-        action = GetUniform(2) % 2; 
+        action = GetUniform(2) % 2 ; 
 
         switch(action){
           case 0:
             if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
               if (kill(0,p_rqs[rq].pid) == -1){          // TODO: Port this as required
                 print_f(1,"Error killing process\n");        // TODO: Port this as required
-                return;
+                exitUserland();
               }
               p_rqs[rq].state = KILLED; 
               alive--;
@@ -303,13 +311,14 @@ void test_processes(_ARGUMENTS,int foreground){
             }
             break;
 
-          case 1:
+            case 1:
             if (p_rqs[rq].state == RUNNING){
               if(kill(1,p_rqs[rq].pid) == -1){          // TODO: Port this as required
                 print_f(1,"Error blocking process\n");       // TODO: Port this as required
-                return;
+                exitUserland();
               }
-              p_rqs[rq].state = BLOCKED; 
+              p_rqs[rq].state = BLOCKED;
+               renounceUserland(); 
             }
             break;
         }
@@ -320,29 +329,35 @@ void test_processes(_ARGUMENTS,int foreground){
         if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
           if(kill(2,p_rqs[rq].pid) == -1){            // TODO: Port this as required
             print_f(1,"Error unblocking process\n");         // TODO: Port this as required
-            return;
+            exitUserland();
           }
           p_rqs[rq].state = RUNNING; 
+           renounceUserland();
         }
+    
+     
     } 
   }
 
-exitUserland();
 
 }
 
-int test_processes_wrapper(_ARGUMENTS,int foreground){
+void test_processes_wrapper(_ARGUMENTS,int foreground){
   
   
-int pid = createProcessUserland((uint64_t)&test_processes , 0 , (char**)0 , 0);
+int pid = createProcessUserland((uint64_t)&test_processes , 0 , 0 , foreground);
 
-nice(pid , -3);
-//nice(pid , -20);
 
-  if(foreground)
-      waitSon(); 
+if(pid < 0){
+  print_f(1,"Error al crear el proceso");
+  return;
+}
 
-  return 0;
+nice(pid , -5);
+
+if(foreground)
+  waitSon(); 
+
 }
 
 
@@ -408,10 +423,24 @@ void test_sync(_ARGUMENTS ){
     print_f(1,"CREATING PROCESSES...(WITH NO SEM)\n" );
 
   char * arg1 = memalloc(2*sizeof(char));
+
+  if(!arg1){
+    print_f(1,"El sistema no tiene memoria disponible");
+    memfree(argv);
+    exitUserland();
+  }
+
   buffer = "1";
   strcpy(arg1,buffer);
 
   char * arg2 = memalloc(3*sizeof(char));
+
+  if(!arg2){
+    print_f(1,"El sistema no tiene memoria disponible");
+    memfree(argv);
+    exitUserland();
+  }
+
   buffer = "-1";
   strcpy(arg2,buffer);
 
@@ -420,11 +449,13 @@ void test_sync(_ARGUMENTS ){
   char * argP2[3] ={"inc",argv[1],arg2};
 
   for(i = 0; i < TOTAL_PAIR_PROCESSES; i++){
-    createProcessUserland((uint64_t)&inc, 4,argP1,1);
-    createProcessUserland((uint64_t)&inc, 4, argP2,1);
+    if(createProcessUserland((uint64_t)&inc, 4,argP1,1) < 0 || createProcessUserland((uint64_t)&inc, 4, argP2,1) < 0 ){
+      print_f(1,"El sistema no tiene memoria disponible");
+      exitUserland();
+    }
   }
 
-   for(int i = 0 ; i < (TOTAL_PAIR_PROCESSES * 2) ; i++)
+   for(int j = 0 ; j < ( i * 2) ; j++)
      waitSon();
 
   print_f(1,"Final value: %d\n",global);
@@ -440,15 +471,29 @@ void test_sync_wrapper(_ARGUMENTS , int foreground ){
 
   char * buffer ; 
   char * sem = memalloc(2*sizeof(char));
+
+  if(!sem){
+    print_f(1,"El sistema no tiene memoria disponible");
+    return;
+  }
+  
   buffer = "1";
   strcpy(sem,buffer);
 
   char ** arguments = (char**) memalloc(2*sizeof(char*));
+  if(!arguments){
+    print_f(1,"El sistema no tiene memoria disponible");
+    return;
+  }
+
   arguments[0] = "testSync";
   arguments[1]= sem;
 
 
-  createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground );
+  if(createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground ) < 0 ){
+    print_f(1,"El sistema no tiene memoria");
+    return;
+  }
 
   if(foreground)
     waitSon();
@@ -456,24 +501,37 @@ void test_sync_wrapper(_ARGUMENTS , int foreground ){
 }
 
 
-int test_no_sync_wrapper(_ARGUMENTS , int foreground ){
+void test_no_sync_wrapper(_ARGUMENTS , int foreground ){
 
   char * buffer ; 
   char * sem = memalloc(2*sizeof(char));
+
+    if(!sem){
+    print_f(1,"El sistema no tiene memoria disponible");
+    return;
+  }
+
   buffer = "0";
   strcpy(sem,buffer);
 
   char ** arguments = (char**) memalloc(2*sizeof(char*));
+  
+  if(!arguments){
+    print_f(1,"El sistema no tiene memoria disponible");
+    return;
+  }
+
   arguments[0] = "testSync";
   arguments[1]= sem;
 
-  createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground );
+  if(createProcessUserland((uint64_t )&test_sync , 2 , arguments ,foreground ) < 0 ){
+    print_f(1,"El sistema no tiene memoria");
+    return;
+  }
 
   if(foreground)
     waitSon();
   
-
-  return 0;
 }
 
 
@@ -529,9 +587,12 @@ void test_mm(){
 
 void test_mm_wrapper(_ARGUMENTS,int foreground){
 
-  createProcessUserland((uint64_t)&test_mm,0,0,0);
+if(  createProcessUserland((uint64_t)&test_mm,0,0,0) < 0 ){
+  print_f(1,"El sistema no tiene memoria");
+  return;
+}
 
- if(foreground)
+if(foreground)
   waitSon();
  
 }
@@ -564,8 +625,11 @@ void test_prio(_ARGUMENTS){
   uint64_t pids[TOTAL_PROCESSES];
   uint64_t i;
 
-  for(i = 0; i < TOTAL_PROCESSES; i++)
+  for(i = 0; i < TOTAL_PROCESSES; i++){
     pids[i] = createProcessUserland((uint64_t)&endless_loopPid,0,0,0);
+    if(pids[i] < 0)
+      exitUserland();
+  }
 
     for (i = 0; i < 10000; i++);
       renounceUserland();
@@ -641,7 +705,10 @@ void test_prio(_ARGUMENTS){
 
 void test_prio_wrapper(_ARGUMENTS,int foreground){
 
-  createProcessUserland((uint64_t)&test_prio,0,0,foreground);
+  if(createProcessUserland((uint64_t)&test_prio,0,0,foreground) < 0){
+    print_f(1,"El sistema no tiene memoria");
+    return ; 
+  }
 
   if(foreground)
     waitSon();

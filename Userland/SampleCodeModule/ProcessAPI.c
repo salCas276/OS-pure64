@@ -8,7 +8,7 @@ void exitAsm();
 void waitAsm();
 
 
-uint64_t createProcessUserland(uint64_t function,_ARGUMENTS,int foreground){
+int createProcessUserland(uint64_t function,_ARGUMENTS,int foreground){
     return createProcessAsm(function,argc,argv,foreground); 
 }
 

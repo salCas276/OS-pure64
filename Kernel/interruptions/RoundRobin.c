@@ -72,6 +72,7 @@ void addProcess(processControlBlock * process){
 
         uint64_t * basePointerIdle = malloc(256 * sizeof(uint64_t));
         processControlBlock * idleProcess = malloc(sizeof(processControlBlock));
+        
         idleProcess->baseRSP = (uint64_t)&basePointerIdle[255] ;
         idleProcess->functionAddress= (uint64_t)&idleProcessFunction;
         idleProcess->taskRSP = _buildContext(idleProcess->baseRSP, idleProcess->functionAddress,0,0);
@@ -123,7 +124,7 @@ int killProcess(int pid) {
         i++; 
     } while( p == 0 && i<QHEADERS); 
     
-    if ( p == 0 ) return 1; 
+    if ( p == 0 ) return -1; 
 
 
     free(( (uint64_t * ) p->baseRSP ) - 4095);
@@ -153,7 +154,7 @@ int blockProcess(int pid, int password) {
     //lo saco de la lista de procesos listos 
     headers[0] = unlinkProcess(headers[0], pid, &p);
 
-    if (p == 0) return 1; 
+    if (p == 0) return -1; 
 
     pushProcess( &headers[password+1], p); 
 
@@ -174,9 +175,11 @@ int unblockProcess(int pid, int password) {
     processControlBlock * p; 
     headers[password+1] = unlinkProcess(headers[password+1], pid, &p); 
 
-    if (p == 0) return 1; 
+    if (p == 0) return -1; 
+    
     pushProcess( &headers[0], p); 
 
+    
         
     return 0; 
 }

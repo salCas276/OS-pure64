@@ -22,9 +22,12 @@ static int generateNextPid();
 void firstProcess(uint64_t functionAddress, prompt_info prompt) {
 
     uint64_t * basePointer = malloc(4096 * sizeof(uint64_t));
+    processControlBlock * task= malloc(sizeof(processControlBlock));
+
+    if(!task || ! basePointer)
+        return ; 
 
     Prompt = prompt;
-    processControlBlock * task= malloc(sizeof(processControlBlock));
     freePidsCounter--;
     task->pid=0;
     task->quantityWaiting = 0; 
@@ -44,11 +47,19 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     InitFirstProcess();
 }
 
-uint64_t createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
-    uint64_t * basePointer = malloc(4096 * sizeof(uint64_t));
+int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
+    uint64_t * basePointer = (uint64_t*)malloc(4096 * sizeof(uint64_t));
+    processControlBlock * task= (processControlBlock*) malloc(sizeof(processControlBlock));
 
-    processControlBlock * task= malloc(sizeof(processControlBlock));
+      if(!task || !basePointer)
+        return -1; 
+    
+    
     task->pid=generateNextPid();
+    if(task->pid < 0 )
+        return -1; 
+
+
     task->prompt = Prompt;
     
     if(foreground)
@@ -107,9 +118,10 @@ int deleteProcess(int pid){
         allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
     
     allProcesses[pid]=(void*)0;
-    killProcess(pid);
+    freePidsCounter++;
 
-    return 1;
+    return killProcess(pid);
+
 }
 
 

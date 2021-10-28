@@ -216,6 +216,9 @@ int main() {
 	firstProcess((uint64_t)sampleCodeModuleAddress,leftPrompt);
 
 
+	ncPrint("El sistema no tiene memoria , no puede arrancar\n");
+
+
 //	loadTask(1, (uint64_t)test_mm, 0x700000, rightPrompt);
 
 

@@ -36,7 +36,8 @@ static BlockLink_t xStart, xEnd;
 		/* than the block we are inserting. */                                                                                     \
 		for (pxIterator = &xStart; pxIterator->pxNextFreeBlock->xBlockSize < xBlockSize; pxIterator = pxIterator->pxNextFreeBlock) \
 		{                                                                                                                          \
-			/* There is nothing to do here - just iterate to the correct position. */                                              \
+			/* There is nothing to do here - just iterate to the correct position. */   										   \				
+				         																										   \		
 		}                                                                                                                          \
                                                                                                                                    \
 		/* Update the list to include the block being inserted in the correct */                                                   \

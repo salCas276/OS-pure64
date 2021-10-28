@@ -9,7 +9,7 @@
 
 void firstProcess(uint64_t functionAddress, prompt_info prompt);
 
-uint64_t createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground);
+int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground);
 
 int getProcessesData(uint64_t descriptorsArray);
  
