@@ -39,5 +39,16 @@ void * memalloc(uint64_t size);
 void memfree(void * pv); 
 int getProcessesData(processDescriptor * despriptorArray);
 int getpid();
+int createFileAsm(char* name);
+int createFifoAsm(char* name);
+int openAsm(char* name, int mode);
+int closeAsm(int fd);
+int unlinkAsm(char* name);
+int getFileContent(char* name, char* buf);
+int getFileInfo(char* name, fileInfo* buf);
+int dupAsm(int oldVirtualFd, int* buf, int* count);
+int dup2Asm(int oldVirtualFd, int newVirtualFd, int*buf, int* count);
+int writeFifoAsm(int fd, char* buf, int count);
+int readFifoAsm(int fd, char* buf, int count);
 
 #endif

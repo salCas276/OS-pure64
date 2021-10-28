@@ -6,7 +6,7 @@
 #include <idtLoader.h>
 #include <video.h>
 #include "./include/memoryManager.h"
-#include <Process.h>
+#include <process.h>
 
 
 extern uint8_t text;

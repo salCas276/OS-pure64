@@ -7,11 +7,9 @@
 #include "../include/video.h"
 
 #define WORSTPRIORITY 40
-#define MAXBLOCKTYPES 10
+#define MAXBLOCKTYPES 40
+#define MAX_PFD 40
 #define _ARGUMENTS  int argc,char **argv
-
-
-
 
 typedef struct processControlBlock {
     uint8_t pid;
@@ -25,8 +23,7 @@ typedef struct processControlBlock {
     prompt_info prompt;
     struct processControlBlock * tail; 
     char * name;
-
-    
+    int processFileDescriptors[MAX_PFD];
 } processControlBlock;
 
 typedef struct processDescriptor{
@@ -52,15 +49,28 @@ prompt_info * getCurrentPrompt();
 
 int getCurrentPid();
 
+int getCurrentMinFd();
+
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 
 int killProcess(int pid);
+
 int blockProcess(int pid, int password);
+
+int blockMyself(int password);
+
 int unblockProcess(int pid, int password);
+
 int renounce(void); 
 
 void popAndUnblock(int password);
 
 int * getBlockedBy(int password , int maxQ);
+
+void printBlockedBy(int password);
+
+int getBlockedPidsByPass(int password, int* pidsBuf);
+
+int getAvailablePassword();
 
 #endif

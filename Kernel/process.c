@@ -1,8 +1,7 @@
 #include <process.h>
-//#include "../../Userland/SampleCodeModule/include/string.h"
+#include "include/fileSystem.h"
+#include "include/string.h"
 
-//C:\Users\Usuario\Desktop\OS-pure64\Kernel\Process.c
-//C:\Users\Usuario\Desktop\OS-pure64\Userland\SampleCodeModule\include\string.h
 static prompt_info Prompt;
 
 
@@ -43,14 +42,24 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress,0,0);
     task->tail = (processControlBlock *) 0; 
+    for(int i=0; i<MAX_PIDS; i++)
+        task->processFileDescriptors[i] = i < 3 ? i : -1;
 
+    createFile("keyboard", 0);
+    createFile("console", 1);
+    openFile("keyboard", 0);
+    openFile("console", 1);
+    openFile("console", 1);
+    unlinkFile("keyboard");
+    unlinkFile("console");
     // Processes are created with the worst possible priority.
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0; 
     
     allProcesses[task->pid] = task;
 
-    addProcess(task); 
+    addProcess(task);
+
     InitFirstProcess();
 }
 
@@ -86,6 +95,12 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0;
     task->tail = (processControlBlock *) 0; 
+    for(int i=0; i<MAX_PIDS; i++)
+        task->processFileDescriptors[i] = i < 3 ? i : -1;
+    
+    openFile("keyboard", 0);
+    openFile("console", 1);
+    openFile("console", 1);
 
     addProcess(task); 
     return task->pid;  

@@ -1,7 +1,7 @@
 #include <keyboard.h>
 #include <lib.h>
 #include <naiveConsole.h>
-#include <RoundRobin.h>
+#include <roundRobin.h>
 
 #define LEFT_SHIFT  0x2A
 #define LEFT_SHIFT_FLAG 0b00000001

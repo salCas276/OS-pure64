@@ -3,16 +3,14 @@
 #include <lib.h>
 #include <utils.h>
 #include <exceptions.h>
-#include <ProcessApi.h>
-#include "./include/lib.h"
+#include "include/processApi.h"
 #include <string.h>
-
-
+#include "./include/lib.h"
 #include <stdio.h>
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 17
+#define MODULES_SIZE 28
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 
@@ -30,6 +28,17 @@ static char * commandStrings[MODULES_SIZE] = {
 	"ps", 
 	"nice", 
 	"kill",
+	"mkfifo",
+	"mkfile",
+	"printFileContent",
+	"printFileInfo",
+	"open",
+	"close",
+	"unlink",
+	"dup",
+	"dup2",
+	"readFifo",
+	"writeFifo",
 	"testProcess",
 	"sem",
 	"testSync",
@@ -51,6 +60,17 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printProcessesData,
 	nicecmd, 
 	killcmd,
+	createFifo,
+	createFile,
+	printFileContent,
+	printFileInfo,
+	printOpen,
+	printClose,
+	printUnlink,
+	dup,
+	dup2,
+	printReadFifo,
+	writeFifo,
 	test_processes_wrapper,
 	sem,
 	test_sync_wrapper,
@@ -86,6 +106,33 @@ int main() {
 
 
 
+
+	
+	// int i = 0; 
+	// char * allocs[32] = {0};
+	// while ( (allocs[i] = buddymalloc(32768-25)) != NULL) i ++; 
+
+
+	// for (int i=0; i<32; i++)
+	// 	print_f(1, "Alloc #%d 0x%x\n", i, allocs[i]); 
+
+
+	// for (int i=0; i<32; i++) {
+	// 	buddyfree(allocs[i]); 
+	// }
+
+	// print_f(2, "------------\n"); 
+
+	// int j = 0; 
+	// char * allocs2[32] = {0}; 
+	// while ( (allocs2[j] = buddymalloc( (32768-25)*2)) != NULL) j++; 
+
+	// for (int i=0; i<32; i++)
+	// 	print_f(1, "Alloc 0x%x\n", allocs2[i]); 
+
+
+
+	// print_f(2, "OK!\n"); 
 
 	while(1) {
 		print_f(2, "\n>> ");

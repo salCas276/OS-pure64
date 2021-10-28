@@ -49,7 +49,7 @@ void prvInsertBlockIntoFreeList(BlockLink_t * pxBlockToInsert)
 		pxIterator->pxNextFreeBlock = pxBlockToInsert;                                                                             
 	}
 
-void *malloc(unsigned int xWantedSize)
+void *malloc(size_t xWantedSize)
 {
 	BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
 	static int xHeapHasBeenInitialised = 0;

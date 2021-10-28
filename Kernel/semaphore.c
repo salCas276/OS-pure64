@@ -1,6 +1,6 @@
 #include <semaphore.h>
 #include <string.h>
-#include "./interruptions/RoundRobin.h"
+#include "./interruptions/roundRobin.h"
 
 #define SEMAPHORE_PASSWORD 2
 
@@ -136,8 +136,6 @@ int getSemaphoreData(uint64_t arrayPointer){
     }
     return j;
 }
-
-
 
 static int searchEmptySlot(){ 
     for(int i = 0  ; i < LENGTH ; i++){
