@@ -113,8 +113,6 @@ int64_t get_s(char * buffer, uint64_t maxLength) {
     int32_t counter = 0;
     int64_t c;
     while ((c = getChar()) != '\n') {
-        if (c == -1)
-            continue;
         if (counter < maxLength) {
             if (c == '\b') { // Backspace
                 if (counter == 0)

@@ -16,6 +16,7 @@ GLOBAL _irq05Handler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 GLOBAL _int80Handler
+GLOBAL timerTickInterrupt
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -182,9 +183,6 @@ _irq00Handler:
 ;Keyboard
 _irq01Handler:
 	pushState ; 
-	;;<-- Save rsp
-	;;mov rdi, rsp
-	;;call setCurrentRSP
 
 	mov rdi, 1 ; pasaje de parametro
 	call irqDispatcher
@@ -193,8 +191,6 @@ _irq01Handler:
 	mov al, 20h
 	out 20h, al
 
-	;;call getCurrentRSP
-	;;mov rsp, rax
 
 	popState
 	iretq
@@ -226,6 +222,7 @@ _exception6Handler:
 
 _int80Handler:
 	pushStateWithoutAX
+	mov r8 , rcx
 	mov rcx, rax
 	call syscallDispatcher
 	popStateWithoutAX
@@ -234,6 +231,11 @@ _int80Handler:
 haltcpu:
 	cli
 	hlt
+	ret
+
+
+timerTickInterrupt:
+	int 20h
 	ret
 
 

@@ -10,10 +10,27 @@ GLOBAL memfree
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getpid
+GLOBAL openSemAsm
+GLOBAL waitSemAsm
+GLOBAL postSemAsm
+GLOBAL closeSemAsm
 GLOBAL niceAsm
 GLOBAL killAsm
 GLOBAL renounceAsm
-
+GLOBAL createFileAsm
+GLOBAL createFifoAsm
+GLOBAL openAsm
+GLOBAL closeAsm
+GLOBAL unlinkAsm
+GLOBAL getFileContent
+GLOBAL getFileInfo
+GLOBAL dupAsm
+GLOBAL dup2Asm
+GLOBAL exitAsm
+GLOBAL waitAsm
+GLOBAL printSemaphoreAsm
+GLOBAL writeFifoAsm 
+GLOBAL readFifoAsm 
 
 EXTERN print_f
 
@@ -82,6 +99,13 @@ _quadratic:
     mov rsp, rbp
     pop rbp
     ret
+
+printSemaphoreAsm:
+    mov rax , 19
+    int 80h
+    ret
+
+
 
 print:
     mov rax, 1
@@ -243,11 +267,29 @@ getpid:
     int 80h
     ret
 
+openSemAsm:
+    mov rax , 16
+    int 80h
+    ret 
+
+waitSemAsm:
+    mov rax , 13
+    int 80h
+    ret 
 niceAsm:
     mov rax, 10
     int 80h
     ret
 
+exitAsm:
+    mov rax, 17
+    int 80h
+    ret
+
+waitAsm:
+    mov rax, 18
+    int 80h
+    ret
 
 killAsm:
     mov rax, 11
@@ -259,11 +301,69 @@ renounceAsm:
     int 80h
     ret
 
+createFileAsm:
+    mov rax, 20
+    int 80h
+    ret
 
+createFifoAsm:
+    mov rax, 21
+    int 80h
+    ret
+postSemAsm:
+    mov rax , 14
+    int 80h
+    ret
 
+closeSemAsm:
+    mov rax , 15
+    int 80h
+    ret 
 
+openAsm:
+    mov rax, 22
+    int 80h
+    ret
 
+closeAsm:
+    mov rax, 23
+    int 80h
+    ret
 
+unlinkAsm:
+    mov rax, 24
+    int 80h
+    ret
+
+getFileContent:
+    mov rax, 25
+    int 80h
+    ret
+    
+getFileInfo:
+    mov rax, 26
+    int 80h
+    ret
+
+dupAsm:
+    mov rax, 27
+    int 80h
+    ret
+
+dup2Asm:
+    mov rax, 28
+    int 80h
+    ret
+
+writeFifoAsm:
+    mov rax, 29
+    int 80h
+    ret
+
+readFifoAsm:
+    mov rax, 30
+    int 80h
+    ret
 
 section .data
 fmt db "%s: %xh", 10, 0

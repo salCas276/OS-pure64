@@ -3,13 +3,14 @@
 #include <cpuid.h>
 #include <cpuidflags.h>
 #include <processApi.h>
-
+#include <string.h>
+#include <testSem.h>
 
 #define BUFFER_SIZE 16
 #define MAX_PROCS 5
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
-
+static void askAndRead(char* buffer, char* text);
 
 void printDate(_ARGUMENTS) {
 	dateType currDate;
@@ -35,8 +36,16 @@ void help(_ARGUMENTS) {
     print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
-    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n ");
-
+    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n");
+    print_f(1, " - mkfifo <filename>: Crea un pipe con nombre en el file system\n");
+    print_f(1, " - mkfile <filename>: Crea un file en el file system\n");
+    print_f(1, " - printFileContent <filename>: Obtengo el contenido escrito en un elemento del file system\n");
+    print_f(1, " - printFileInfo <filename>: Obtengo la informacion del inode de un elemento del file system\n");
+    print_f(1, " - open <-m> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
+    print_f(1, " - close <fd>: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - unlink <filename>: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
+    print_f(1, " - dup <oldfd>: toma un fd y crea otro nuevo que apunta a la misma apertura\n");
+    print_f(1, " - dup2 <oldfd> <newfd>: toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
 
 }
 
@@ -132,17 +141,17 @@ void echo(_ARGUMENTS) {
         if ( argv[1][1] == 'm' ) {
             for (int i=0; argv[2][i]; i++)
                 if (argv[2][i] >= 'a' && argv[2][i] <= 'z') argv[2][i] += 'A'-'a'; 
-            print_f(0, "%s", argv[2]);
+            print_f(1, "%s", argv[2]);
         } 
     } else if (argc >= 2)
-        print_f(0, "%s", argv[1]); 
+        print_f(1, "%s", argv[1]); 
 }
 
 
 void aux(void);
 
-void auxa(void);
-void auxb(void);
+void auxa(int argc,char* argv[]);
+void auxb(int argc,char * argv[]);
 
 
 void nicecmd(_ARGUMENTS) {
@@ -179,10 +188,6 @@ void killcmd(_ARGUMENTS) {
 }
 
 
-void printHola(_ARGUMENTS){
-    createProcessUserland( (uint64_t) &auxa);
-    createProcessUserland( (uint64_t) &auxb);
-}
 
 void printProcessesData(_ARGUMENTS){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
@@ -193,28 +198,307 @@ void printProcessesData(_ARGUMENTS){
     }
     memfree(descriptorArray);
 }
+//--------------------------------------------------------------
+void printHola(_ARGUMENTS,int foreground){
 
+    createProcessUserland( (uint64_t) &auxa,argc,argv,foreground);
+    createProcessUserland( (uint64_t) &auxb,argc,argv,foreground);
 
-void aux(void){
-    while(1) {
-        print_f(1,"hola\n");
+    if(foreground){
+        waitSon();
+        waitSon();
     }
 }
 
-void auxa(void){
+
+void auxa(int argc,char * argv[]){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"AAAA #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
-void auxb(void){
+void auxb(int argc,char * argv[]){
     int i = 0; 
     while(1) {
-        for(int i=0; i<10000000; i++); 
-        print_f(1,"BBBB #%d\n", i++);
+         for(int i=0; i<10000000; i++); 
+         print_f(1,"%s #%d\n",argv[1], i++);
     }
 }
 
+void createFile(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    createFileAsm(argv[1]);
+}
 
+void createFifo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    createFifoAsm(argv[1]);
+}
+
+void printFileContent(_ARGUMENTS){
+    if(argc != 2)
+        return;
+
+    char* buf = memalloc(MAX_SIZE_BLOCK); 
+    if(getFileContent(argv[1], buf) == -1){
+        print_f(1, "No existe archivo con ese nombre\n");
+        memfree(buf);
+        return;
+    }
+
+    print_f(1, "%s\n", buf);
+    memfree(buf);
+}
+
+void printFileInfo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    fileInfo* buf = memalloc(sizeof(fileInfo));
+    if(getFileInfo(argv[1], buf) == -1){
+        print_f(1, "No existe archivo con ese nombre\n");
+        memfree(buf);
+        return;
+    }
+
+    char* auxFileType;
+    switch (buf->fileType)
+    {
+    case 0:
+        auxFileType = "keyboard";
+        break;
+    case 1:
+        auxFileType = "console";
+        break;
+    case 2:
+        auxFileType = "regular";
+        break;
+    case 3:
+        auxFileType = "fifo";
+        break;
+    }
+
+    print_f(1, "------------%s-----------\n", argv[1]);
+    print_f(1, "Read Index: %d\n", buf->indexes[0]);
+    print_f(1, "Write Index: %d\n", buf->indexes[1]);
+    print_f(1, "Opening Number: %d\n", buf->openCount);
+    print_f(1, "Writer Number: %d\n", buf->writeOpenCount);
+    print_f(1, "File Type: %s\n", auxFileType);
+    print_f(1, "For unlink: %s\n", buf->forUnlink ? "True" : "False");
+
+    memfree(buf);
+}
+
+void printOpen(_ARGUMENTS){
+    if(argc != 3 || argv[1][0] != '-' || argv[1][1] != 'm' || argv[1][2]!='=')
+        return;
+    int fd = openAsm(argv[2], strtoint(&argv[1][3], NULL, 10));
+    if(fd == -1){
+        print_f(1, "Hubo un error en la creacion\n");
+        return;
+    }
+    print_f(1, "El fd correspondiente es: %d", fd);
+}
+
+void printClose(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    if(closeAsm(strtoint(argv[1], NULL, 10)) == -1){
+        print_f(1, "Hubo un error con el cerrado\n");
+        return;
+    }
+}
+
+void printUnlink(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    if(unlinkAsm(argv[1]) == -1){
+        print_f(1, "Hubo en error desvinculando el archivo\n");
+        return;
+    }
+    print_f(1, "Este sera desvinculado cuando todas sus aperturas se hayan cerrado\n");
+}
+
+void dup(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    int buf[40], count;
+    int ret = dupAsm(strtoint(argv[1], NULL, 10), buf, &count);
+    if(ret == -1){
+        print_f(1, "Hubo un error");
+        return;
+    }
+    print_f(1, "V|R\n");
+    for(int i=0; i<8; i++){
+        print_f(1, "%d|%d\n", i, buf[i]);
+    }
+}
+
+void dup2(_ARGUMENTS){
+    if(argc != 3)
+        return;
+    int buf[40], count;
+    int ret = dup2Asm(strtoint(argv[1], NULL, 10), strtoint(argv[2], NULL, 10), buf, &count);
+    if(ret == -1){
+        print_f(1, "Hubo un error");
+        return;
+    }
+    print_f(1, "V|R\n");
+    for(int i=0; i<8; i++){
+        print_f(1, "%d|%d\n", i, buf[i]);
+    }
+}
+
+void writeFifo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    char* buf = "Este es un mensaje secreto";
+    if(writeFifoAsm(strtoint(argv[1], NULL, 10), buf, strlen(buf)+1) == -1){
+        print_f(1, "No se pudo escribir correctamente\n");
+        return;
+    }
+}
+
+void printReadFifo(_ARGUMENTS){
+    if(argc != 2)
+        return;
+    char buf[30];
+    if(readFifoAsm(strtoint(argv[1], NULL, 10), buf, 27) == -1){
+        print_f(1, "No se pudo leer correctamente\n");
+        return;
+    }
+    print_f(1, "%s\n", buf);
+}
+
+static void askAndRead(char* buffer, char* text){
+    int ans;
+     do {
+        print_f(1, "%s\n", text);
+        ans = get_s(buffer, BUFFER_SIZE);
+    } while (ans == -1);
+}
+//------------------------------------------------------------------------------------------
+
+
+static uint32_t m_z = 362436069;
+static uint32_t m_w = 521288629;
+
+uint32_t GetUint(){
+  m_z = 36969 * (m_z & 65535) + (m_z >> 16);
+  m_w = 18000 * (m_w & 65535) + (m_w >> 16);
+  return (m_z << 16) + m_w;
+}
+
+uint32_t GetUniform(uint32_t max){
+  uint32_t u = GetUint();
+  return (u + 1.0) * 2.328306435454494e-10 * max;
+}
+
+
+//TO BE INCLUDED
+void endless_loop(){
+  while(1);
+}
+
+#define MAX_PROCESSES 16 //Should be around 80% of the the processes handled by the kernel
+
+enum State {ERROR, RUNNING, BLOCKED, KILLED};
+
+typedef struct P_rq{
+  uint32_t pid;
+  enum State state;
+}p_rq;
+
+void test_processes(_ARGUMENTS,int foreground){
+  p_rq p_rqs[MAX_PROCESSES];
+  uint8_t rq;
+  uint8_t alive = 0;
+  uint8_t action;
+
+  while (1){
+
+    // Create MAX_PROCESSES processes
+    for(rq = 0; rq < MAX_PROCESSES; rq++){
+      p_rqs[rq].pid = createProcessUserland( (uint64_t) &endless_loop, argc , argv ,foreground);  // TODO: Port this call as required
+
+      if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
+        print_f(1,"Error creating process\n");               // TODO: Port this as required
+        return;
+      }else{
+        p_rqs[rq].state = RUNNING;
+        alive++;
+      }
+    }
+
+    // Randomly kills, blocks or unblocks processes until every one has been killed
+    while (alive > 0){
+
+      for(rq = 0; rq < MAX_PROCESSES; rq++){
+        action = GetUniform(2) % 2; 
+
+        switch(action){
+          case 0:
+            if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
+              if (kill(0,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error killing process\n");        // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = KILLED; 
+              alive--;
+              renounceUserland();
+            }
+            break;
+
+          case 1:
+            if (p_rqs[rq].state == RUNNING){
+              if(kill(1,p_rqs[rq].pid) == -1){          // TODO: Port this as required
+                print_f(1,"Error blocking process\n");       // TODO: Port this as required
+                return;
+              }
+              p_rqs[rq].state = BLOCKED; 
+            }
+            break;
+        }
+      }
+
+      // Randomly unblocks processes
+      for(rq = 0; rq < MAX_PROCESSES; rq++)
+        if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
+          if(kill(2,p_rqs[rq].pid) == -1){            // TODO: Port this as required
+            print_f(1,"Error unblocking process\n");         // TODO: Port this as required
+            return;
+          }
+          p_rqs[rq].state = RUNNING; 
+        }
+    } 
+  }
+
+exitUserland();
+
+}
+
+int test_processes_wrapper(_ARGUMENTS,int foreground){
+  
+  
+int pid = createProcessUserland((uint64_t)&test_processes , 0 , (char**)0 , 0);
+
+nice(pid , -3);
+//nice(pid , -20);
+
+  if(foreground)
+      waitSon(); 
+
+  return 0;
+}
+
+
+//-------------
+
+void sem(_ARGUMENTS,int foreground){
+
+  printSemaphore();
+
+}
