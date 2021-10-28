@@ -57,7 +57,7 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
 int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     uint64_t * basePointer = (uint64_t*)malloc(4096 * sizeof(uint64_t));
     processControlBlock * task= (processControlBlock*) malloc(sizeof(processControlBlock));
-    char * nameAux = malloc(strlen(argv[0]));
+    char * nameAux = malloc(strlen(argv[0])+1);
 
     if(!task || !basePointer || !nameAux)
     return -1; 

@@ -1,4 +1,5 @@
 #include <semaphore.h>
+#include <string.h>
 #include "./interruptions/RoundRobin.h"
 
 #define SEMAPHORE_PASSWORD 2
@@ -19,7 +20,7 @@ void release(uint64_t * lock);
 
 static int searchEmptySlot();
 static int searchSemaphore(char * sem_id);
-static int8_t strcmp (const char *p1, const char *p2);
+// static int8_t strcmp (const char *p1, const char *p2);
 
 
 uint64_t semOpen(char * sem_id, uint64_t initialValue){
@@ -155,15 +156,15 @@ static int searchSemaphore(char * sem_id){
 
 
 
-static int8_t strcmp (const char *p1, const char *p2) {
-  const unsigned char *s1 = (const unsigned char *) p1;
-  const unsigned char *s2 = (const unsigned char *) p2;
-  unsigned char c1, c2;
-  do {
-      c1 = (unsigned char) *s1++;
-      c2 = (unsigned char) *s2++;
-      if (c1 == '\0')
-        return c1 - c2;
-    } while (c1 == c2);
-  return c1 - c2;
-}
+// static int8_t strcmp (const char *p1, const char *p2) {
+//   const unsigned char *s1 = (const unsigned char *) p1;
+//   const unsigned char *s2 = (const unsigned char *) p2;
+//   unsigned char c1, c2;
+//   do {
+//       c1 = (unsigned char) *s1++;
+//       c2 = (unsigned char) *s2++;
+//       if (c1 == '\0')
+//         return c1 - c2;
+//     } while (c1 == c2);
+//   return c1 - c2;
+// }

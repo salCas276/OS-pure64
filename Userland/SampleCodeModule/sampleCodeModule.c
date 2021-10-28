@@ -4,8 +4,9 @@
 #include <utils.h>
 #include <exceptions.h>
 #include <ProcessApi.h>
-#include <string.h>
 #include "./include/lib.h"
+#include <string.h>
+
 
 #include <stdio.h>
 //#include <stdlib.h>
@@ -25,7 +26,7 @@ static char * commandStrings[MODULES_SIZE] = {
 	"printFeatures",
 	"printQuadraticRoots",
 	"echo",
-	"printHola",
+	"loop",
 	"ps", 
 	"nice", 
 	"kill",
@@ -46,7 +47,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printFeatures,
 	printQuadraticRoots,
 	echo, 
-	printHola,
+	loop_wrapper,
 	printProcessesData,
 	nicecmd, 
 	killcmd,

@@ -25,25 +25,28 @@ static const unsigned long heapSTRUCT_SIZE = ((sizeof(BlockLink_t) + (portBYTE_A
 
 static BlockLink_t xStart, xEnd;
 
-#define prvInsertBlockIntoFreeList(pxBlockToInsert)                                                                                \
-	{                                                                                                                              \
-		BlockLink_t *pxIterator;                                                                                                   \
-		unsigned int xBlockSize;                                                                                                   \
-                                                                                                                                   \
-		xBlockSize = pxBlockToInsert->xBlockSize;                                                                                  \
-                                                                                                                                   \
-		/* Iterate through the list until a block is found that has a larger size */                                               \
-		/* than the block we are inserting. */                                                                                     \
-		for (pxIterator = &xStart; pxIterator->pxNextFreeBlock->xBlockSize < xBlockSize; pxIterator = pxIterator->pxNextFreeBlock) \
-		{                                                                                                                          \
-			/* There is nothing to do here - just iterate to the correct position. */   										   \				
-				         																										   \		
-		}                                                                                                                          \
-                                                                                                                                   \
-		/* Update the list to include the block being inserted in the correct */                                                   \
-		/* position. */                                                                                                            \
-		pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;                                                            \
-		pxIterator->pxNextFreeBlock = pxBlockToInsert;                                                                             \
+void prvInsertBlockIntoFreeList(BlockLink_t * pxBlockToInsert)                                                                                
+	{                                                                                                                              
+		BlockLink_t *pxIterator;                                                                                                   
+		unsigned int xBlockSize;                                                                                                   
+                                                                                                                                   
+		xBlockSize = pxBlockToInsert->xBlockSize;                                                                                  
+                                                                                                                                   
+		/* Iterate through the list until a block is found that has a larger size */                                               
+		/* than the block we are inserting. */                                                                                     
+		for (pxIterator = &xStart; pxIterator->pxNextFreeBlock->xBlockSize < xBlockSize; pxIterator = pxIterator->pxNextFreeBlock) 
+		{                                                                                                                          
+			/* There is nothing to do here - just iterate to the correct position. */   										   				
+			if(pxIterator -> pxNextFreeBlock == &xEnd )	         														       		
+				break;         																									   		
+				         																										   		
+				         																										   		
+		}                                                                                                                          
+                                                                                                                                   
+		/* Update the list to include the block being inserted in the correct */                                                   
+		/* position. */                                                                                                            
+		pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;                                                            
+		pxIterator->pxNextFreeBlock = pxBlockToInsert;                                                                             
 	}
 
 void *malloc(unsigned int xWantedSize)

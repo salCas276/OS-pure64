@@ -10,7 +10,10 @@
 
 
 typedef struct processDescriptor{
+    char * name;
     uint8_t pid;
+    uint8_t priority;
+    uint8_t foreground;
 } processDescriptor;
 
 void printDate(_ARGUMENTS);
@@ -20,7 +23,7 @@ void printFeatures(_ARGUMENTS);
 void printQuadraticRoots(_ARGUMENTS);
 void echo(_ARGUMENTS); 
 void printProcessesData(_ARGUMENTS);
-void printHola(_ARGUMENTS,int foreground);
+void loop_wrapper(_ARGUMENTS,int foreground);
 void nicecmd(_ARGUMENTS); 
 void killcmd(_ARGUMENTS); 
 void test_processes_wrapper(_ARGUMENTS,int foreground);
