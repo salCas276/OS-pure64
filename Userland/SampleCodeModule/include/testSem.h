@@ -7,8 +7,7 @@ uint64_t waitSemaphore(char * sem_id  );
 uint64_t postSemaphore(char * sem_id  );
 uint64_t closeSemaphore(char * sem_id  );
 
-void printSemaphore();
-
+int getSemaphoreData(uint64_t semaphoreDescriptorArray);
 
 
 #endif

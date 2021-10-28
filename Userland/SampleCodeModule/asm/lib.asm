@@ -19,7 +19,7 @@ GLOBAL killAsm
 GLOBAL renounceAsm
 GLOBAL exitAsm
 GLOBAL waitAsm
-GLOBAL printSemaphoreAsm
+GLOBAL getSemaphoreDataAsm
 
 EXTERN print_f
 
@@ -89,7 +89,7 @@ _quadratic:
     pop rbp
     ret
 
-printSemaphoreAsm:
+getSemaphoreDataAsm:
     mov rax , 19
     int 80h
     ret

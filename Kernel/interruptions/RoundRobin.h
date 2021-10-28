@@ -61,7 +61,6 @@ int renounce(void);
 
 void popAndUnblock(int password);
 
-void printBlockedBy(int password);
-
+int * getBlockedBy(int password , int maxQ);
 
 #endif

@@ -123,16 +123,18 @@ uint64_t semClose(char * sem_id){
 }
 
 
-void printSemaphore(){
-    for(int i = 0 ; i < LENGTH ; i++){
-        if(semaphores[i] != (void*)0){
-                ncPrint(semaphores[i]->id);
-                ncPrint("\n");
-                ncPrintDec(semaphores[i]->value); 
-                ncPrint("\n");
-                printBlockedBy(SEMAPHORE_PASSWORD + i);
+int getSemaphoreData(uint64_t arrayPointer){
+    int j = 0;
+    semaphoreDescriptor * semaphoreDescriptorArray = (semaphoreDescriptor *) arrayPointer;
+    for(int i=0; i< LENGTH ; i++){
+        if(semaphores[i] != (void*)0 ){
+            (semaphoreDescriptorArray+j)->sem_id=semaphores[i]->id;
+            (semaphoreDescriptorArray+j)->value=semaphores[i]->value;
+            (semaphoreDescriptorArray+j)->blocked=getBlockedBy(SEMAPHORE_PASSWORD+i,semaphores[i]->attachedProcess);
+            j++;
         }
     }
+    return j;
 }
 
 

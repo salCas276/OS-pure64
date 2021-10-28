@@ -42,8 +42,22 @@ void printChain(processControlBlock * c) {
 
 
 
-void printBlockedBy(int password){
-    printChain(headers[password+1]);
+int * getBlockedBy(int password , int maxQ){
+    //chequear password incorrecta
+
+    int * pidArray = malloc((maxQ+1)*(sizeof(uint64_t)));
+
+    processControlBlock * currentProcess = headers[password+1];
+
+    int index = 0;
+    while(currentProcess){
+        pidArray[index++]=currentProcess->pid;
+        currentProcess = currentProcess -> tail;
+    }
+    
+    pidArray[index] = -1;
+
+    return pidArray;
 }
 
 

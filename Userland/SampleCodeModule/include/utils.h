@@ -16,6 +16,14 @@ typedef struct processDescriptor{
     uint8_t foreground;
 } processDescriptor;
 
+typedef struct semaphoreDescriptor{
+    int value;
+    char * sem_id;
+    int * blocked;
+}semaphoreDescriptor;
+
+
+
 void printDate(_ARGUMENTS);
 void help(_ARGUMENTS);
 void printmem(_ARGUMENTS);

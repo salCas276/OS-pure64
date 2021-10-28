@@ -369,7 +369,21 @@ if(foreground)
 
 void sem(_ARGUMENTS,int foreground){
 
-  printSemaphore();
+  semaphoreDescriptor * data = memalloc(20*sizeof(semaphoreDescriptor));
+  int quantity = getSemaphoreData((uint64_t)data);
+  for(int i = 0 ; i < quantity ; i++){
+    print_f(1,"id:%s\n",data[i].sem_id);
+    print_f(1,"valor:%d\n",data[i].value);
+    print_f(1,"Procesos Bloqueados: ");
+    for(int j = 0; data[i].blocked[j] > 0 ;j++){
+      print_f(1,"%d ",data[i].blocked[j]);
+    }
+    memfree(data[i].blocked);
+    print_f(1,"\n------\n");
+  }
+
+
+  memfree(data);
 
 }
 
