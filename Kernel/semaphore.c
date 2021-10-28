@@ -135,8 +135,6 @@ void printSemaphore(){
     }
 }
 
-
-
 static int searchEmptySlot(){ 
     for(int i = 0  ; i < LENGTH ; i++){
         if(semaphores[i]==( void * ) 0){

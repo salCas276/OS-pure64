@@ -223,6 +223,35 @@ int dup2(int oldVirtualFd, int newVirtualFd){
     return newVirtualFd;
 }
 
+int getPidsBlocked(char* name, int* pidsBuf){
+    int inodeIndex;
+    inode* targetInode = getInode(name, &inodeIndex);
+    if(inodeIndex == -1)
+        return -1;
+    
+    int counter = 0;
+    if(targetInode->rPassword != -1){
+        counter = getBlockedPidsByPass(targetInode->rPassword, pidsBuf+counter);
+    }
+    pidsBuf[counter++] = -1; //Marco separeciones entre tipos de pids
+
+    if(targetInode->wPassword != -1){
+        counter = getBlockedPidsByPass(targetInode->wPassword, pidsBuf+counter);
+    }
+    pidsBuf[counter++] = -1;
+
+    if(targetInode->rSemId[0]){
+        //Tengo que ver que hacer aca
+    }
+    pidsBuf[counter++] = -1;
+
+    if(targetInode->wSemId[0]){
+        //Tengo que ver que hacer aca
+    }
+
+    return counter;
+}
+
 //Devuelve el inode con ese nombre y el indece de este en la tabla de inodes
 //En caso de que no existe un inode con ese nombre se devuelve -1
 inode* getInode(char* name, int* inodeIndex){

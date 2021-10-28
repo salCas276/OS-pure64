@@ -3,6 +3,8 @@
 
 #include "fileSystem.h"
 
+#define REG_BLOCK_SIZE 1024
+
 int createRegular(inode* createdInode);
 
 int openRegular(inode* openedInode, int inodeIndex, int mode);

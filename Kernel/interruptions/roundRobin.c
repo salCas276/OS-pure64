@@ -317,6 +317,18 @@ int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
     return 0; 
 }
 
+int getBlockedPidsByPass(int password, int* pidsBuf){
+    processControlBlock* next = headers[password];
+    int counter=0;
+    while(next){
+        *pidsBuf = next->pid;
+        next = next->tail;
+        pidsBuf++;
+        counter++;
+    }
+    return counter;
+}
+
 int getAvailablePassword(){
     return passIndex++;
 }

@@ -63,6 +63,8 @@ void popAndUnblock(int password);
 
 void printBlockedBy(int password);
 
+int getBlockedPidsByPass(int password, int* pidsBuf);
+
 int getAvailablePassword();
 
 #endif

@@ -38,6 +38,8 @@ static char * commandStrings[MODULES_SIZE] = {
 	"unlink",
 	"dup",
 	"dup2",
+	"readFifo",
+	"writeFifo",
 	"testProcess",
 	"sem"
 };
@@ -64,6 +66,8 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printUnlink,
 	dup,
 	dup2,
+	printReadFifo,
+	writeFifo,
 	test_processes_wrapper,
 	sem
 	// test_sync,
