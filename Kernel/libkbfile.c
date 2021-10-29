@@ -1,6 +1,8 @@
 #include "include/libkbfile.h"
 #include "interruptions/keyboard.h"
 #include "naiveConsole.h"
+#include "include/semaphore.h"
+#include "include/string.h"
 
 
 int createKeyboard(inode* createdInode){
@@ -24,10 +26,10 @@ int createKeyboard(inode* createdInode){
     return 0;
 }
 
-int openKeyboard(inode* openedInode, int inodeIndex, int mode){
+int openKeyboard(int pid, inode* openedInode, int inodeIndex, int mode){
     if(mode != 0)
         return -1; //Solo se puede leer de teclado
-    return openFileFromInode(openedInode, inodeIndex, mode);
+    return openFileFromInode(pid, openedInode, inodeIndex, mode);
 }
 
 //Este metdodo va a ser basicamente un read_s con un semaforo

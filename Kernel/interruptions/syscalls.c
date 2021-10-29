@@ -84,11 +84,11 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int
 }
 
 uint64_t sys_writeFifo(uint64_t fd, uint64_t buf, uint64_t count){
-	return writeFile((int) fd, (char*) buf, (int) count);
+	return writeFile(-1, (int) fd, (char*) buf, (int) count);
 }
 
 uint64_t sys_readFifo(uint64_t fd, uint64_t buf, uint64_t count){
-	return readFile((int) fd, (char*) buf, (int) count);
+	return readFile(-1, (int) fd, (char*) buf, (int) count);
 }
 
 void sysWait(){
@@ -107,7 +107,7 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 	if (fd > 2)
 		return -1;
 	
-	return writeFile((int) fd, (char*) buffer, (int) count);
+	return writeFile(-1, (int) fd, (char*) buffer, (int) count);
 	/*
 	Color * fontColor = (fd == STD_ERR) ? &RED : &WHITE;
     
@@ -119,7 +119,7 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 }
 
 int64_t sys_read(uint8_t fd, char * buffer, uint64_t count) {
-  	return readFile(fd, buffer, count);
+  	return readFile(-1, fd, buffer, count);
 }
 
 uint8_t BCDToDec(uint8_t bcd) {
@@ -202,7 +202,7 @@ uint64_t sys_createFifo(uint64_t name){
 }
 
 uint64_t sys_open(uint64_t name, uint64_t mode){
-	return openFile((char*) name, (int) mode);
+	return openFile(-1, (char*) name, (int) mode);
 }
 
 uint64_t sys_getFileContent(uint64_t name, uint64_t buf){
@@ -240,7 +240,7 @@ uint64_t sys_getFileInfo(uint64_t name, uint64_t inodeBuf){
 }
 
 uint64_t sys_close(uint64_t fd){
-	return closeFile((int) fd);
+	return closeFile(-1, (int) fd);
 }
 
 uint64_t sys_unlink(uint64_t name){
@@ -250,22 +250,22 @@ uint64_t sys_unlink(uint64_t name){
 //TODO sacar los prints del testeo en los dups
 uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
 	int* fdBuf = (int*) buf;
-	int newVirtualFd = dup((int) oldVirtualFd);
-	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
+	int newVirtualFd = dupp(-1, (int) oldVirtualFd);
+	int* fdVirtualTable = getProcessByPid(-1)->processFileDescriptors;
 	int i;
 	for(i=0; i<MAX_PFD; i++)
-		fdBuf[i] = currentFdVirtualTable[i];
+		fdBuf[i] = fdVirtualTable[i];
 	*count = i;
 	return newVirtualFd;
 }
 
 uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count){
 	int* fdBuf = (int*) buf;
-	int ret = dup2((int) oldVirtualFd, (int) newVirtualFd);
-	int* currentFdVirtualTable = getCurrentTask()->processFileDescriptors;
+	int ret = dupp2(-1, (int) oldVirtualFd, (int) newVirtualFd);
+	int* fdVirtualTable = getProcessByPid(-1)->processFileDescriptors;
 	int i;
 	for(i=0; i<MAX_PFD; i++)
-		fdBuf[i] = currentFdVirtualTable[i];
+		fdBuf[i] = fdVirtualTable[i];
 	*count = i;
 	return ret;
 }

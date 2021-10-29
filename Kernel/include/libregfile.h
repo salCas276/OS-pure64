@@ -7,7 +7,7 @@
 
 int createRegular(inode* createdInode);
 
-int openRegular(inode* openedInode, int inodeIndex, int mode);
+int openRegular(int pid, inode* openedInode, int inodeIndex, int mode);
 
 int writeRegular(inode* writtenInode, char* buf, int count);
 

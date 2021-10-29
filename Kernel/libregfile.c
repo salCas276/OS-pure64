@@ -13,8 +13,8 @@ int createRegular(inode* createdInode){
     return 0;
 }
 
-int openRegular(inode* openedInode, int inodeIndex, int mode){
-    return openFileFromInode(openedInode, inodeIndex, mode);
+int openRegular(int pid, inode* openedInode, int inodeIndex, int mode){
+    return openFileFromInode(pid, openedInode, inodeIndex, mode);
 }
 
 int writeRegular(inode* writtenInode, char* buf, int count){

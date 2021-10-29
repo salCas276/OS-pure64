@@ -297,15 +297,6 @@ int getCurrentPid(){
     else return -1;
 }
 
-int getCurrentMinFd(){
-    processControlBlock* process = getCurrentTask();
-    for(int i=0; i<MAX_PFD; i++){
-        if(process->processFileDescriptors[i] == -1)
-            return i;
-    }
-    return -1;
-}
-
 static int changeNicenessRec(processControlBlock * header, int pid, int deltaNice) {
     
     if (header == 0) 
@@ -331,6 +322,8 @@ int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
 }
 
 int getBlockedPidsByPass(int password, int* pidsBuf){
+    if(password < 0)
+        return -1;
     processControlBlock* next = headers[password];
     int counter=0;
     while(next){

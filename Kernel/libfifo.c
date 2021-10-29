@@ -30,10 +30,10 @@ int createFifo(inode* createdInode){
     return 0;
 }
 //Uso esta funcion para agregarle restricciones propias de un fifo a la apertura de un archivo
-int openFifo(inode* inode, int inodeIndex, int mode){
+int openFifo(int pid, inode* inode, int inodeIndex, int mode){
     if(mode == 2)
         return -1; //Solo se puede o escribir o leer de un fifo
-    int fd = openFileFromInode(inode, inodeIndex, mode);
+    int fd = openFileFromInode(pid, inode, inodeIndex, mode);
 
     if(fd == -1)
         return -1;

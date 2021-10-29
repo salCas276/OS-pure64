@@ -47,9 +47,9 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
 
     createFile("keyboard", 0);
     createFile("console", 1);
-    openFile("keyboard", 0);
-    openFile("console", 1);
-    openFile("console", 1);
+    openFile(-1, "keyboard", 0);
+    openFile(-1, "console", 1);
+    openFile(-1, "console", 1);
     unlinkFile("keyboard");
     unlinkFile("console");
     // Processes are created with the worst possible priority.
@@ -98,9 +98,9 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     for(int i=0; i<MAX_PIDS; i++)
         task->processFileDescriptors[i] = i < 3 ? i : -1;
     
-    openFile("keyboard", 0);
-    openFile("console", 1);
-    openFile("console", 1);
+    openFile(-1, "keyboard", 0);
+    openFile(-1, "console", 1);
+    openFile(-1, "console", 1);
 
     addProcess(task); 
     return task->pid;  
@@ -151,7 +151,22 @@ int deleteProcess(int pid){
 
 }
 
+processControlBlock* getProcessByPid(int pid){
+    if(pid < -1)
+        return -1;
+    if(pid == -1)
+        return getCurrentTask();
+    return allProcesses[pid];
+}
 
+int getMinFdByPid(int pid){
+    processControlBlock* process = getProcessByPid(pid);
+    for(int i=0; i<MAX_PFD; i++){
+        if(process->processFileDescriptors[i] == -1)
+            return i;
+    }
+    return -1;
+}
 
 void exit(){
     deleteProcess(getCurrentPid());
@@ -162,3 +177,4 @@ void wait(){
     allProcesses[getCurrentPid()]->quantityWaiting++;
     renounce();
 }
+

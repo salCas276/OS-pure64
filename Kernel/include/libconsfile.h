@@ -5,7 +5,7 @@
 
 int createConsole(inode* createdInode);
 
-int openConsole(inode* openedInode, int inodeIndex, int mode);
+int openConsole(int pid, inode* openedInode, int inodeIndex, int mode);
 
 int writeConsole(inode* inode, char* buf, int count);
 

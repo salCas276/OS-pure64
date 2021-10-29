@@ -1,4 +1,4 @@
- #ifndef _ROUNDROBIN_H_
+#ifndef _ROUNDROBIN_H_
 #define _ROUNROBIN_H_
 
 
@@ -41,15 +41,13 @@ void nextTask();
 
 processControlBlock * getCurrentTask();
 
-void setCurrentRSP(uint64_t rsp) ;
+void setCurrentRSP(uint64_t rsp);
 
 uint64_t getCurrentRSP();
 
 prompt_info * getCurrentPrompt();
 
 int getCurrentPid();
-
-int getCurrentMinFd();
 
 int changeNicenessBy(uint64_t pid, uint64_t deltaNice); 
 

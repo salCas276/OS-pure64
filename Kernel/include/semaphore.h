@@ -20,4 +20,6 @@ uint64_t semClose(char * sem_id);
 
 int getSemaphoreData(uint64_t arrayPointer);
 
+int getSemBlokcedPids(char* sem_id, int* pidsBuff);
+
 #endif

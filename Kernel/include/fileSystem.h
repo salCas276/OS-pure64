@@ -40,21 +40,21 @@ typedef struct openedFile{
 
 int createFile(char* name, int fileType);
 
-int openFile(char* name, int mode);
+int openFile(int pid, char* name, int mode);
 
-int openFileFromInode(inode* inode, int inodeIndex, int mode);
+int openFileFromInode(int pid, inode* inode, int inodeIndex, int mode);
 
-int closeFile(int fd);
+int closeFile(int pid, int fd);
 
 int unlinkFile(char* name);
 
-int readFile(int fd, char* buf, int count);
+int readFile(int pid, int fd, char* buf, int count);
 
-int writeFile(int fd, char* buf, int count);
+int writeFile(int pid, int fd, char* buf, int count);
 
-int dup(int oldfd);
+int dupp(int pid, int oldfd);
 
-int dup2(int oldfd, int newfd);
+int dupp2(int pid, int oldfd, int newfd);
 
 inode* getInode(char* name, int* inodeIndex);
 

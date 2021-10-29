@@ -12,6 +12,10 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt);
 int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground);
 
 int getProcessesData(uint64_t descriptorsArray);
+
+processControlBlock* getProcessByPid(int pid);
+
+int getMinFdByPid(int pid);
  
 int deleteProcess(int pid);
 

@@ -5,7 +5,7 @@
 
 int createFifo(inode* createdInode);
 
-int openFifo(inode* inode, int inodeIndex, int mode);
+int openFifo(int pid, inode* inode, int inodeIndex, int mode);
 
 int readFifo(inode* readInode, char* buf, int count);
 

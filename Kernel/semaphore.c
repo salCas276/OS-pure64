@@ -154,6 +154,11 @@ static int searchSemaphore(char * sem_id){
     return -1;//not found
 }
 
+int getSemBlokcedPids(char* sem_id, int* pidsBuff){
+    int semIndex = searchSemaphore(sem_id);
+    return getBlockedPidsByPass(SEMAPHORE_PASSWORD+sem_id, pidsBuff);
+}
+
 
 
 // static int8_t strcmp (const char *p1, const char *p2) {

@@ -1,6 +1,7 @@
 #include "include/libconsfile.h"
 #include "include/fileSystem.h"
 #include "include/naiveConsole.h"
+#include "include/semaphore.h"
 
 int createConsole(inode* createdInode){
     createdInode->block = 0;
@@ -21,10 +22,10 @@ int createConsole(inode* createdInode){
     return 0;
 }
 
-int openConsole(inode* openedInode, int inodeIndex, int mode){
+int openConsole(int pid, inode* openedInode, int inodeIndex, int mode){
     if(mode != 1)
         return -1; //Solo se puede escribir en pantalla
-    return openFileFromInode(openedInode, inodeIndex, mode);
+    return openFileFromInode(pid, openedInode, inodeIndex, mode);
 }
 
 //Este va a ser un print_s pero con un semaforo

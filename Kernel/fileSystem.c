@@ -1,11 +1,12 @@
 #include "include/fileSystem.h"
-#include <roundRobin.h>
 #include "include/string.h"
 #include "include/naiveConsole.h"
 #include "include/libfifo.h"
 #include "include/libconsfile.h"
 #include "include/libregfile.h"
 #include "include/libkbfile.h"
+#include "include/semaphore.h"
+#include "include/process.h"
 
 inode* inodeTable[MAX_FILES];
 openedFile* openedFileTable[MAX_OPEN_FILES];
@@ -42,7 +43,7 @@ int createFile(char* name, int fileType){
 }
 
 
-int openFileFromInode(inode* inode, int inodeIndex, int mode){
+int openFileFromInode(int pid, inode* inode, int inodeIndex, int mode){
 
     for(int j=0; j<MAX_OPEN_FILES; j++){
         if(!openedFileTable[j]){
@@ -63,8 +64,8 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
                 inode->writeOpenCount++;
             inode->openCount++;
 
-            int virtualFd = getCurrentMinFd();
-            getCurrentTask()->processFileDescriptors[virtualFd] = j;                    
+            int virtualFd = getMinFdByPid(pid);
+            getProcessByPid(pid)->processFileDescriptors[virtualFd] = j;                    
 
             return virtualFd; //Devuelvo la posicion de este objeto en la openedFileTable
         }
@@ -72,7 +73,7 @@ int openFileFromInode(inode* inode, int inodeIndex, int mode){
     return -2; //El inode correspondiente existe pero no hay espacio para abriar un archivo
 }
 
-int openFile(char* name, int mode){
+int openFile(int pid, char* name, int mode){
     int inodeIndex;
 	inode* openedInode = getInode((char*) name, &inodeIndex);
 
@@ -81,19 +82,19 @@ int openFile(char* name, int mode){
 
 	switch(openedInode->fileType){
         case 0:
-            return openKeyboard(openedInode, inodeIndex, mode);
+            return openKeyboard(pid, openedInode, inodeIndex, mode);
         case 1:
-            return openConsole(openedInode, inodeIndex, mode);
+            return openConsole(pid, openedInode, inodeIndex, mode);
 		case 2:
-			return openRegular(openedInode, inodeIndex, mode);
+			return openRegular(pid, openedInode, inodeIndex, mode);
 		case 3:
-			return openFifo(openedInode, inodeIndex, mode);
+			return openFifo(pid, openedInode, inodeIndex, mode);
 	}
 	return -1;
 }
 
-int closeFile(int virtualFd){
-    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+int closeFile(int pid, int virtualFd){
+    int fd = getProcessByPid(pid)->processFileDescriptors[virtualFd];
 
     if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
@@ -109,9 +110,10 @@ int closeFile(int virtualFd){
     free(openedFileTable[fd]);
     openedFileTable[fd] = (openedFile*) 0;
 
+    //TODO mirar que cierre fd's y no aperturas
     for(int i=0; i<MAX_PFD; i++){
-        if(getCurrentTask()->processFileDescriptors[i] == fd)
-            getCurrentTask()->processFileDescriptors[i] = -1;
+        if(getProcessByPid(pid)->processFileDescriptors[i] == fd)
+            getProcessByPid(pid)->processFileDescriptors[i] = -1;
     }
 
     //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
@@ -147,8 +149,8 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
     return 0;
 }
 
-int readFile(int virtualFd, char* buf, int count){
-    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+int readFile(int pid, int virtualFd, char* buf, int count){
+    int fd = getProcessByPid(pid)->processFileDescriptors[virtualFd];
 
     if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
@@ -172,8 +174,8 @@ int readFile(int virtualFd, char* buf, int count){
     return -1;
 }
 
-int writeFile(int virtualFd, char* buf, int count){
-    int fd = getCurrentTask()->processFileDescriptors[virtualFd];
+int writeFile(int pid, int virtualFd, char* buf, int count){
+    int fd = getProcessByPid(pid)->processFileDescriptors[virtualFd];
 
     if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
@@ -197,30 +199,30 @@ int writeFile(int virtualFd, char* buf, int count){
     return -1;
 }
 
-int dup(int oldVirtualFd){
-    processControlBlock* currentProcess = getCurrentTask();
-    if(currentProcess->processFileDescriptors[oldVirtualFd] == -1)
+int dupp(int pid, int oldVirtualFd){
+    processControlBlock* targetProcess = getProcessByPid(pid);
+    if(targetProcess->processFileDescriptors[oldVirtualFd] == -1)
         return -1;
 
-    int newVirtualFd = getCurrentMinFd();
+    int newVirtualFd = getMinFdByPid(pid);
 
     if(newVirtualFd == -1)
         return -1;
 
-    currentProcess->processFileDescriptors[newVirtualFd] = currentProcess->processFileDescriptors[oldVirtualFd];
+    targetProcess->processFileDescriptors[newVirtualFd] = targetProcess->processFileDescriptors[oldVirtualFd];
     return newVirtualFd;
 }
 
-int dup2(int oldVirtualFd, int newVirtualFd){
-    processControlBlock* currentProcess = getCurrentTask();
+int dupp2(int pid, int oldVirtualFd, int newVirtualFd){
+    processControlBlock* targetProcess = getProcessByPid(pid);
 
-    if(currentProcess->processFileDescriptors[oldVirtualFd] == -1)
+    if(targetProcess->processFileDescriptors[oldVirtualFd] == -1)
         return -1;
 
     if(newVirtualFd > MAX_PFD)
         return -1;
 
-    currentProcess->processFileDescriptors[newVirtualFd] = currentProcess->processFileDescriptors[oldVirtualFd];
+    targetProcess->processFileDescriptors[newVirtualFd] = targetProcess->processFileDescriptors[oldVirtualFd];
     return newVirtualFd;
 }
 
@@ -232,22 +234,22 @@ int getPidsBlocked(char* name, int* pidsBuf){
     
     int counter = 0;
     if(targetInode->rPassword != -1){
-        counter = getBlockedPidsByPass(targetInode->rPassword, pidsBuf+counter);
+        counter += getBlockedPidsByPass(targetInode->rPassword, pidsBuf+counter);
     }
     pidsBuf[counter++] = -1; //Marco separeciones entre tipos de pids
 
     if(targetInode->wPassword != -1){
-        counter = getBlockedPidsByPass(targetInode->wPassword, pidsBuf+counter);
+        counter += getBlockedPidsByPass(targetInode->wPassword, pidsBuf+counter);
     }
     pidsBuf[counter++] = -1;
 
     if(targetInode->rSemId[0]){
-        //Tengo que ver que hacer aca
+        counter += getSemBlokcedPids(targetInode->rSemId, pidsBuf+counter);
     }
     pidsBuf[counter++] = -1;
 
     if(targetInode->wSemId[0]){
-        //Tengo que ver que hacer aca
+        counter += getSemBlokcedPids(targetInode->wSemId, pidsBuf+counter);
     }
 
     return counter;

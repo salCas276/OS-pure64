@@ -6,7 +6,7 @@
 
 int createKeyboard(inode* createdInode);
 
-int openKeyboard(inode* openedInode, int inodeIndex, int mode);
+int openKeyboard(int pid, inode* openedInode, int inodeIndex, int mode);
 
 int readKeyboard();
 
