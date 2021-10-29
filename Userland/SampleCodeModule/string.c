@@ -37,3 +37,19 @@ int strcpy2(const char* src, char* dest){
   }
   return i;
 }
+
+int strcat(const char* src, char* dest){
+  int i = 0, j = 0;
+  while(*(dest+i)) i++;
+  while(*(src+j)) dest[i++] = src[j++];
+  dest[i] = 0;
+  return i;
+}
+
+int charcat(char c, char* dest){
+  int i = 0;
+  while(*(dest+i)) i++;
+  dest[i++] = c;
+  dest[i] = 0; 
+  return i;
+}

@@ -7,5 +7,7 @@ uint8_t strcmp(const char *p1, const char *p2);
 uint8_t strlen(const char *str);
 char * strcpy(char *strDest, const char *strSrc);
 int strcpy2(const char* src, char* dest);
+int strcat(const char* src, char* dest);
+int charcat(char c, char* dest);
 
 #endif

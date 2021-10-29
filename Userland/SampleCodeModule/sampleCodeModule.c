@@ -134,9 +134,11 @@ int main() {
 
 	// print_f(2, "OK!\n"); 
 
+	char* aux[2] = {"readFifo", "f"};
 	while(1) {
 		print_f(2, "\n>> ");
-		int64_t ans = get_s(buffer, MAX_COMMAND);
+
+		int64_t ans = read(0, buffer, MAX_COMMAND);
 		if (ans != -1) {
 			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	
 		

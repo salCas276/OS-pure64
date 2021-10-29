@@ -20,6 +20,7 @@ typedef struct dateType {
 
 // C
 int print_f(uint8_t fd, const char * format, ...);
+int testPrint_f(uint8_t fd, const char * format, ...);
 void put_char(uint8_t fd, const char character);
 void put_s(uint8_t fd, const char * s);
 int sscan(char * buff, char * fmt, ...) ;

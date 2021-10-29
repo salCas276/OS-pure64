@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "include/string.h"
+
+#define BUFF_SIZE 256
 
 static uint64_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
 	char *p = buffer;
@@ -34,7 +37,7 @@ static uint64_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
 }
 
 // http://www.firmcodes.com/write-printf-function-c/
-int print_f(uint8_t fd, const char * format, ...) {
+int testPrint_f(uint8_t fd, const char * format, ...) {
     va_list arg;
     va_start(arg, format);
     
@@ -97,6 +100,79 @@ int print_f(uint8_t fd, const char * format, ...) {
 
     }
     va_end(arg);
+    return (traverse - format) / sizeof(traverse);
+}
+
+int print_f(uint8_t fd, const char * format, ...) {
+    char writtingBuff[BUFF_SIZE] = {0};
+    va_list arg;
+    va_start(arg, format);
+    
+    int64_t i;
+    char buff[24];
+    char * s;
+    const char * traverse;
+    double g;
+    
+    for(traverse = format; *traverse != '\0'; traverse++) {
+        while(*traverse != '%') {
+            if(*traverse == '\0') {
+                va_end(arg);
+                charcat('\0', writtingBuff);
+                put_s(fd, writtingBuff);
+                return (traverse - format) / sizeof(traverse);
+            }
+            charcat(*traverse, writtingBuff);
+            traverse++;
+        }
+
+        traverse++;
+
+        switch(*traverse) {
+            case 'c':
+                i = va_arg(arg, int);
+                charcat(i, writtingBuff);
+                break;
+            case 's':
+                s = va_arg(arg, char *);
+                strcat(s, writtingBuff);
+                break;
+            case 'd':
+                i = (int32_t)va_arg(arg, int64_t);
+                if (i < 0) {
+                    i = -i;
+                    charcat('-', writtingBuff);
+                }
+                if(uintToBase(i, buff, 10) > 0) strcat(buff, writtingBuff);
+                break;
+            case 'x':
+                i = va_arg(arg, int64_t);
+                if(uintToBase(i, buff, 16) > 0) strcat(buff, writtingBuff);
+                break;
+            case 'g':
+                g = va_arg(arg, double);
+                if (g < 0) {
+                    g = -g;
+                    charcat('-', writtingBuff);
+                }
+                i = (uint64_t)g;
+                if (uintToBase(i, buff, 10) > 0) strcat(buff, writtingBuff);
+                charcat('.', writtingBuff);
+                g -= i;
+                i = (uint64_t)(g * 1000); // cantidad de decimales significativos (1000 -> 3 decimales significativos)
+                if (uintToBase(i, buff, 10) > 0) strcat(buff, writtingBuff);
+                break;
+            case '\0':
+                va_end(arg);
+                charcat('\0', writtingBuff);
+                put_s(fd, writtingBuff);
+                return (traverse - format) / sizeof(traverse);
+        }
+
+    }
+    va_end(arg);
+    charcat('\0', writtingBuff);
+    write(1, writtingBuff, BUFF_SIZE);
     return (traverse - format) / sizeof(traverse);
 }
 
