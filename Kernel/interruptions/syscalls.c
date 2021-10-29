@@ -22,7 +22,7 @@ typedef struct dateType {
 uint64_t sys_writeFifo(uint64_t fd, uint64_t buf, uint64_t count);
 uint64_t sys_readFifo(uint64_t fd, uint64_t buf, uint64_t count);
 uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count);
-int64_t sys_read(void);
+int64_t sys_read(uint8_t fd, char * buffer, uint64_t count);
 uint64_t sys_date(dateType * pDate);
 uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
 uint64_t sys_malloc(uint64_t size);
@@ -49,7 +49,7 @@ void printSemaphore();
 int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
 	switch(rcx) {
 		case 1: return sys_write(rdi, (char*)rsi, rdx);
-		case 2: return sys_read();
+		case 2: return sys_read((int)rdi, (char*)rsi, (int)rdx);
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
 		case 5 : return createProcess(rdi,rsi,(char**)rdx,foreground);
@@ -115,8 +115,8 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 	return count;
 }
 
-int64_t sys_read(void) {
-  	return getChar();
+int64_t sys_read(uint8_t fd, char * buffer, uint64_t count) {
+  	return readFile(fd, buffer, count);
 }
 
 uint8_t BCDToDec(uint8_t bcd) {

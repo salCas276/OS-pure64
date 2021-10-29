@@ -33,7 +33,7 @@ void setReg(void);
 uint64_t fillDate(dateType * pDate);
 void inforeg(/*_ARGUMENTS*/);
 int64_t fillMem(uint64_t src, uint8_t * dst, uint8_t size);
-int64_t getChar(void);
+int64_t read(int fd, char* buf, int count);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);
 void * memalloc(uint64_t size); 
 void memfree(void * pv); 

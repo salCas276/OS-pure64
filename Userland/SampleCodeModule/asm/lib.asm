@@ -1,5 +1,5 @@
 GLOBAL print
-GLOBAL getChar
+GLOBAL read
 GLOBAL setReg
 GLOBAL fillDate
 GLOBAL inforeg
@@ -112,7 +112,7 @@ print:
     int 80h
     ret
 
-getChar:
+read:
     mov rax, 2
     int 80h
     ret

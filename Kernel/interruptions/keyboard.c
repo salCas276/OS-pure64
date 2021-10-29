@@ -9,7 +9,6 @@
 #define RIGHT_SHIFT_FLAG 0b00000010
 #define LEFT_ALT 0x38
 
-#define KEYBOARD_PASSWORD 1 
 
 #define BUFFER_SIZE 128
 

@@ -60,7 +60,7 @@ void printmem(_ARGUMENTS) {
 
     do {
         print_f(1, "Ingrese una direccion de 64 bits a partir de la cual leer:\n0x");
-        ans = get_s(buffer, BUFFER_SIZE);
+        ans = read(0, buffer, 100);
     } while (ans == -1);
     
     for (int i = 0; i < ans; i++) {
@@ -117,7 +117,7 @@ void printQuadraticRoots(_ARGUMENTS){
 
     do {
         print_f(1, "Ingresar coeficientes a, b y c: ");
-        ans = get_s(buffer, 100);
+        ans = read(0, buffer, -1);
     } while (ans == -1);
 
     sscan(buffer, "%g %g %g", &a, &b, &c);
@@ -364,7 +364,7 @@ void printReadFifo(_ARGUMENTS){
     if(argc != 2)
         return;
     char buf[30];
-    if(readFifoAsm(strtoint(argv[1], NULL, 10), buf, 27) == -1){
+    if(read(strtoint(argv[1], NULL, 10), buf, 27) == -1){
         print_f(1, "No se pudo leer correctamente\n");
         return;
     }
@@ -375,7 +375,7 @@ static void askAndRead(char* buffer, char* text){
     int ans;
      do {
         print_f(1, "%s\n", text);
-        ans = get_s(buffer, BUFFER_SIZE);
+        ans = read(0, buffer, BUFFER_SIZE);
     } while (ans == -1);
 }
 //------------------------------------------------------------------------------------------

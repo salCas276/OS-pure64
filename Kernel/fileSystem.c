@@ -140,7 +140,8 @@ int unlinkFile(char* name){
 }
 
 static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
-    free(onDeleteInode->block);
+    if(onDeleteInode->block)
+        free(onDeleteInode->block);
     free(onDeleteInode);
     inodeTable[onDeleteInodeIndex] = (inode*) 0;
     return 0;
