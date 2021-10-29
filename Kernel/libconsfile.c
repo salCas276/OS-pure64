@@ -1,5 +1,6 @@
 #include "include/libconsfile.h"
 #include "include/fileSystem.h"
+#include "include/naiveConsole.h"
 
 int createConsole(inode* createdInode){
     createdInode->block = malloc(BLOCK_SIZE);
@@ -19,5 +20,6 @@ int openConsole(inode* openedInode, int inodeIndex, int mode){
 
 //Este va a ser un print_s pero con un semaforo
 int writeConsole(inode* writtenInode, char* buf, int count){
-
+    int counter = 0;
+    while(*(buf+counter) && counter < count) ncPrintCharAtt(*(buf+counter++), &WHITE, &BLACK);
 }

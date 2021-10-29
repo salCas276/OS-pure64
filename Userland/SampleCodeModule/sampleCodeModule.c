@@ -134,7 +134,6 @@ int main() {
 
 	// print_f(2, "OK!\n"); 
 
-	char* aux[2] = {"readFifo", "f"};
 	while(1) {
 		print_f(2, "\n>> ");
 

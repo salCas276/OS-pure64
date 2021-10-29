@@ -1,4 +1,4 @@
-GLOBAL print
+GLOBAL write
 GLOBAL read
 GLOBAL setReg
 GLOBAL fillDate
@@ -107,7 +107,7 @@ getSemaphoreDataAsm:
 
 
 
-print:
+write:
     mov rax, 1
     int 80h
     ret

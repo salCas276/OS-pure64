@@ -118,8 +118,7 @@ int print_f(uint8_t fd, const char * format, ...) {
         while(*traverse != '%') {
             if(*traverse == '\0') {
                 va_end(arg);
-                charcat('\0', writtingBuff);
-                put_s(fd, writtingBuff);
+                write(fd, writtingBuff, BUFF_SIZE);
                 return (traverse - format) / sizeof(traverse);
             }
             charcat(*traverse, writtingBuff);
@@ -164,24 +163,24 @@ int print_f(uint8_t fd, const char * format, ...) {
                 break;
             case '\0':
                 va_end(arg);
-                charcat('\0', writtingBuff);
-                put_s(fd, writtingBuff);
+                write(fd, writtingBuff, BUFF_SIZE);
                 return (traverse - format) / sizeof(traverse);
         }
 
     }
     va_end(arg);
-    charcat('\0', writtingBuff);
-    write(1, writtingBuff, BUFF_SIZE);
+    write(fd, writtingBuff, BUFF_SIZE);
     return (traverse - format) / sizeof(traverse);
 }
 
 void put_char(uint8_t fd,  char character) {
-    print(fd, &character, 1);
+    char aux[2] = {0};
+    aux[0] = character;
+    write(fd, &character, 1);
 }
 
 void put_s(uint8_t fd, const char * s) {
-    while(*s) put_char(fd, *s++);
+    write(fd, s, BUFF_SIZE);
 }
 
 // maxLength = Letras a leer sin contar el \0 al final

@@ -29,7 +29,7 @@ double strtodouble(char * start, char ** end);
 int64_t get_s(char * buffer, uint64_t maxLength);
 
 // ASM
-void print(uint8_t fd, char * s, uint64_t count);
+void write(uint8_t fd, char * s, uint64_t count);
 void setReg(void);
 uint64_t fillDate(dateType * pDate);
 void inforeg(/*_ARGUMENTS*/);

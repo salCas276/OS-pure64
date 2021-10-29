@@ -106,13 +106,16 @@ uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
 		
 	if (fd > 2)
 		return -1;
-
+	
+	return writeFile((int) fd, (char*) buffer, (int) count);
+	/*
 	Color * fontColor = (fd == STD_ERR) ? &RED : &WHITE;
     
 	for (int i = 0; i < count && buffer[i]; i++)
 		ncPrintCharAtt(buffer[i], fontColor, &BLACK);
 	
 	return count;
+	*/
 }
 
 int64_t sys_read(uint8_t fd, char * buffer, uint64_t count) {
