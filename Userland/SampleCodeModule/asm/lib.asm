@@ -17,15 +17,20 @@ GLOBAL closeSemAsm
 GLOBAL niceAsm
 GLOBAL killAsm
 GLOBAL renounceAsm
-GLOBAL createFileAsm
-GLOBAL createFifoAsm
-GLOBAL openAsm
-GLOBAL closeAsm
-GLOBAL unlinkAsm
+
+GLOBAL createFifo
+GLOBAL createReg
+GLOBAL unlink
+GLOBAL open
+GLOBAL close
+GLOBAL write
+GLOBAL read
+GLOBAL dup
+GLOBAL dup2
 GLOBAL getFileContent
 GLOBAL getFileInfo
-GLOBAL dupAsm
-GLOBAL dup2Asm
+GLOBAL getFdTableByPid
+
 GLOBAL exitAsm
 GLOBAL waitAsm
 GLOBAL getSemaphoreDataAsm
@@ -301,12 +306,12 @@ renounceAsm:
     int 80h
     ret
 
-createFileAsm:
+createReg:
     mov rax, 20
     int 80h
     ret
 
-createFifoAsm:
+createFifo:
     mov rax, 21
     int 80h
     ret
@@ -320,17 +325,17 @@ closeSemAsm:
     int 80h
     ret 
 
-openAsm:
+open:
     mov rax, 22
     int 80h
     ret
 
-closeAsm:
+close:
     mov rax, 23
     int 80h
     ret
 
-unlinkAsm:
+unlink:
     mov rax, 24
     int 80h
     ret
@@ -345,25 +350,21 @@ getFileInfo:
     int 80h
     ret
 
-dupAsm:
+dup:
     mov rax, 27
     int 80h
     ret
 
-dup2Asm:
+dup2:
     mov rax, 28
     int 80h
     ret
 
-writeFifoAsm:
+getFdTableByPid:
     mov rax, 29
     int 80h
     ret
 
-readFifoAsm:
-    mov rax, 30
-    int 80h
-    ret
 
 section .data
 fmt db "%s: %xh", 10, 0

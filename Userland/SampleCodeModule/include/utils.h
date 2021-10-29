@@ -5,7 +5,9 @@
 #define MAX_COMMAND 100 // Habria que achicarlo
 #define MAX_ARGC 5 // El nombre del comando es un parametro... 
 #define MAX_SIZE_BLOCK 256
+#define BUFFER_SIZE 128
 #define _ARGUMENTS int argc , char * argv[]
+#define NULL 0
 #include <stdint.h>
 //#include <test_util.h>
 
@@ -42,17 +44,20 @@ void loop_wrapper(_ARGUMENTS,int foreground);
 void nicecmd(_ARGUMENTS); 
 void killcmd(_ARGUMENTS); 
 void test_processes_wrapper(_ARGUMENTS,int foreground);
-void createFifo(_ARGUMENTS);
-void createFile(_ARGUMENTS);
-void printFileContent(_ARGUMENTS);
-void printFileInfo(_ARGUMENTS);
-void printClose(_ARGUMENTS);
-void printUnlink(_ARGUMENTS);
-void printOpen(_ARGUMENTS);
-void dup(_ARGUMENTS);
-void dup2(_ARGUMENTS);
-void writeFifo(_ARGUMENTS);
-void printReadFifo(_ARGUMENTS);
+
+void api_createFifo(_ARGUMENTS);
+void api_createReg(_ARGUMENTS);
+void api_unlink(_ARGUMENTS);
+void api_open(_ARGUMENTS);
+void api_close(_ARGUMENTS);
+void api_read(_ARGUMENTS);
+void api_write(_ARGUMENTS);
+void api_dup(_ARGUMENTS);
+void api_dup2(_ARGUMENTS);
+void api_printFileContent(_ARGUMENTS);
+void api_printFileInfo(_ARGUMENTS);
+void api_printFdTableByPid(_ARGUMENTS);
+
 void sem(_ARGUMENTS,int foreground);
 void test_sync_wrapper(_ARGUMENTS , int foreground );
 void test_no_sync_wrapper(_ARGUMENTS , int foreground );

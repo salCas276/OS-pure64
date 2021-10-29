@@ -29,27 +29,27 @@ double strtodouble(char * start, char ** end);
 int64_t get_s(char * buffer, uint64_t maxLength);
 
 // ASM
-void write(uint8_t fd, char * s, uint64_t count);
 void setReg(void);
 uint64_t fillDate(dateType * pDate);
 void inforeg(/*_ARGUMENTS*/);
 int64_t fillMem(uint64_t src, uint8_t * dst, uint8_t size);
-int64_t read(int fd, char* buf, int count);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);
 void * memalloc(uint64_t size); 
 void memfree(void * pv); 
 int getProcessesData(processDescriptor * despriptorArray);
 int getpid();
-int createFileAsm(char* name);
-int createFifoAsm(char* name);
-int openAsm(char* name, int mode);
-int closeAsm(int fd);
-int unlinkAsm(char* name);
+
+int createReg(char* name);
+int createFifo(char* name);
+int open(int pid, char* name, int mode);
+int close(int pid, int fd);
+int read(int pid, int fd, char* buf, int count);
+int write(int pid, int fd, char* buf, int count);
+int unlink(char* name);
 int getFileContent(char* name, char* buf);
 int getFileInfo(char* name, fileInfo* buf);
-int dupAsm(int oldVirtualFd, int* buf, int* count);
-int dup2Asm(int oldVirtualFd, int newVirtualFd, int*buf, int* count);
-int writeFifoAsm(int fd, char* buf, int count);
-int readFifoAsm(int fd, char* buf, int count);
+int dup(int pid, int oldVirtualFd);
+int dup2(int pid, int oldVirtualFd, int newVirtualFd);
+int getFdTableByPid(int pid, int* fbBuff);
 
 #endif

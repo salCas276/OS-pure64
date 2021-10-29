@@ -118,7 +118,7 @@ int print_f(uint8_t fd, const char * format, ...) {
         while(*traverse != '%') {
             if(*traverse == '\0') {
                 va_end(arg);
-                write(fd, writtingBuff, BUFF_SIZE);
+                write(-1, fd, writtingBuff, BUFF_SIZE);
                 return (traverse - format) / sizeof(traverse);
             }
             charcat(*traverse, writtingBuff);
@@ -163,22 +163,22 @@ int print_f(uint8_t fd, const char * format, ...) {
                 break;
             case '\0':
                 va_end(arg);
-                write(fd, writtingBuff, BUFF_SIZE);
+                write(-1, fd, writtingBuff, BUFF_SIZE);
                 return (traverse - format) / sizeof(traverse);
         }
 
     }
     va_end(arg);
-    write(fd, writtingBuff, BUFF_SIZE);
+    write(-1, fd, writtingBuff, BUFF_SIZE);
     return (traverse - format) / sizeof(traverse);
 }
 
 void put_char(uint8_t fd,  char character) {
-    write(fd, &character, 1);
+    write(-1, fd, &character, 1);
 }
 
 void put_s(uint8_t fd, const char * s) {
-    write(fd, s, BUFF_SIZE);
+    write(-1, fd, s, BUFF_SIZE);
 }
 
 // maxLength = Letras a leer sin contar el \0 al final
@@ -186,7 +186,7 @@ void put_s(uint8_t fd, const char * s) {
 int64_t get_s(char * buffer, uint64_t maxLength) {
     int32_t counter = 0;
     int64_t c[2];
-    while ((*c = read(0, c, 1)) != '\n') {
+    while ((*c = read(-1, 0, c, 1)) != '\n') {
         if (counter < maxLength) {
             if (*c == '\b') { // Backspace
                 if (counter == 0)

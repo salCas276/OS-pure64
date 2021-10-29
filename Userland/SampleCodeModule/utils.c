@@ -8,12 +8,10 @@
 #include <string.h>
 
 
-#define BUFFER_SIZE 16
 #define MAX_PROCS 20
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
 void * memset(void*destiation,int32_t c, uint64_t length);
-static void askAndRead(char* buffer, char* text);
 
 void printDate(_ARGUMENTS) {
 	dateType currDate;
@@ -41,14 +39,17 @@ void help(_ARGUMENTS) {
     print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
     print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n");
     print_f(1, " - mkfifo <filename>: Crea un pipe con nombre en el file system\n");
-    print_f(1, " - mkfile <filename>: Crea un file en el file system\n");
-    print_f(1, " - printFileContent <filename>: Obtengo el contenido escrito en un elemento del file system\n");
-    print_f(1, " - printFileInfo <filename>: Obtengo la informacion del inode de un elemento del file system\n");
-    print_f(1, " - open <-m> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
-    print_f(1, " - close <fd>: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - mkreg <filename>: Crea un file en el file system\n");
     print_f(1, " - unlink <filename>: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
-    print_f(1, " - dup <oldfd>: toma un fd y crea otro nuevo que apunta a la misma apertura\n");
-    print_f(1, " - dup2 <oldfd> <newfd>: toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
+    print_f(1, " - open [-p] <m> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
+    print_f(1, " - close [-p] <fd>: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - write [-p] <fd>: Escribe el texto ingresado en el fd idicado\n");
+    print_f(1, " - read [-p] <fd> <count>: Lee una cantidad de bytes count del fd idicado\n");
+    print_f(1, " - dup [-p] <oldfd>: Toma un fd y crea otro nuevo que apunta a la misma apertura\n");
+    print_f(1, " - dup2 [-p] <oldfd> <newfd>: Toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
+    print_f(1, " - printFileContent <filename>: Imprime el contenido escrito en un elemento del file system\n");
+    print_f(1, " - printFileInfo <filename>: Imprime la informacion del inode de un elemento del file system\n");
+    print_f(1, " - printFdTable [-p]: Imprimie la tabla de file descriptors del proces indicado\n");
 
 }
 
@@ -60,7 +61,7 @@ void printmem(_ARGUMENTS) {
 
     do {
         print_f(1, "Ingrese una direccion de 64 bits a partir de la cual leer:\n0x");
-        ans = read(0, buffer, 100);
+        ans = read(-1, 0, buffer, 100);
     } while (ans == -1);
     
     for (int i = 0; i < ans; i++) {
@@ -117,7 +118,7 @@ void printQuadraticRoots(_ARGUMENTS){
 
     do {
         print_f(1, "Ingresar coeficientes a, b y c: ");
-        ans = read(0, buffer, -1);
+        ans = read(-1, 0, buffer, -1);
     } while (ans == -1);
 
     sscan(buffer, "%g %g %g", &a, &b, &c);
@@ -209,7 +210,7 @@ void loop(_ARGUMENTS){
          print_f(1,"%d----%s\n",id,argv[1]);
          
          for(int i=0 ; i < 1000000;i++)
-           renounceUserland();
+         renounceUserland();
     }
 }
 
@@ -223,161 +224,6 @@ void loop_wrapper(_ARGUMENTS,int foreground){
 }
 
 
-
-
-void createFile(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    createFileAsm(argv[1]);
-}
-
-void createFifo(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    createFifoAsm(argv[1]);
-}
-
-void printFileContent(_ARGUMENTS){
-    if(argc != 2)
-        return;
-
-    char* buf = memalloc(MAX_SIZE_BLOCK); 
-    if(getFileContent(argv[1], buf) == -1){
-        print_f(1, "No existe archivo con ese nombre\n");
-        memfree(buf);
-        return;
-    }
-
-    print_f(1, "%s\n", buf);
-    memfree(buf);
-}
-
-void printFileInfo(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    fileInfo* buf = memalloc(sizeof(fileInfo));
-    if(getFileInfo(argv[1], buf) == -1){
-        print_f(1, "No existe archivo con ese nombre\n");
-        memfree(buf);
-        return;
-    }
-
-    char* auxFileType;
-    switch (buf->fileType)
-    {
-    case 0:
-        auxFileType = "keyboard";
-        break;
-    case 1:
-        auxFileType = "console";
-        break;
-    case 2:
-        auxFileType = "regular";
-        break;
-    case 3:
-        auxFileType = "fifo";
-        break;
-    }
-
-    print_f(1, "------------%s-----------\n", argv[1]);
-    print_f(1, "Read Index: %d\n", buf->indexes[0]);
-    print_f(1, "Write Index: %d\n", buf->indexes[1]);
-    print_f(1, "Opening Number: %d\n", buf->openCount);
-    print_f(1, "Writer Number: %d\n", buf->writeOpenCount);
-    print_f(1, "File Type: %s\n", auxFileType);
-    print_f(1, "For unlink: %s\n", buf->forUnlink ? "True" : "False");
-
-    memfree(buf);
-}
-
-void printOpen(_ARGUMENTS){
-    if(argc != 3 || argv[1][0] != '-' || argv[1][1] != 'm' || argv[1][2]!='=')
-        return;
-    int fd = openAsm(argv[2], strtoint(&argv[1][3], NULL, 10));
-    if(fd == -1){
-        print_f(1, "Hubo un error en la creacion\n");
-        return;
-    }
-    print_f(1, "El fd correspondiente es: %d", fd);
-}
-
-void printClose(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    if(closeAsm(strtoint(argv[1], NULL, 10)) == -1){
-        print_f(1, "Hubo un error con el cerrado\n");
-        return;
-    }
-}
-
-void printUnlink(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    if(unlinkAsm(argv[1]) == -1){
-        print_f(1, "Hubo en error desvinculando el archivo\n");
-        return;
-    }
-    print_f(1, "Este sera desvinculado cuando todas sus aperturas se hayan cerrado\n");
-}
-
-void dup(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    int buf[40], count;
-    int ret = dupAsm(strtoint(argv[1], NULL, 10), buf, &count);
-    if(ret == -1){
-        print_f(1, "Hubo un error");
-        return;
-    }
-    print_f(1, "V|R\n");
-    for(int i=0; i<8; i++){
-        print_f(1, "%d|%d\n", i, buf[i]);
-    }
-}
-
-void dup2(_ARGUMENTS){
-    if(argc != 3)
-        return;
-    int buf[40], count;
-    int ret = dup2Asm(strtoint(argv[1], NULL, 10), strtoint(argv[2], NULL, 10), buf, &count);
-    if(ret == -1){
-        print_f(1, "Hubo un error");
-        return;
-    }
-    print_f(1, "V|R\n");
-    for(int i=0; i<8; i++){
-        print_f(1, "%d|%d\n", i, buf[i]);
-    }
-}
-
-void writeFifo(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    char* buf = "Este es un mensaje secreto";
-    if(writeFifoAsm(strtoint(argv[1], NULL, 10), buf, strlen(buf)+1) == -1){
-        print_f(1, "No se pudo escribir correctamente\n");
-        return;
-    }
-}
-
-void printReadFifo(_ARGUMENTS){
-    if(argc != 2)
-        return;
-    char buf[30];
-    if(read(strtoint(argv[1], NULL, 10), buf, 27) == -1){
-        print_f(1, "No se pudo leer correctamente\n");
-        return;
-    }
-    print_f(1, "%s\n", buf);
-}
-
-static void askAndRead(char* buffer, char* text){
-    int ans;
-     do {
-        print_f(1, "%s\n", text);
-        ans = read(0, buffer, BUFFER_SIZE);
-    } while (ans == -1);
-}
 //------------------------------------------------------------------------------------------
 
 

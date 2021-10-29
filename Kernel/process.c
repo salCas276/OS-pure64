@@ -96,11 +96,11 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     task->currentPushes = 0;
     task->tail = (processControlBlock *) 0; 
     for(int i=0; i<MAX_PIDS; i++)
-        task->processFileDescriptors[i] = i < 3 ? i : -1;
+        task->processFileDescriptors[i] = -1;
     
-    openFile(-1, "keyboard", 0);
-    openFile(-1, "console", 1);
-    openFile(-1, "console", 1);
+    openFile(task->pid, "keyboard", 0);
+    openFile(task->pid, "console", 1);
+    openFile(task->pid, "console", 1);
 
     addProcess(task); 
     return task->pid;  

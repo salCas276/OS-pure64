@@ -28,6 +28,8 @@ int createFile(char* name, int fileType){
     inodeTable[candidate] = malloc(sizeof(inode));
     strcpy(inodeTable[candidate]->name, name);
 
+    
+
     switch (fileType)
     {
     case 0:

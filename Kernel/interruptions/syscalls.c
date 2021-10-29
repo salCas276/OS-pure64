@@ -21,8 +21,8 @@ typedef struct dateType {
 
 uint64_t sys_writeFifo(uint64_t fd, uint64_t buf, uint64_t count);
 uint64_t sys_readFifo(uint64_t fd, uint64_t buf, uint64_t count);
-uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count);
-int64_t sys_read(uint8_t fd, char * buffer, uint64_t count);
+uint64_t sys_write(int pid, uint8_t fd, char * buffer, uint64_t count);
+int64_t sys_read(int pid, uint8_t fd, char * buffer, uint64_t count);
 uint64_t sys_date(dateType * pDate);
 uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
 uint64_t sys_malloc(uint64_t size);
@@ -32,27 +32,28 @@ uint64_t sysWaitSemaphore(uint64_t rdi );
 uint64_t sysPostSemaphore(uint64_t rdi );
 uint64_t sysCloseSemaphore(uint64_t rdi );
 int sys_kill(uint64_t code, uint64_t pid); 
-uint64_t sys_createFile(uint64_t name);
+uint64_t sys_createReg(uint64_t name);
 uint64_t sys_createFifo(uint64_t name);
-uint64_t sys_open(uint64_t name, uint64_t mode);
+uint64_t sys_open(int pid, uint64_t name, uint64_t mode);
 uint64_t sys_getFileContent(uint64_t name, uint64_t buf);
 uint64_t sys_getFileInfo(uint64_t name, uint64_t buf);
-uint64_t sys_close(uint64_t fd);
+uint64_t sys_close(int pid, uint64_t fd);
 uint64_t sys_unlink(uint64_t name);
-uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count);
-uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count);
+uint64_t sys_dup(int pid, uint64_t oldVirtualFd);
+uint64_t sys_dup2(int pid, uint64_t oldVirtualFd, uint64_t newVirtualFd);
+uint64_t sys_getFdTableByPid(int pid, int* fdsBuf);
 void sysExit();
 void sysWait();
 void printSemaphore();
 
 // TODO: Usar un arreglo y no switch case
-int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int foreground) {
+int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, int r8) {
 	switch(rcx) {
-		case 1: return sys_write(rdi, (char*)rsi, rdx);
-		case 2: return sys_read((int)rdi, (char*)rsi, (int)rdx);
+		case 1: return sys_write(rdi, (char*)rsi, rdx, r8);
+		case 2: return sys_read((int)rdi, (char*)rsi, (int)rdx, r8);
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
-		case 5 : return createProcess(rdi,rsi,(char**)rdx,foreground);
+		case 5 : return createProcess(rdi,rsi,(char**)rdx, r8);
 		case 6 : return getProcessesData(rdi);
 		case 7 : return getCurrentPid();
 		case 8: return sys_malloc(rdi); 
@@ -64,32 +65,24 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx,int
 		case 17 :  sysExit(); break;
 		case 18 : sysWait();break;
 		case 19 : return getSemaphoreData(rdi);
-
 		case 10: return changeNicenessBy(rdi, rsi); 
 		case 11: return sys_kill(rdi, rsi);
 		case 12: return renounce();break;  
-		case 20: return sys_createFile(rdi);
+
+		case 20: return sys_createReg(rdi);
 		case 21: return sys_createFifo(rdi);
-		case 22: return sys_open(rdi, rsi);
-		case 23: return sys_close(rdi);
+		case 22: return sys_open(rdi, rsi, rdx);
+		case 23: return sys_close(rdi, rsi);
 		case 24: return sys_unlink(rdi);
 		case 25: return sys_getFileContent(rdi, rsi);
 		case 26: return sys_getFileInfo(rdi, rsi);
-		case 27: return sys_dup(rdi, rsi, (int*) rdx);
-		case 28: return sys_dup2(rdi, rsi, rdx, (int*) rcx);
-		case 29: return sys_writeFifo(rdi, rsi, rdx);
-		case 30: return sys_readFifo(rdi, rsi, rdx);
+		case 27: return sys_dup(rdi, rsi);
+		case 28: return sys_dup2(rdi, rsi, rdx);
+		case 29: return sys_getFdTableByPid(rdi, rsi);
 	}
 	return 0;
 }
 
-uint64_t sys_writeFifo(uint64_t fd, uint64_t buf, uint64_t count){
-	return writeFile(-1, (int) fd, (char*) buf, (int) count);
-}
-
-uint64_t sys_readFifo(uint64_t fd, uint64_t buf, uint64_t count){
-	return readFile(-1, (int) fd, (char*) buf, (int) count);
-}
 
 void sysWait(){
 	return wait();
@@ -100,26 +93,15 @@ void sysExit(){
 	return exit();
 }
 
-uint64_t sys_write(uint8_t fd, char * buffer, uint64_t count) {
+uint64_t sys_write(int pid, uint8_t fd, char * buffer, uint64_t count) {
 	if (buffer == 0 || count <= 0)
 		return -1;
-		
-	if (fd > 2)
-		return -1;
 	
-	return writeFile(-1, (int) fd, (char*) buffer, (int) count);
-	/*
-	Color * fontColor = (fd == STD_ERR) ? &RED : &WHITE;
-    
-	for (int i = 0; i < count && buffer[i]; i++)
-		ncPrintCharAtt(buffer[i], fontColor, &BLACK);
-	
-	return count;
-	*/
+	return writeFile(pid, (int) fd, (char*) buffer, (int) count);
 }
 
-int64_t sys_read(uint8_t fd, char * buffer, uint64_t count) {
-  	return readFile(-1, fd, buffer, count);
+int64_t sys_read(int pid, uint8_t fd, char * buffer, uint64_t count) {
+  	return readFile(pid, fd, buffer, count);
 }
 
 uint8_t BCDToDec(uint8_t bcd) {
@@ -193,7 +175,7 @@ int sys_kill(uint64_t code, uint64_t pid) {
 	return -1; 
 }
 
-uint64_t sys_createFile(uint64_t name){
+uint64_t sys_createReg(uint64_t name){
 	return createFile((char*) name, 2);
 }
 
@@ -201,8 +183,8 @@ uint64_t sys_createFifo(uint64_t name){
 	return createFile((char*) name, 3);
 }
 
-uint64_t sys_open(uint64_t name, uint64_t mode){
-	return openFile(-1, (char*) name, (int) mode);
+uint64_t sys_open(int pid, uint64_t name, uint64_t mode){
+	return openFile(pid, (char*) name, (int) mode);
 }
 
 uint64_t sys_getFileContent(uint64_t name, uint64_t buf){
@@ -239,8 +221,8 @@ uint64_t sys_getFileInfo(uint64_t name, uint64_t inodeBuf){
 	return 0;
 }
 
-uint64_t sys_close(uint64_t fd){
-	return closeFile(-1, (int) fd);
+uint64_t sys_close(int pid, uint64_t fd){
+	return closeFile(pid, (int) fd);
 }
 
 uint64_t sys_unlink(uint64_t name){
@@ -248,24 +230,24 @@ uint64_t sys_unlink(uint64_t name){
 }
 
 //TODO sacar los prints del testeo en los dups
-uint64_t sys_dup(uint64_t oldVirtualFd, uint64_t buf, int* count){
-	int* fdBuf = (int*) buf;
-	int newVirtualFd = dupp(-1, (int) oldVirtualFd);
-	int* fdVirtualTable = getProcessByPid(-1)->processFileDescriptors;
-	int i;
-	for(i=0; i<MAX_PFD; i++)
-		fdBuf[i] = fdVirtualTable[i];
-	*count = i;
+uint64_t sys_dup(int pid, uint64_t oldVirtualFd){
+	int newVirtualFd = dupp(pid, (int) oldVirtualFd);
+	int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
 	return newVirtualFd;
 }
 
-uint64_t sys_dup2(uint64_t oldVirtualFd, uint64_t newVirtualFd, uint64_t buf, int* count){
-	int* fdBuf = (int*) buf;
-	int ret = dupp2(-1, (int) oldVirtualFd, (int) newVirtualFd);
-	int* fdVirtualTable = getProcessByPid(-1)->processFileDescriptors;
-	int i;
-	for(i=0; i<MAX_PFD; i++)
-		fdBuf[i] = fdVirtualTable[i];
-	*count = i;
+uint64_t sys_dup2(int pid, uint64_t oldVirtualFd, uint64_t newVirtualFd){
+	int ret = dupp2(pid, (int) oldVirtualFd, (int) newVirtualFd);
+	int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
 	return ret;
+}
+
+uint64_t sys_getFdTableByPid(int pid, int* fdsBuf){
+	if(pid < 0)
+		return -1;
+	int* fdTable = getProcessByPid(pid)->processFileDescriptors;	
+	int i;
+	for(i=0; i < MAX_PFD; i++)
+		fdsBuf[i] = fdTable[i];
+	return i;
 }

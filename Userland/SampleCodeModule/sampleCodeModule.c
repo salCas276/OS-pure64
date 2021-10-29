@@ -10,7 +10,7 @@
 //#include <stdlib.h>
 #include <stdarg.h>
 
-#define MODULES_SIZE 28
+#define MODULES_SIZE 29
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 
@@ -28,17 +28,20 @@ static char * commandStrings[MODULES_SIZE] = {
 	"ps", 
 	"nice", 
 	"kill",
+
 	"mkfifo",
-	"mkfile",
-	"printFileContent",
-	"printFileInfo",
+	"mkreg",
+	"unlink",
 	"open",
 	"close",
-	"unlink",
+	"write",
+	"read",
 	"dup",
 	"dup2",
-	"readFifo",
-	"writeFifo",
+	"printFileContent",
+	"printFileInfo",
+	"printFdTable",
+
 	"testProcess",
 	"sem",
 	"testSync",
@@ -60,17 +63,20 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printProcessesData,
 	nicecmd, 
 	killcmd,
-	createFifo,
-	createFile,
-	printFileContent,
-	printFileInfo,
-	printOpen,
-	printClose,
-	printUnlink,
-	dup,
-	dup2,
-	printReadFifo,
-	writeFifo,
+
+	api_createFifo,
+	api_createReg,
+	api_unlink,
+	api_open,
+	api_close,
+	api_write,
+	api_read,
+	api_dup,
+	api_dup2,
+	api_printFileContent,
+	api_printFileInfo,
+	api_printFdTableByPid,
+
 	test_processes_wrapper,
 	sem,
 	test_sync_wrapper,
@@ -136,8 +142,15 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
-
-		int64_t ans = read(0, buffer, MAX_COMMAND);
+		//char* aux[1] = {"loop"};
+		//loop_wrapper(1, aux, 0);	
+		//createFifo("f");
+		//open(1, "f", 1);
+		//char buf[256];
+		//write(-1, 3, buf, 256);
+		//int fdBuf[40];
+		//getFdTableByPid(-1, fdBuf);
+		int64_t ans = read(-1, 0, buffer, MAX_COMMAND);
 		if (ans != -1) {
 			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	
 		
