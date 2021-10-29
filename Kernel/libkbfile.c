@@ -18,6 +18,9 @@ int createKeyboard(inode* createdInode){
     strcat("R", createdInode->rSemId);
     int ret2 = (int) semOpen(createdInode->rSemId, 1);
 
+    if(ret2 == -1)
+        return -1;
+
     return 0;
 }
 

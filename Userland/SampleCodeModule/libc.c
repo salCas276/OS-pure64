@@ -174,8 +174,6 @@ int print_f(uint8_t fd, const char * format, ...) {
 }
 
 void put_char(uint8_t fd,  char character) {
-    char aux[2] = {0};
-    aux[0] = character;
     write(fd, &character, 1);
 }
 
