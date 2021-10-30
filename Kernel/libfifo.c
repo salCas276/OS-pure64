@@ -33,10 +33,26 @@ int createFifo(inode* createdInode){
 int openFifo(int pid, inode* inode, int inodeIndex, int mode){
     if(mode == 2)
         return -1; //Solo se puede o escribir o leer de un fifo
+
+    int flag = 0;
+
+    if(inode->indexes[0] == -1 && mode == 0){
+        flag = 1; 
+    }
+    else if(inode->indexes[0] == -1 && mode == 1){
+        flag = -1;
+    }
+
     int fd = openFileFromInode(pid, inode, inodeIndex, mode);
 
     if(fd == -1)
         return -1;
+
+    if(flag == 1)
+        while(popAndUnblock(inode->wPassword) != -1);
+
+    if(flag == -1)
+        blockMyself(inode->wPassword);
     /*
     if(inode->writeOpenCount == 0){ //No hay escritores
         switch(mode){
@@ -99,7 +115,7 @@ int writeFifo(inode* writtenInode, char* buf, int count){
 
     int i;
     for(i=0; i<count; i++){
-        if((writtenInode->indexes[1]+i)%BLOCK_SIZE == writtenInode->indexes[0] || writtenInode->indexes[0] == -1){
+        if((writtenInode->indexes[1]+i+1)%BLOCK_SIZE == writtenInode->indexes[0]){
             if(writtenInode->openCount == writtenInode->writeOpenCount && writtenInode->indexes[0] != -1){
                 writtenInode->indexes[1] = writtenInode->indexes[1]+i;
                 return 0; //Llegue al EOF

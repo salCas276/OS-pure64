@@ -61,7 +61,7 @@ int unblockProcess(int pid, int password);
 
 int renounce(void); 
 
-void popAndUnblock(int password);
+int popAndUnblock(int password);
 
 int * getBlockedBy(int password , int maxQ);
 

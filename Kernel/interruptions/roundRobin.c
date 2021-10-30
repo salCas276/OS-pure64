@@ -212,11 +212,11 @@ static void restartRoundRobin(processControlBlock * header){
 }
 
 
-void popAndUnblock(int password) { 
+int popAndUnblock(int password) { 
     //chequear password 
-     if (headers[password+1] == 0) return;
+     if (headers[password+1] == 0) return -1;
 
-     unblockProcess(headers[password+1]->pid, password);
+     return unblockProcess(headers[password+1]->pid, password);
 }
 
 

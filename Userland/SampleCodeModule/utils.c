@@ -207,10 +207,10 @@ void printProcessesData(_ARGUMENTS){
 void loop(_ARGUMENTS){
     int id = getPid();
     while(1) {
-         print_f(1,"%d----%s\n",id,argv[1]);
+        print_f(1,"%d----%s\n",id,argv[1]);
          
-         for(int i=0 ; i < 1000000;i++)
-         renounceUserland();
+        for(int i=0 ; i < 1000000;i++)
+        renounceUserland();
     }
 }
 

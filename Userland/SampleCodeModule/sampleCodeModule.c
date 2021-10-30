@@ -142,14 +142,6 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
-		//char* aux[1] = {"loop"};
-		//loop_wrapper(1, aux, 0);	
-		//createFifo("f");
-		//open(1, "f", 1);
-		//char buf[256];
-		//write(-1, 3, buf, 256);
-		//int fdBuf[40];
-		//getFdTableByPid(-1, fdBuf);
 		int64_t ans = read(-1, 0, buffer, MAX_COMMAND);
 		if (ans != -1) {
 			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	

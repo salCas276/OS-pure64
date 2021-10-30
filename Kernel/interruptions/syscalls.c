@@ -243,7 +243,7 @@ uint64_t sys_dup2(int pid, uint64_t oldVirtualFd, uint64_t newVirtualFd){
 }
 
 uint64_t sys_getFdTableByPid(int pid, int* fdsBuf){
-	if(pid < 0)
+	if(pid < -1)
 		return -1;
 	int* fdTable = getProcessByPid(pid)->processFileDescriptors;	
 	int i;

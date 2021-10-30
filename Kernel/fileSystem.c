@@ -28,7 +28,7 @@ int createFile(char* name, int fileType){
     inodeTable[candidate] = malloc(sizeof(inode));
     strcpy(inodeTable[candidate]->name, name);
 
-    
+
 
     switch (fileType)
     {
@@ -104,19 +104,25 @@ int closeFile(int pid, int virtualFd){
     inode* auxInode = openedFileTable[fd]->inode;
     int auxInodeIndex = openedFileTable[fd]->inodeIndex;
 
-    auxInode->openCount--;
+    getProcessByPid(pid)->processFileDescriptors[virtualFd] = -1;
 
-    if(openedFileTable[fd]->mode == 1 || openedFileTable[fd]->mode == 2) 
-        auxInode->writeOpenCount--;
-
-    free(openedFileTable[fd]);
-    openedFileTable[fd] = (openedFile*) 0;
-
-    //TODO mirar que cierre fd's y no aperturas
+    int count = 0;
     for(int i=0; i<MAX_PFD; i++){
         if(getProcessByPid(pid)->processFileDescriptors[i] == fd)
-            getProcessByPid(pid)->processFileDescriptors[i] = -1;
+            count++;
     }
+    
+    if(!count){
+        free(openedFileTable[fd]);
+        openedFileTable[fd] = (openedFile*) 0;
+
+        auxInode->openCount--;
+
+        if(openedFileTable[fd]->mode == 1 || openedFileTable[fd]->mode == 2) 
+            auxInode->writeOpenCount--;
+    }
+
+    //TODO mirar que cierre fd's y no aperturas
 
     //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
     if(auxInode->openCount == 0 && auxInode->forUnlink == 1)
