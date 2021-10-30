@@ -221,3 +221,5 @@ static void askAndRead(char* buffer, char* text){
     print_f(1, "%s\n", text);
     read(-1, 0, buffer, BUFFER_SIZE);
 }
+
+

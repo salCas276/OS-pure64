@@ -28,6 +28,9 @@ static char * commandStrings[MODULES_SIZE] = {
 	"ps", 
 	"nice", 
 	"kill",
+	"cat",
+	"wc", 
+	"filter", 
 
 	"mkfifo",
 	"mkreg",
@@ -63,6 +66,9 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	printProcessesData,
 	nicecmd, 
 	killcmd,
+	cat_wrapper, 
+	wc_wrapper, 
+	filter_wrapper, 
 
 	api_createFifo,
 	api_createReg,
@@ -94,6 +100,7 @@ void checkModulePtr(char *argv[], int argc,int foreground);
 
 int main() {
 	 char buffer[MAX_COMMAND + 1];
+
 	// char argv[MAX_ARGC][MAX_COMMAND]; 
 	//int32_t counter = 0;
 
