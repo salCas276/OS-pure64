@@ -219,15 +219,17 @@ void api_printFdTableByPid(_ARGUMENTS){
 }
 
 void api_printFifosData(_ARGUMENTS){
-   fifoData* fifosBuf = memalloc(sizeof(fifoData)*3);
-   if(!fifosBuf){
+   fifoData* fifosBuf = memalloc(sizeof(fifoData)*MAX_PRINTING_FILES);
+   if(fifosBuf <= 0){
        print_f(1, "Hubo un error al reservar memoria\n");
        return;
    }
 
    int count = getFifosData(fifosBuf);
+
    if(count == -1){
        print_f(1, "Hubo un problema con la obtencion de las datos\n");
+       memfree(fifosBuf);
        return;
    }
 
@@ -237,13 +239,16 @@ void api_printFifosData(_ARGUMENTS){
         print_f(1, "R Index: %d ----- W Index: %d\n", fifosBuf[i].indexes[0], fifosBuf[i].indexes[1]);
         print_f(1, "For Unlink: %s\n", fifosBuf[i].forUnlink ? "true" : "false");
         int j = 0;
-        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        j++;
         print_f(1, "|");
-        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        j++;
         print_f(1, "|");
-        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        j++;
         print_f(1, "|");
-        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
     }
     memfree(fifosBuf);
 }

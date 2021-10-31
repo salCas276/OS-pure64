@@ -9,7 +9,7 @@
 #define RD_WRT 2
 #define MAX_OPEN_FILES 40
 #define BLOCK_SIZE 256
-#define MAX_NAME 64
+#define MAX_NAME 128
 
 //Representa un archivo creado
 typedef struct inode{

@@ -327,10 +327,8 @@ int getBlockedPidsByPass(int password, int* pidsBuf){
     processControlBlock* next = headers[password];
     int counter=0;
     while(next){
-        *pidsBuf = next->pid;
+        pidsBuf[counter++] = next->pid;
         next = next->tail;
-        pidsBuf++;
-        counter++;
     }
     return counter;
 }

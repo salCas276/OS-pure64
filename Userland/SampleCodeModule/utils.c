@@ -12,6 +12,7 @@
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
 void * memset(void*destiation,int32_t c, uint64_t length);
+static void askAndRead(char* buffer, char* text);
 
 void printDate(_ARGUMENTS) {
 	dateType currDate;
@@ -208,6 +209,10 @@ void printProcessesData(_ARGUMENTS){
 void loop(_ARGUMENTS){
     int id = getPid();
     waitSemaphore("pepe");
+    createFifo("f");
+    open(-1, "f", 0);
+    char buf[10];
+    read(-1, 3, buf, 10);
     while(1) {
     /*
     char buf[256];
@@ -773,9 +778,10 @@ void test_prio_wrapper(_ARGUMENTS,int foreground){
 }
 
 void cat(_ARGUMENTS) {  
-  //   print_f(1, "Entrando al cat\n");
-  // char buffer[256]; 
-  // askAndRead(buffer, "ESCRIBA SU MENSAJE");
+  print_f(1, "Entrando al cat\n");
+  char buffer[256]; 
+  print_f(1, "%s\n", "aaaaaaaaaaa");
+  read(-1, 0, buffer, BUFFER_SIZE);
   exitUserland(); 
 }
 
@@ -806,4 +812,9 @@ void filter_wrapper(_ARGUMENTS, int foreground) {
 
     if(createProcessUserland( (uint64_t) &filter, argc, argv, foreground)  < 0) // Cambiar aca la funcion a la que apunta 
       print_f(1,"El sistema no tiene memoria");
+}
+
+static void askAndRead(char* buffer, char* text){
+    print_f(1, "%s\n", text);
+    read(-1, 0, buffer, BUFFER_SIZE);
 }

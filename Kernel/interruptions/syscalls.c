@@ -255,6 +255,5 @@ uint64_t sys_getFdTableByPid(int pid, int* fdsBuf){
 }
 
 uint64_t sys_getFifosData(fifoData* fifosBuf){
-	loadFifosData(fifosBuf);
-	
+	return loadFifosData(fifosBuf);
 }

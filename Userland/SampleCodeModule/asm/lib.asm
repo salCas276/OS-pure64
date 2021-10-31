@@ -30,7 +30,7 @@ GLOBAL dup2
 GLOBAL getFileContent
 GLOBAL getFileInfo
 GLOBAL getFdTableByPid
-GLOBAL getFifosData:
+GLOBAL getFifosData
 
 GLOBAL exitAsm
 GLOBAL waitAsm

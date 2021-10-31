@@ -243,22 +243,22 @@ int getPidsBlocked(inode* targetInode, int* pidsBuf){
     
     int counter = 0;
     if(targetInode->rPassword != -1){
-        counter += getBlockedPidsByPass(targetInode->rPassword, pidsBuf+counter);
+        counter += getBlockedPidsByPass(31, pidsBuf+counter);
     }
     pidsBuf[counter++] = -1; //Marco separeciones entre tipos de pids
 
     if(targetInode->wPassword != -1){
-        counter += getBlockedPidsByPass(targetInode->wPassword, pidsBuf+counter);
+        counter += getBlockedPidsByPass(32, pidsBuf+counter);
     }
     pidsBuf[counter++] = -1;
 
     if(targetInode->rSemId[0]){
-        counter += getSemBlokcedPids(targetInode->rSemId, pidsBuf+counter);
+        counter += getSemBlokcedPids("fR", pidsBuf+counter);
     }
     pidsBuf[counter++] = -1;
 
     if(targetInode->wSemId[0]){
-        counter += getSemBlokcedPids(targetInode->wSemId, pidsBuf+counter);
+        counter += getSemBlokcedPids("fW", pidsBuf+counter);
     }
     pidsBuf[counter++] = -1;
 

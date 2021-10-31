@@ -153,9 +153,11 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
-		//char* aux[] = {"pipe"};
-		//api_printFifosData(1, aux);
 		/*
+		char* aux[] = {"loop"};
+		loop_wrapper(1, aux, 0);
+		char* aux2[] = {"pipe"};
+		api_printFifosData(1, aux2);
 		openSemaphore("pepe", 1);	
 		openSemaphore("b", 1);	
 		openSemaphore("a", 1);	
