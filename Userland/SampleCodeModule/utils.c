@@ -772,4 +772,38 @@ void test_prio_wrapper(_ARGUMENTS,int foreground){
   
 }
 
+void cat(_ARGUMENTS) {  
+  //   print_f(1, "Entrando al cat\n");
+  // char buffer[256]; 
+  // askAndRead(buffer, "ESCRIBA SU MENSAJE");
+  exitUserland(); 
+}
 
+void cat_wrapper(_ARGUMENTS, int foreground) {
+    print_f(1, "Entrando al wrapper\n");
+    if(createProcessUserland( (uint64_t) &cat, argc, argv, foreground)  < 0)
+      print_f(1,"El sistema no tiene memoria");
+}
+
+void wc() {
+  
+  char c; 
+  // while ( (c=getChar()) != 0)
+  exitUserland(); 
+}
+
+void filter() {
+  exitUserland(); 
+}
+
+void wc_wrapper(_ARGUMENTS, int foreground) {
+
+    if(createProcessUserland( (uint64_t) &wc, argc, argv, foreground)  < 0) // Cambiar aca la funcion a la que apunta 
+      print_f(1,"El sistema no tiene memoria");
+}
+
+void filter_wrapper(_ARGUMENTS, int foreground) {
+
+    if(createProcessUserland( (uint64_t) &filter, argc, argv, foreground)  < 0) // Cambiar aca la funcion a la que apunta 
+      print_f(1,"El sistema no tiene memoria");
+}

@@ -52,6 +52,9 @@ void loop_wrapper(_ARGUMENTS,int foreground);
 void nicecmd(_ARGUMENTS); 
 void killcmd(_ARGUMENTS); 
 void test_processes_wrapper(_ARGUMENTS,int foreground);
+void cat_wrapper(_ARGUMENTS, int foreground); 
+void filter_wrapper(_ARGUMENTS, int foreground); 
+void wc_wrapper(_ARGUMENTS, int foreground); 
 
 void api_createFifo(_ARGUMENTS);
 void api_createReg(_ARGUMENTS);
@@ -66,6 +69,7 @@ void api_printFileContent(_ARGUMENTS);
 void api_printFileInfo(_ARGUMENTS);
 void api_printFdTableByPid(_ARGUMENTS);
 void api_printFifosData(_ARGUMENTS);
+
 
 void sem(_ARGUMENTS,int foreground);
 void test_sync_wrapper(_ARGUMENTS , int foreground );
