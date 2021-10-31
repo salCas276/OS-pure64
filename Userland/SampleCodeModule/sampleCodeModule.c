@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include "include/testSem.h"
 
-#define MODULES_SIZE 30
+#define MODULES_SIZE 34
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);

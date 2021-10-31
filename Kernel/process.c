@@ -1,8 +1,7 @@
 #include <process.h>
 #include "include/fileSystem.h"
 #include "include/string.h"
-
-static prompt_info Prompt;
+#define WAITING 2
 
 
 
@@ -24,7 +23,7 @@ processControlBlock * allProcesses[MAX_PIDS];
 static int generateNextPid();
 
 //First process created by the kernel.
-void firstProcess(uint64_t functionAddress, prompt_info prompt) {
+void firstProcess(uint64_t functionAddress, prompt_info shellPrompt , prompt_info backgroundPrompt) {
 
     uint64_t * basePointer = malloc(4096 * sizeof(uint64_t));
     processControlBlock * task= malloc(sizeof(processControlBlock));
@@ -33,11 +32,9 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
         return ; 
 
     task->name = "Shell";
-    Prompt = prompt;
     freePidsCounter--;
     task->pid=0;
     task->quantityWaiting = 0; 
-    task->prompt = Prompt;
     task->baseRSP =(uint64_t)&basePointer[4095] ;
     task->functionAddress = functionAddress;
     task->taskRSP = _buildContext(task->baseRSP, functionAddress,0,0);
@@ -58,6 +55,8 @@ void firstProcess(uint64_t functionAddress, prompt_info prompt) {
     
     allProcesses[task->pid] = task;
 
+    setPrompt(shellPrompt,backgroundPrompt);
+
     addProcess(task);
 
     InitFirstProcess();
@@ -77,8 +76,6 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     if(task->pid < 0 )
         return -1; 
 
-
-    task->prompt = Prompt;
     
     if(foreground)
         task->parentPid = getCurrentPid();
@@ -144,8 +141,15 @@ int deleteProcess(int pid){
     for(int i = 0; i < MAX_PFD; i++)
         closeFile(pid, i);
 
-    if(allProcesses[pid]->parentPid >= 0 ) //si no estaba en background , nadie le hace un wait.
-        allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  
+
+
+    if(allProcesses[pid]->parentPid >= 0 ){
+        processControlBlock * parent = allProcesses[allProcesses[pid]->parentPid] ;        
+        parent->quantityWaiting -- ; 
+        if(parent->quantityWaiting == 0 )
+            unblockProcess(parent->pid,WAITING);
+    }
+  
     
     allProcesses[pid]=(void*)0;
     freePidsCounter++;
@@ -177,7 +181,11 @@ void exit(){
 
 
 void wait(){
-    allProcesses[getCurrentPid()]->quantityWaiting++;
-    renounce();
+
+    int currentPid = getCurrentPid();
+    allProcesses[currentPid]->quantityWaiting++;
+    
+    if( allProcesses[currentPid]->quantityWaiting == 1 )
+        blockProcess(currentPid,WAITING);
 }
 
