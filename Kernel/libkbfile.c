@@ -35,6 +35,7 @@ int openKeyboard(int pid, inode* openedInode, int inodeIndex, int mode){
 //Este metdodo va a ser basicamente un read_s con un semaforo
 int readKeyboard(inode* readInode, char* buf, int count){
 
+
     if((int) semWait(readInode->rSemId) == -1)
         return -1;
 

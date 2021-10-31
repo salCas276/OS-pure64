@@ -98,7 +98,8 @@ void api_write(_ARGUMENTS){
         pos = 2;
     }
     char buf[BUFFER_SIZE];
-    askAndRead(buf, "Ingrese a continuacion lo que desee escribir:");
+    //askAndRead(buf, "Ingrese a continuacion lo que desee escribir:");
+    read(pid, 0, buf, BUFFER_SIZE);
     if(write(pid, strtoint(argv[pos], NULL, 10), buf, strlen(buf)) == -1){
         print_f(1, "Hubo un problema con la escritura\n");
         return;
@@ -215,6 +216,36 @@ void api_printFdTableByPid(_ARGUMENTS){
     for(int i = 0; i < 10; i++){
         print_f(1, "%d|%d\n", i, buf[i]);
     }
+}
+
+void api_printFifosData(_ARGUMENTS){
+   fifoData* fifosBuf = memalloc(sizeof(fifoData)*3);
+   if(!fifosBuf){
+       print_f(1, "Hubo un error al reservar memoria\n");
+       return;
+   }
+
+   int count = getFifosData(fifosBuf);
+   if(count == -1){
+       print_f(1, "Hubo un problema con la obtencion de las datos\n");
+       return;
+   }
+
+   for(int i = 0; i < count; i++){
+        print_f(1, "\n------------%s-------------\n", fifosBuf[i].name);
+        print_f(1, "Openings: %d ----- W Openings: %d\n", fifosBuf[i].openCount, fifosBuf[i].writeOpenCount);
+        print_f(1, "R Index: %d ----- W Index: %d\n", fifosBuf[i].indexes[0], fifosBuf[i].indexes[1]);
+        print_f(1, "For Unlink: %s\n", fifosBuf[i].forUnlink ? "true" : "false");
+        int j = 0;
+        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "|");
+        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "|");
+        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "|");
+        while(fifosBuf[i].blockedPids[j] != -1) print_f("%d-", fifosBuf[i].blockedPids[j++]);
+    }
+    memfree(fifosBuf);
 }
 
 static void askAndRead(char* buffer, char* text){

@@ -169,7 +169,7 @@ int print_f(uint8_t fd, const char * format, ...) {
 
     }
     va_end(arg);
-    write(-1, fd, writtingBuff, BUFF_SIZE);
+    write(-1, fd, writtingBuff, strlen(writtingBuff));
     return (traverse - format) / sizeof(traverse);
 }
 

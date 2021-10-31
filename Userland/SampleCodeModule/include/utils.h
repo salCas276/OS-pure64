@@ -5,6 +5,7 @@
 #define MAX_COMMAND 100 // Habria que achicarlo
 #define MAX_ARGC 5 // El nombre del comando es un parametro... 
 #define MAX_SIZE_BLOCK 256
+#define MAX_PRINTING_FILES 40
 #define BUFFER_SIZE 128
 #define _ARGUMENTS int argc , char * argv[]
 #define NULL 0
@@ -23,15 +24,22 @@ typedef struct semaphoreDescriptor{
     int value;
     char * sem_id;
     int * blocked;
-}semaphoreDescriptor;
+} semaphoreDescriptor;
 
+typedef struct fifoData{
+    char name[BUFFER_SIZE];
+    int indexes[2];
+    int openCount, writeOpenCount;
+    int forUnlink;
+    int blockedPids[BUFFER_SIZE];
+} fifoData;
 
 typedef struct fileInfo{
     int indexes[2]; //Indices de lectura (0) y escritura (1), son unicos para todo el archivo
     int openCount, writeOpenCount; //Contador de aperturas y aperturas para escribir
     int fileType; //0 -> File, 1 -> Fifo
     int forUnlink; //Flag que me indica si se le hizo un unlink
-}fileInfo;
+} fileInfo;
 
 void printDate(_ARGUMENTS);
 void help(_ARGUMENTS);
@@ -57,6 +65,7 @@ void api_dup2(_ARGUMENTS);
 void api_printFileContent(_ARGUMENTS);
 void api_printFileInfo(_ARGUMENTS);
 void api_printFdTableByPid(_ARGUMENTS);
+void api_printFifosData(_ARGUMENTS);
 
 void sem(_ARGUMENTS,int foreground);
 void test_sync_wrapper(_ARGUMENTS , int foreground );

@@ -51,5 +51,6 @@ int getFileInfo(char* name, fileInfo* buf);
 int dup(int pid, int oldVirtualFd);
 int dup2(int pid, int oldVirtualFd, int newVirtualFd);
 int getFdTableByPid(int pid, int* fbBuff);
+int getFifosData(fifoData* fifosBuf);
 
 #endif

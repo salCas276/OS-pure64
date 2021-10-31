@@ -9,10 +9,12 @@
 #include <stdio.h>
 //#include <stdlib.h>
 #include <stdarg.h>
+#include "include/testSem.h"
 
-#define MODULES_SIZE 29
+#define MODULES_SIZE 30
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
+void piping(char * argv1[], int argc1, char * argv2[], int argc2);
 
 static char * commandStrings[MODULES_SIZE] = {
 	"help",
@@ -41,13 +43,14 @@ static char * commandStrings[MODULES_SIZE] = {
 	"printFileContent",
 	"printFileInfo",
 	"printFdTable",
+	"pipe",
 
 	"testProcess",
 	"sem",
 	"testSync",
 	"testNoSync",
 	"testMM",
-	"testPriority"
+	"testPriority",
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -76,20 +79,21 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	api_printFileContent,
 	api_printFileInfo,
 	api_printFdTableByPid,
+	api_printFifosData,
 
 	test_processes_wrapper,
 	sem,
 	test_sync_wrapper,
 	test_no_sync_wrapper,
 	test_mm_wrapper,
-	test_prio_wrapper
+	test_prio_wrapper,
 
 };
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
 // static int parseArgv(char * buffer, char argv[MAX_ARGC][MAX_COMMAND]); 
-static int parseArgvPtr(char * buffer , char *argv[MAX_ARGC+1]);
-void checkModulePtr(char *argv[], int argc,int foreground);
+static int parseArgvPtr(char * buffer , char *argv[MAX_ARGC+1], int * isPiped);
+commandType checkModulePtr(char *argv[] );//, int argc,int foreground);
 
 
 int main() {
@@ -142,29 +146,75 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
+		//char* aux[] = {"pipe"};
+		//api_printFifosData(1, aux);
+		/*
+		openSemaphore("pepe", 1);	
+		openSemaphore("b", 1);	
+		openSemaphore("a", 1);	
+		openSemaphore("d", 1);	
+		openSemaphore("t", 1);	
+		openSemaphore("3", 1);	
+		openSemaphore("z", 1);	
+		openSemaphore("w", 1);	
+		openSemaphore("y", 1);	
+		char* aux[] = {"loop"};
+		loop_wrapper(1, aux, 0);
+		char* aux2[] = {"kill", "-k=0", "1"};
+		killcmd(3, aux2);
+		loop_wrapper(1, aux, 0);
+		loop_wrapper(1, aux, 0);
+		loop_wrapper(1, aux, 0);
+		loop_wrapper(1, aux, 0);
+		loop_wrapper(1, aux, 0);
+		loop_wrapper(1, aux, 0);
+		char* aux1[] = {"loop", "r"};
+		api_printFileInfo(2, aux1);
+		open(-1, "r", 0);
+		char* aux2[] = {"sem"};
+		sem(1, aux2, 1);
+		sem(1, aux2, 1);
+		*/
 		int64_t ans = read(-1, 0, buffer, MAX_COMMAND);
 		if (ans != -1) {
-			char ** argv = (char**) memalloc( (MAX_ARGC+1) * sizeof(char*));	
+			char ** argvLeft = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*)); 
+			char ** argvRight = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*));	
+	
 		
-			if(argv == 0 ) {
+			if(argvLeft == 0 || argvRight == 0) {
 				print_f(1,"El sistema no tiene memoria disponible");
 				break;
 			}
-
-			int argc = parseArgvPtr(buffer, argv);
+			int isPiped = 0; 
+			int argcLeft = parseArgvPtr(buffer, argvLeft, &isPiped); 
+			int argcRight = 0;
+			if (isPiped) { 
+				isPiped += 2; 
+				argcRight = parseArgvPtr(buffer, argvRight, &isPiped); 
+			}
 		
-			if(argc < 0 ){
+
+			if(argcLeft < 0 || argcRight < 0 ){
 				print_f(1,"El sistema fallo parseando su comando : a)Cantidad de parametros invalida b)El sistema no tiene memoria disponible\n");
-				for(int i = 0 ; i < MAX_ARGC+1;i++)
-					memfree(argv[i]);
-				memfree(argv);
+				for(int i = 0 ; i < MAX_ARGC+1;i++) {
+					memfree(argvRight[i]); // Todo corregir esto 
+					memfree(argvLeft[i]); 
+				}
+				memfree(argvRight);
+				memfree(argvLeft);
 				continue;
 			}
-			int foreground = 1 ; 
-			if(argv[argc-1][0]=='&'){
-				foreground = 0 ; 
-			}
-			checkModulePtr(argv, argc, foreground);
+			int foreground = ! (argvLeft[argcLeft-1][0]=='&'); 
+
+
+			if (isPiped){ 
+				piping(argvLeft, argcLeft, argvRight, argcRight);	
+			} else {
+				commandType cmd = checkModulePtr(argvLeft);
+				if ( cmd != 0 ) cmd(argcLeft, argvLeft, foreground) ; 
+			} ;
+
+
 		} else
 			print_f(1, "Comando no valido\n");
 
@@ -172,26 +222,65 @@ int main() {
 
 }
 
-
-
-
-void checkModulePtr(char *argv[], int argc,int foreground) {
-	for (int i = 0; i < MODULES_SIZE; i++){
-		if (!strcmp(argv[0], commandStrings[i])){
-			commandFunctions[i](argc, argv,foreground);
-			return;
-		}
-	}; 
-	print_f(1, "Comando no valido\n");
+void pipeWrapper(_ARGUMENTS, int foreground) {
+	int isWriting = argv[argc-1]; 
+	char * fifoName = argv[argc-2]; 
+	int oldFd = open(-1, fifoName, !!isWriting);
+	dup2(-1, oldFd, !!isWriting);
+	close(-1, oldFd);
+	commandType cmd = checkModulePtr(argv);
+	cmd(argc-2, argv, foreground); 
+	close(-1, !!isWriting);
+	//unlink(fifoName);
+	exitUserland();
 }
 
 
-static int parseArgvPtr(char * buffer , char *argv[]){
+void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
+	static int id = 0;
+	char * fifoName = memalloc(sizeof(char)*3); 
+	fifoName[0] = 'F';
+	fifoName[1] = id+'!'; 
+	fifoName[2] = 0; 
+	createFifo(fifoName); 
+	argv1[argc1++] = fifoName; 
+	argv1[argc1++] = 1; 
 
-	int currentBuffPos = 0; 
+	argv2[argc2++] = fifoName; 
+	argv2[argc2++] = 0; 
+
+	createProcessUserland((uint64_t) &pipeWrapper, argc1, argv1, 0); 
+	
+	createProcessUserland((uint64_t) &pipeWrapper, argc2, argv2, 0);
+}
+
+
+commandType checkModulePtr(char *argv[]) {
+	for (int i = 0; i < MODULES_SIZE; i++){
+		if (!strcmp(argv[0], commandStrings[i])){
+			return commandFunctions[i];
+		}
+	}; 
+	print_f(1, "Comando no valido\n");
+	return 0; 
+}
+// void checkModulePtr(char *argv[], int argc,int foreground) {
+// 	for (int i = 0; i < MODULES_SIZE; i++){
+// 		if (!strcmp(argv[0], commandStrings[i])){
+// 			commandFunctions[i](argc, argv,foreground);
+// 			return;
+// 		}
+// 	}; 
+// 	print_f(1, "Comando no valido\n");
+// }
+
+
+static int parseArgvPtr(char * buffer , char *argv[], int * isPiped){
+
+	int currentBuffPos = *isPiped; 
 	int index=0;
   	int inside = 0 ;
-	while( buffer[currentBuffPos]!=0){
+	while( buffer[currentBuffPos]!=0 && buffer[currentBuffPos] != '|'){
 		char * aux = (char*)memalloc( (MAX_COMMAND+1) * sizeof(char));
 		if(aux == 0)
 			return -1;
@@ -199,7 +288,7 @@ static int parseArgvPtr(char * buffer , char *argv[]){
 		int current = 0 ; 
 	    inside = 0 ; 
 
-    	while(current < MAX_COMMAND && buffer[currentBuffPos]!=0 && buffer[currentBuffPos]!=32 ){
+    	while(current < MAX_COMMAND && buffer[currentBuffPos]!=0 && buffer[currentBuffPos]!=' ' ){
 			aux[current++]=buffer[currentBuffPos++];
       		inside = 1; 
 		}
@@ -215,11 +304,12 @@ static int parseArgvPtr(char * buffer , char *argv[]){
 		if(index == MAX_ARGC + 1) //cantidad de parametros invalida.
 			return -1;
 
-
 	}
-
+	if (buffer[currentBuffPos] == '|') *isPiped = currentBuffPos; 
 	return index;
 }
+
+
 
 
 

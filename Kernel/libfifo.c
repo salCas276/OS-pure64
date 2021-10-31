@@ -92,6 +92,7 @@ int readFifo(inode* readInode, char* buf, int count){
                 readInode->indexes[0] = readInode->indexes[0]+i;
                 return 0; //Llegue al EOF
             }
+            readInode->indexes[0] = readInode->indexes[0]+i;
             blockMyself(readInode->rPassword);
         }
 
@@ -115,11 +116,12 @@ int writeFifo(inode* writtenInode, char* buf, int count){
 
     int i;
     for(i=0; i<count; i++){
-        if((writtenInode->indexes[1]+i+1)%BLOCK_SIZE == writtenInode->indexes[0]){
-            if(writtenInode->openCount == writtenInode->writeOpenCount && writtenInode->indexes[0] != -1){
+        if((writtenInode->indexes[1]+i+1)%BLOCK_SIZE == writtenInode->indexes[0] || buf[i] == '~'){
+            if( (writtenInode->openCount == writtenInode->writeOpenCount && writtenInode->indexes[0] != -1) || buf[i] == '~'){
                 writtenInode->indexes[1] = writtenInode->indexes[1]+i;
                 return 0; //Llegue al EOF
             }
+            writtenInode->indexes[1] = writtenInode->indexes[1]+i;
             blockMyself(writtenInode->wPassword);
         }
         writtenInode->block[(writtenInode->indexes[1]+i)%BLOCK_SIZE] = buf[i];
@@ -133,4 +135,31 @@ int writeFifo(inode* writtenInode, char* buf, int count){
         return -1;
 
     return i;
+}
+
+
+int loadFifosData(fifoData* fifosBuf){
+    inode** inodeBuf = malloc(sizeof(inode*)*MAX_FILES);
+    if(!inodeBuf)
+        return -1;
+    int counter;
+
+    if( (counter = getTypeInodes(inodeBuf, 3)) == -1){
+        free(inodeBuf);
+        return -1;
+    }
+
+    for(int i = 0; i < counter; i++){
+            strcpy(fifosBuf[i].name, inodeBuf[i]->name);
+            fifosBuf[i].forUnlink = inodeBuf[i]->forUnlink;
+            fifosBuf[i].indexes[0] = inodeBuf[i]->indexes[0];
+            fifosBuf[i].indexes[1] = inodeBuf[i]->indexes[1];
+            fifosBuf[i].openCount = inodeBuf[i]->openCount;
+            fifosBuf[i].writeOpenCount = inodeBuf[i]->writeOpenCount;
+            if(getPidsBlocked(inodeBuf[i], fifosBuf[i].blockedPids) == -1)
+                return -1;
+    }
+
+    free(inodeBuf);
+    return counter;
 }

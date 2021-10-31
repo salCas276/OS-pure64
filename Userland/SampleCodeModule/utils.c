@@ -50,6 +50,7 @@ void help(_ARGUMENTS) {
     print_f(1, " - printFileContent <filename>: Imprime el contenido escrito en un elemento del file system\n");
     print_f(1, " - printFileInfo <filename>: Imprime la informacion del inode de un elemento del file system\n");
     print_f(1, " - printFdTable [-p]: Imprimie la tabla de file descriptors del proces indicado\n");
+    print_f(1, " - pipe: Imprime informacion sobre todos los pipes con nombre abiertos\n");
 
 }
 
@@ -206,7 +207,22 @@ void printProcessesData(_ARGUMENTS){
 //--------------------------------------------------------------
 void loop(_ARGUMENTS){
     int id = getPid();
+    waitSemaphore("pepe");
     while(1) {
+    /*
+    char buf[256];
+    createFifo("f");
+    int fd1 = open(-1, "f", 0);
+    unlink("f");
+    createFifo("r");
+    int fd2 = open(-1, "r", 1);
+    unlink("r");
+    read(-1, fd1, buf, 30);
+    write(-1, 1, buf, 30);
+    write(-1, fd2, buf, 30);
+    close(-1, fd1);
+    close(-1, fd2);
+    */
         print_f(1,"%d----%s\n",id,argv[1]);
          
         for(int i=0 ; i < 1000000;i++)

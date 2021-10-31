@@ -58,4 +58,8 @@ int dupp2(int pid, int oldfd, int newfd);
 
 inode* getInode(char* name, int* inodeIndex);
 
+int getTypeInodes(inode* inodeBuf[], int fileType);
+
+int getPidsBlocked(inode* targetInode, int* pidsBuf);
+
 #endif

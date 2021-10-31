@@ -30,6 +30,7 @@ GLOBAL dup2
 GLOBAL getFileContent
 GLOBAL getFileInfo
 GLOBAL getFdTableByPid
+GLOBAL getFifosData:
 
 GLOBAL exitAsm
 GLOBAL waitAsm
@@ -365,6 +366,10 @@ getFdTableByPid:
     int 80h
     ret
 
+getFifosData:
+    mov rax, 30
+    int 80h
+    ret
 
 section .data
 fmt db "%s: %xh", 10, 0

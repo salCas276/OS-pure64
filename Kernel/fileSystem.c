@@ -106,6 +106,7 @@ int closeFile(int pid, int virtualFd){
 
     getProcessByPid(pid)->processFileDescriptors[virtualFd] = -1;
 
+
     int count = 0;
     for(int i=0; i<MAX_PFD; i++){
         if(getProcessByPid(pid)->processFileDescriptors[i] == fd)
@@ -113,13 +114,14 @@ int closeFile(int pid, int virtualFd){
     }
     
     if(!count){
-        free(openedFileTable[fd]);
-        openedFileTable[fd] = (openedFile*) 0;
 
         auxInode->openCount--;
 
         if(openedFileTable[fd]->mode == 1 || openedFileTable[fd]->mode == 2) 
             auxInode->writeOpenCount--;
+
+        free(openedFileTable[fd]);
+        openedFileTable[fd] = (openedFile*) 0;
     }
 
     //TODO mirar que cierre fd's y no aperturas
@@ -159,6 +161,7 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
 
 int readFile(int pid, int virtualFd, char* buf, int count){
     int fd = getProcessByPid(pid)->processFileDescriptors[virtualFd];
+
 
     if(fd == -1 || fd >= MAX_PFD) //El fd no apunta a una apertura existente
         return -1;
@@ -230,15 +233,13 @@ int dupp2(int pid, int oldVirtualFd, int newVirtualFd){
     if(newVirtualFd > MAX_PFD)
         return -1;
 
+    closeFile(pid, newVirtualFd);
+
     targetProcess->processFileDescriptors[newVirtualFd] = targetProcess->processFileDescriptors[oldVirtualFd];
     return newVirtualFd;
 }
 
-int getPidsBlocked(char* name, int* pidsBuf){
-    int inodeIndex;
-    inode* targetInode = getInode(name, &inodeIndex);
-    if(inodeIndex == -1)
-        return -1;
+int getPidsBlocked(inode* targetInode, int* pidsBuf){
     
     int counter = 0;
     if(targetInode->rPassword != -1){
@@ -259,6 +260,7 @@ int getPidsBlocked(char* name, int* pidsBuf){
     if(targetInode->wSemId[0]){
         counter += getSemBlokcedPids(targetInode->wSemId, pidsBuf+counter);
     }
+    pidsBuf[counter++] = -1;
 
     return counter;
 }
@@ -276,4 +278,16 @@ inode* getInode(char* name, int* inodeIndex){
     }
     *inodeIndex = -1;
     return (inode*) -1; 
+}
+
+int getTypeInodes(inode** inodeBuf, int fileType){
+    int counter = 0;
+    for(int i = 0; i < MAX_FILES; i++){
+        if(inodeTable[i]){
+            if(inodeTable[i]->fileType == fileType){
+                inodeBuf[counter++] = inodeTable[i];
+            }
+        }
+    }
+    return counter;
 }

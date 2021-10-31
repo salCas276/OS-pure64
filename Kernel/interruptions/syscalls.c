@@ -42,6 +42,7 @@ uint64_t sys_unlink(uint64_t name);
 uint64_t sys_dup(int pid, uint64_t oldVirtualFd);
 uint64_t sys_dup2(int pid, uint64_t oldVirtualFd, uint64_t newVirtualFd);
 uint64_t sys_getFdTableByPid(int pid, int* fdsBuf);
+uint64_t sys_getFifosData(fifoData* fifosBuf);
 void sysExit();
 void sysWait();
 void printSemaphore();
@@ -79,6 +80,7 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, in
 		case 27: return sys_dup(rdi, rsi);
 		case 28: return sys_dup2(rdi, rsi, rdx);
 		case 29: return sys_getFdTableByPid(rdi, rsi);
+		case 30: return sys_getFifosData(rdi);
 	}
 	return 0;
 }
@@ -250,4 +252,9 @@ uint64_t sys_getFdTableByPid(int pid, int* fdsBuf){
 	for(i=0; i < MAX_PFD; i++)
 		fdsBuf[i] = fdTable[i];
 	return i;
+}
+
+uint64_t sys_getFifosData(fifoData* fifosBuf){
+	loadFifosData(fifosBuf);
+	
 }
