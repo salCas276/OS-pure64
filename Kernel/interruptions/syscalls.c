@@ -87,12 +87,12 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, in
 
 
 void sysWait(){
-	return wait();
+	wait();
 }
 
 
 void sysExit(){
-	return exit();
+	exit();
 }
 
 uint64_t sys_write(int pid, uint8_t fd, char * buffer, uint64_t count) {

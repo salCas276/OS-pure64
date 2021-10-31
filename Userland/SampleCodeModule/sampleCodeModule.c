@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include "include/testSem.h"
 
-#define MODULES_SIZE 30
+#define MODULES_SIZE 34
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);
@@ -153,6 +153,10 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
+		char* aux[] = {"loop"};
+		loop_wrapper(1, aux, 0);
+		write(-1, 1, "\n", 1);
+		
 		/*
 		char* aux[] = {"loop"};
 		loop_wrapper(1, aux, 0);
@@ -167,8 +171,6 @@ int main() {
 		openSemaphore("z", 1);	
 		openSemaphore("w", 1);	
 		openSemaphore("y", 1);	
-		char* aux[] = {"loop"};
-		loop_wrapper(1, aux, 0);
 		char* aux2[] = {"kill", "-k=0", "1"};
 		killcmd(3, aux2);
 		loop_wrapper(1, aux, 0);
@@ -184,7 +186,7 @@ int main() {
 		sem(1, aux2, 1);
 		sem(1, aux2, 1);
 		*/
-		int64_t ans = read(-1, 0, buffer, MAX_COMMAND);
+		int64_t ans = read(-1, 0, buffer, -1);
 		if (ans != -1) {
 			char ** argvLeft = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*)); 
 			char ** argvRight = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*));	

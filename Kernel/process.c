@@ -1,6 +1,7 @@
 #include <process.h>
 #include "include/fileSystem.h"
 #include "include/string.h"
+#include "include/naiveConsole.h"
 
 static prompt_info Prompt;
 
@@ -135,14 +136,12 @@ static int generateNextPid(){
     return lastPid;
 }
 
-
-
 int deleteProcess(int pid){
     if(pid == 0 )
         return 0; //la shell no puede eliminarse
 
-    for(int i = 0; i < MAX_PFD; i++)
-        closeFile(pid, i);
+    //for(int i = 0; i < MAX_PFD; i++)
+    //    closeFile(pid, i);
 
     if(allProcesses[pid]->parentPid >= 0 ) //si no estaba en background , nadie le hace un wait.
         allProcesses[allProcesses[pid]->parentPid]->quantityWaiting=allProcesses[allProcesses[pid]->parentPid]->quantityWaiting-1;  

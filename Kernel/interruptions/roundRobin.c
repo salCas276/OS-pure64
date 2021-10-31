@@ -222,6 +222,7 @@ int popAndUnblock(int password) {
 
 
 void nextTask(){
+
     if(headers[0] == (void*)0){
         currentProcess = idle ; 
         next=(void*)0;

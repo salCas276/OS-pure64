@@ -53,3 +53,9 @@ int charcat(char c, char* dest){
   dest[i] = 0; 
   return i;
 }
+
+int lenUntil(char* str, char c){
+  int counter = 0;
+  while(str[counter] != c) counter;
+  return counter;
+}

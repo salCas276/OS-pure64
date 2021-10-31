@@ -10,7 +10,7 @@
 #define LEFT_ALT 0x38
 
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 256
 
 uint8_t flags = 0;
 

@@ -208,13 +208,13 @@ void printProcessesData(_ARGUMENTS){
 //--------------------------------------------------------------
 void loop(_ARGUMENTS){
     int id = getPid();
+    /*
     waitSemaphore("pepe");
     createFifo("f");
     open(-1, "f", 0);
     char buf[10];
     read(-1, 3, buf, 10);
     while(1) {
-    /*
     char buf[256];
     createFifo("f");
     int fd1 = open(-1, "f", 0);
@@ -228,15 +228,20 @@ void loop(_ARGUMENTS){
     close(-1, fd1);
     close(-1, fd2);
     */
-        print_f(1,"%d----%s\n",id,argv[1]);
+        //print_f(1,"%d----%s\n",id,argv[1]);
          
-        for(int i=0 ; i < 1000000;i++)
-        renounceUserland();
-    }
+        //for(int i=0 ; i < 1000000;i++)
+        //renounceUserland();
+        //for(int i = 0; i < 1000000000; i++);
+        //print_f(1, "%d, %s\n", argc, argv[0]);
+        //renounceUserland();
+        exitUserland();
+    //}
 }
 
 void loop_wrapper(_ARGUMENTS,int foreground){
 
+    print_f(1, "Antes de CPU\n");
     createProcessUserland( (uint64_t) &loop,argc,argv,foreground);
 
     if(foreground){
@@ -778,34 +783,58 @@ void test_prio_wrapper(_ARGUMENTS,int foreground){
 }
 
 void cat(_ARGUMENTS) {  
-  print_f(1, "Entrando al cat\n");
-  char buffer[256]; 
-  print_f(1, "%s\n", "aaaaaaaaaaa");
-  read(-1, 0, buffer, BUFFER_SIZE);
+  char* aux[] = {argv[0], "1"};
+  api_write(argc+1, aux);
   exitUserland(); 
 }
 
 void cat_wrapper(_ARGUMENTS, int foreground) {
-    print_f(1, "Entrando al wrapper\n");
     if(createProcessUserland( (uint64_t) &cat, argc, argv, foreground)  < 0)
       print_f(1,"El sistema no tiene memoria");
 }
 
 void wc() {
-  
   char c; 
-  // while ( (c=getChar()) != 0)
+  char buf[BUFFER_SIZE];
+  read(-1, 0, buf, BUFFER_SIZE);
+  int lineCount = 0, count = 0;
+  while(buf[count]){
+    if(buf[count] == '\n')
+      lineCount++;
+    count++;
+  }
+  print_f(1, "La cantidad de lineas es: %d\n", lineCount);
   exitUserland(); 
 }
 
 void filter() {
+  char buf[256];
+  int i = 0, vowCount = 0;
+  
+  read(-1, 0, buf, 256);
+
+  while(buf[i]){
+    buf[i-vowCount] = buf[i];
+    if(buf[i] == 'a' || buf[i] == 'e' || buf[i] == 'i' || buf[i] == 'o' || buf[i] == 'u')
+      vowCount++;
+    i++;
+  }
+  
+  buf[i-vowCount] = 0;
+
+  write(-1, 1, buf, strlen(buf));
+
   exitUserland(); 
 }
 
 void wc_wrapper(_ARGUMENTS, int foreground) {
 
-    if(createProcessUserland( (uint64_t) &wc, argc, argv, foreground)  < 0) // Cambiar aca la funcion a la que apunta 
+    if(createProcessUserland( (uint64_t) &wc, argc, argv, 1)  < 0) // Cambiar aca la funcion a la que apunta 
       print_f(1,"El sistema no tiene memoria");
+    
+    if(foreground)
+      waitSon();
+    print_f(1, "Unlock\n");
 }
 
 void filter_wrapper(_ARGUMENTS, int foreground) {

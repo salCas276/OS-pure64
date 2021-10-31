@@ -35,14 +35,13 @@ int openKeyboard(int pid, inode* openedInode, int inodeIndex, int mode){
 //Este metdodo va a ser basicamente un read_s con un semaforo
 int readKeyboard(inode* readInode, char* buf, int count){
 
-
-    if((int) semWait(readInode->rSemId) == -1)
-        return -1;
+   if((int) semWait(readInode->rSemId) == -1)
+    return -1;
 
     int32_t counter = 0;
     int64_t c;
     //Si le paso count=-1 va a leer hasta el \n
-    while((c = getChar()) != '\n'){
+    while((c = getChar()) != '~' && (count != -1 || c != '\n')){
         if(counter < count || count == -1){
             if(c == '\b'){
                 if(counter == 0)
@@ -61,7 +60,10 @@ int readKeyboard(inode* readInode, char* buf, int count){
         ncPrintCharAtt(c, &WHITE, &BLACK);
     }
 
-    ncPrintCharAtt(c, &WHITE, &BLACK);
+    if(c == '~'){
+        ncPrintCharAtt('\n', &WHITE, &BLACK);
+    }
+    else ncPrintCharAtt(c, &WHITE, &BLACK);
 
     if((int) semPost(readInode->rSemId) == -1)
         return -1;
