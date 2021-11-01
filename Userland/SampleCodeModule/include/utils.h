@@ -55,6 +55,8 @@ void test_processes_wrapper(_ARGUMENTS,int foreground);
 void cat_wrapper(_ARGUMENTS, int foreground); 
 void filter_wrapper(_ARGUMENTS, int foreground); 
 void wc_wrapper(_ARGUMENTS, int foreground); 
+void printMemState(_ARGUMENTS, int foreground); 
+
 
 void loop(_ARGUMENTS);
 void test_processes(_ARGUMENTS);

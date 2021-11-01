@@ -830,3 +830,13 @@ static void askAndRead(char* buffer, char* text){
     print_f(1, "%s\n", text);
     read(-1, 0, buffer, BUFFER_SIZE);
 }
+
+void printMemState(_ARGUMENTS, int foreground) {
+
+
+    memstateType * state = memalloc(sizeof(memstateType)); 
+    getMemState(state); 
+    print_f(1, "MEMSTATE\nTotal memory: %d\nFree memory: %d\nOccupied memory: %d\n", state->totalMemory, state->free, state->occupied); 
+    memfree(state); 
+
+}

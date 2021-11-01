@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include "include/testSem.h"
 
-#define MODULES_SIZE 28
+#define MODULES_SIZE 30
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);
@@ -46,7 +46,8 @@ static char * commandStrings[MODULES_SIZE] = {
 	"testPriority",
 	"cat",
 	"wc", 
-	"filter", 
+	"filter",
+	"mem" 
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -79,7 +80,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	cat_wrapper, 
 	wc_wrapper, 
 	filter_wrapper, 
-
+	printMemState, 
 };
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 

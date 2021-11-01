@@ -81,6 +81,8 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, in
 		case 28: return sys_dup2(rdi, rsi, rdx);
 		case 29: return sys_getFdTableByPid(rdi, rsi);
 		case 30: return sys_getFifosData(rdi);
+
+		case 70:  getMemState(rdi); break; 
 	}
 	return 0;
 }
