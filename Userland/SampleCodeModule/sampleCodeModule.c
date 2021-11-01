@@ -253,17 +253,11 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	createFifo(fifoName); 
 
-	int oldFdR = open(-1, fifoName, 0);
+
+
 	int oldFdW = open(-1, fifoName, 1);
-
-	if(oldFdR == -1 || oldFdW == -1){
+	if(oldFdW == -1)
 		return;
-	}
-
-	unlink(fifoName);
-
-
-	openSemaphore(fifoName, 0);
 
 	int auxW = dup(-1, 1);
 	
@@ -275,6 +269,9 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	dup2(-1, auxW, 1);
 	close(-1, auxW);
 
+	int oldFdR = open(-1, fifoName, 0);
+	if(oldFdR == -1)
+		return;
 	
 	int auxR = dup(-1, 0);
 
@@ -287,10 +284,11 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	close(-1, auxR);
 
 
-	closeSemaphore(fifoName);
 	
 	waitSon();
 	waitSon();
+
+	unlink(fifoName);
 
 	memfree(fifoName);
 
