@@ -261,6 +261,8 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	dup2(-1, auxW, 1);
 	close(-1, auxW);
+
+	waitSon();
 	
 	int auxR = dup(-1, 0);
 
@@ -275,7 +277,6 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	closeSemaphore(fifoName);
 	
-	waitSon();
 	waitSon();
 }
 
