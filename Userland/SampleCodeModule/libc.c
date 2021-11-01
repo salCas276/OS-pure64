@@ -163,7 +163,7 @@ int print_f(uint8_t fd, const char * format, ...) {
                 break;
             case '\0':
                 va_end(arg);
-                write(-1, fd, writtingBuff, BUFF_SIZE);
+                write(-1, fd, writtingBuff, strlen(writtingBuff));
                 return (traverse - format) / sizeof(traverse);
         }
 
@@ -178,7 +178,7 @@ void put_char(uint8_t fd,  char character) {
 }
 
 void put_s(uint8_t fd, const char * s) {
-    write(-1, fd, s, BUFF_SIZE);
+    write(-1, fd, s, strlen(s));
 }
 
 // maxLength = Letras a leer sin contar el \0 al final

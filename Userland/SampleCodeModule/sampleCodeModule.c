@@ -222,12 +222,12 @@ int main() {
 void pipeWrapper(_ARGUMENTS, int foreground) {
 	int isWriting = argv[argc-1]; 
 	char * fifoName = argv[argc-2]; 
-	if(!isWriting)
-		waitSemaphore(fifoName);
+	//if(!isWriting)
+	//	waitSemaphore(fifoName);
 	commandType cmd = checkModulePtr(argv, 1);
 	cmd(argc-2, argv, foreground); 
-	if(isWriting)
-		postSemaphore(fifoName);
+	//if(isWriting)
+	//	postSemaphore(fifoName);
 	exitUserland();
 }
 
@@ -243,6 +243,12 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	int oldFdR = open(-1, fifoName, 0);
 	int oldFdW = open(-1, fifoName, 1);
+
+	if(oldFdR == -1 || oldFdW == -1){
+		return;
+	}
+
+	unlink(fifoName);
 
 	argv1[argc1++] = fifoName; 
 	argv1[argc1++] = 1; 
@@ -262,7 +268,6 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	dup2(-1, auxW, 1);
 	close(-1, auxW);
 
-	waitSon();
 	
 	int auxR = dup(-1, 0);
 
@@ -278,6 +283,8 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	closeSemaphore(fifoName);
 	
 	waitSon();
+	waitSon();
+
 }
 
 

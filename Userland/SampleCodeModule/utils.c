@@ -208,9 +208,6 @@ void printProcessesData(_ARGUMENTS){
 //--------------------------------------------------------------
 void loop(_ARGUMENTS){
     int id = getPid();
-    open(-1, "f", 0);
-    char buf[10];
-    read(-1, 3, buf, 10);
     while(1) {
         print_f(1,"%d----%s\n",id,argv[1]);
          
@@ -776,14 +773,18 @@ void cat_wrapper(_ARGUMENTS, int foreground) {
 void wc(_ARGUMENTS) {
   char c; 
   char buf[256];
+  int lineCount = 0, count;
 
-  read(-1, 0, buf, 256);
-  int lineCount = 0, count = 0;
+  int flag = 1;
+  while(flag){
+    flag = read(-1, 0, buf, 255);
+    count = 0;
 
-  while(buf[count]){
-    if(buf[count] == '\n')
-      lineCount++;
-    count++;
+    while(buf[count] && count < 256){
+      if(buf[count] == '\n')
+        lineCount++;
+      count++;
+    }
   }
 
   print_f(1, "La cantidad de lineas es: %d\n", lineCount);
@@ -794,18 +795,24 @@ void filter(_ARGUMENTS) {
   char buf[256];
   int i = 0, vowCount = 0;
   
-  read(-1, 0, buf, 256);
-
-  while(buf[i]){
-    buf[i-vowCount] = buf[i];
-    if(buf[i] == 'a' || buf[i] == 'e' || buf[i] == 'i' || buf[i] == 'o' || buf[i] == 'u')
-      vowCount++;
-    i++;
+  int flag = 1;
+  while(flag){
+    i = 0, vowCount = 0;
+    flag = read(-1, 0, buf, 256);
+    if(flag == -1)
+      return; 
+    while(buf[i] && i < 256){
+     buf[i-vowCount] = buf[i];
+     if(buf[i] == 'a' || buf[i] == 'e' || buf[i] == 'i' || buf[i] == 'o' || buf[i] == 'u' || buf[i] == 'A' || buf[i] == 'E' || buf[i] == 'I' || buf[i] == 'O' || buf[i] == 'U')
+        vowCount++;
+     i++;
+    }
+    buf[i-vowCount] = 0;
+    write(-1, 1, buf, strlen(buf));
   }
-  
-  buf[i-vowCount] = 0;
 
-  write(-1, 1, buf, strlen(buf));
+  
+
 
   exitUserland(); 
 }

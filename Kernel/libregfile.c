@@ -20,10 +20,10 @@ int openRegular(int pid, inode* openedInode, int inodeIndex, int mode){
 int writeRegular(inode* writtenInode, char* buf, int count){
 
     int i;
-    for(i=0; i<count; i++)
-        writtenInode->block[(writtenInode->indexes[1]+i)%REG_BLOCK_SIZE] = buf[i];
-
-    writtenInode->indexes[1] = writtenInode->indexes[1]+i;
+    for(i=0; i<count; i++){
+        writtenInode->block[writtenInode->indexes[1]] = buf[i];
+        writtenInode->indexes[1] = (writtenInode->indexes[1]+1) % REG_BLOCK_SIZE;
+    }
 
     return i;
 }
@@ -33,14 +33,13 @@ int readRegular(inode* readInode, char* buf, int count){
     int i;
     for(i=0; i<count; i++){
         if((readInode->indexes[0]+i)%REG_BLOCK_SIZE == readInode->indexes[1] || readInode->indexes[1] == -1){
-            readInode->indexes[0] = readInode->indexes[0]+i;
             return 0; //Llegue al EOF
         }
 
-        buf[i]=readInode->block[(readInode->indexes[0]+i)%REG_BLOCK_SIZE];
+        buf[i] = readInode->block[readInode->indexes[0]];
+        readInode->indexes[1] = (readInode->indexes[0]+1) % REG_BLOCK_SIZE;
     }
 
-    readInode->indexes[0] = readInode->indexes[0]+i;
 
     return i;
 }

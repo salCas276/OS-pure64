@@ -99,10 +99,15 @@ void api_write(_ARGUMENTS){
     }
     char buf[BUFFER_SIZE];
     //askAndRead(buf, "Ingrese a continuacion lo que desee escribir:");
-    read(pid, 0, buf, BUFFER_SIZE);
-    if(write(pid, strtoint(argv[pos], NULL, 10), buf, strlen(buf)) == -1){
-        print_f(1, "Hubo un problema con la escritura\n");
-        return;
+    int flag = 1;
+    while(flag){
+        flag = read(pid, 0, buf, BUFFER_SIZE-1);
+        if(flag)
+            buf[BUFFER_SIZE] = 0;
+        if(write(pid, strtoint(argv[pos], NULL, 10), buf, strlen(buf)) == -1){
+            print_f(1, "Hubo un problema con la escritura\n");
+            return;
+        }
     }
 }
 
@@ -116,13 +121,13 @@ void api_dup(_ARGUMENTS){
         pid = strtoint(&argv[1][3], NULL, 10);
         pos = 2;
     }
-    if(argc != 2)
-        return;
+
     int ret = dup(pid, strtoint(argv[pos], NULL, 10));
     if(ret == -1){
         print_f(1, "Hubo un error");
         return;
     }
+    print_f(1, "El nuevo fd es: %d\n", ret);
 }
 
 void api_dup2(_ARGUMENTS){
@@ -135,9 +140,7 @@ void api_dup2(_ARGUMENTS){
         pid = strtoint(&argv[1][3], NULL, 10);
         pos = 2;
     }
-    if(argc != 3)
-        return;
-    int ret = dup2(pid, strtoint(argv[pos], NULL, 10), strtoint(argv[2], NULL, 10));
+    int ret = dup2(pid, strtoint(argv[pos], NULL, 10), strtoint(argv[pos+1], NULL, 10));
     if(ret == -1){
         print_f(1, "Hubo un error");
         return;
