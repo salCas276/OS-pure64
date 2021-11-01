@@ -208,40 +208,19 @@ void printProcessesData(_ARGUMENTS){
 //--------------------------------------------------------------
 void loop(_ARGUMENTS){
     int id = getPid();
-    /*
-    waitSemaphore("pepe");
-    createFifo("f");
     open(-1, "f", 0);
     char buf[10];
     read(-1, 3, buf, 10);
     while(1) {
-    char buf[256];
-    createFifo("f");
-    int fd1 = open(-1, "f", 0);
-    unlink("f");
-    createFifo("r");
-    int fd2 = open(-1, "r", 1);
-    unlink("r");
-    read(-1, fd1, buf, 30);
-    write(-1, 1, buf, 30);
-    write(-1, fd2, buf, 30);
-    close(-1, fd1);
-    close(-1, fd2);
-    */
-        //print_f(1,"%d----%s\n",id,argv[1]);
+        print_f(1,"%d----%s\n",id,argv[1]);
          
-        //for(int i=0 ; i < 1000000;i++)
-        //renounceUserland();
-        //for(int i = 0; i < 1000000000; i++);
-        //print_f(1, "%d, %s\n", argc, argv[0]);
-        //renounceUserland();
-        exitUserland();
-    //}
+        for(int i=0 ; i < 1000000;i++)
+        renounceUserland();
+    }
 }
 
 void loop_wrapper(_ARGUMENTS,int foreground){
 
-    print_f(1, "Antes de CPU\n");
     createProcessUserland( (uint64_t) &loop,argc,argv,foreground);
 
     if(foreground){
@@ -643,17 +622,16 @@ void test_mm(_ARGUMENTS){
 
 void test_mm_wrapper(_ARGUMENTS,int foreground){
 
-char ** arguments = memalloc(sizeof(char*));
-arguments[0]=argv[0];
+  char ** arguments = memalloc(sizeof(char*));
+  arguments[0]=argv[0];
 
-if(  createProcessUserland((uint64_t)&test_mm,1,arguments,0) < 0 ){
-  print_f(1,"El sistema no tiene memoria");
-  return;
-}
+  if(createProcessUserland((uint64_t)&test_mm,1,arguments,0) < 0 ){
+    print_f(1,"El sistema no tiene memoria");
+    return;
+  }
 
-if(foreground)
-  waitSon();
- 
+  if(foreground)
+   waitSon();
 }
 
 
@@ -791,9 +769,11 @@ void cat(_ARGUMENTS) {
 void cat_wrapper(_ARGUMENTS, int foreground) {
     if(createProcessUserland( (uint64_t) &cat, argc, argv, foreground)  < 0)
       print_f(1,"El sistema no tiene memoria");
+    if(foreground)
+      waitSon();
 }
 
-void wc() {
+void wc(_ARGUMENTS) {
   char c; 
   char buf[BUFFER_SIZE];
   read(-1, 0, buf, BUFFER_SIZE);
@@ -804,10 +784,10 @@ void wc() {
     count++;
   }
   print_f(1, "La cantidad de lineas es: %d\n", lineCount);
-  exitUserland(); 
+  exitUserland();
 }
 
-void filter() {
+void filter(_ARGUMENTS) {
   char buf[256];
   int i = 0, vowCount = 0;
   
@@ -834,13 +814,13 @@ void wc_wrapper(_ARGUMENTS, int foreground) {
     
     if(foreground)
       waitSon();
-    print_f(1, "Unlock\n");
 }
 
 void filter_wrapper(_ARGUMENTS, int foreground) {
-
     if(createProcessUserland( (uint64_t) &filter, argc, argv, foreground)  < 0) // Cambiar aca la funcion a la que apunta 
       print_f(1,"El sistema no tiene memoria");
+    if(foreground)
+      waitSon();
 }
 
 static void askAndRead(char* buffer, char* text){

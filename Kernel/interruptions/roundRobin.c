@@ -6,12 +6,15 @@
 #define SIZE 20
 #define QHEADERS MAXBLOCKTYPES+1
 #define KEYBOARD_PASSWORD 1
+#define WAITING 2
 
 static int processTotal = 0;
 static processControlBlock * currentProcess = (processControlBlock *)(0); 
 static processControlBlock * next = (processControlBlock * ) 0;
-static processControlBlock * shell = (processControlBlock *)(0); 
 static processControlBlock * idle = (processControlBlock*)(0);
+
+static prompt_info shellPrompt ; 
+static prompt_info backgroundPrompt;
 
 static int passIndex = 30;
 
@@ -82,7 +85,6 @@ void addProcess(processControlBlock * process){
         headers[0] = process; 
         headers[0]->tail = (processControlBlock *)(0); 
         currentProcess = process; 
-        shell = process;
 
         uint64_t * basePointerIdle = malloc(256 * sizeof(uint64_t));
         processControlBlock * idleProcess = malloc(sizeof(processControlBlock));
@@ -98,6 +100,12 @@ void addProcess(processControlBlock * process){
 	processTotal++;
 
 }
+
+void setPrompt(prompt_info shellPromptP , prompt_info backgroundPromptP){
+    shellPrompt = shellPromptP;
+    backgroundPrompt = backgroundPromptP;
+}
+
 
 static void pushProcess( processControlBlock ** header, processControlBlock * process) {
     process->tail = (*header); 
@@ -159,7 +167,7 @@ int blockMyself(int password){
 
 int blockProcess(int pid, int password) {
 
-    if (pid == 0 && password != KEYBOARD_PASSWORD) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado 
+    if (pid == 0 && password != KEYBOARD_PASSWORD && password!=WAITING) return -1; // No puedes bloquear al primer proceso, solo puede bloquearlo el teclado o algun proceso hijo
 
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
 
@@ -288,7 +296,10 @@ uint64_t getCurrentRSP(){
 }
 
 prompt_info * getCurrentPrompt() {
-    return &shell->prompt; 
+    if( getCurrentTask()->parentPid >= 0 ) //foreground
+        return &shellPrompt;
+    else 
+        return &backgroundPrompt;
 }
 
 int getCurrentPid(){
@@ -325,7 +336,7 @@ int changeNicenessBy(uint64_t pid, uint64_t deltaNice) {
 int getBlockedPidsByPass(int password, int* pidsBuf){
     if(password < 0)
         return -1;
-    processControlBlock* next = headers[password];
+    processControlBlock* next = headers[password+1];
     int counter=0;
     while(next){
         pidsBuf[counter++] = next->pid;

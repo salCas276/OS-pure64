@@ -71,4 +71,6 @@ int getBlockedPidsByPass(int password, int* pidsBuf);
 
 int getAvailablePassword();
 
+void setPrompt(prompt_info shellPrompt , prompt_info backgroundPrompt);
+
 #endif

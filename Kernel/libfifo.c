@@ -90,6 +90,8 @@ int readFifo(inode* readInode, char* buf, int count){
         if((readInode->indexes[0]+i)%BLOCK_SIZE == readInode->indexes[1] || readInode->indexes[1] == -1){
             if(readInode->writeOpenCount == 0 && readInode->indexes[1] != -1){
                 readInode->indexes[0] = readInode->indexes[0]+i;
+                if((int) semPost(readInode->rSemId) == -1)
+                    return -1;
                 return 0; //Llegue al EOF
             }
             readInode->indexes[0] = readInode->indexes[0]+i;
@@ -119,6 +121,8 @@ int writeFifo(inode* writtenInode, char* buf, int count){
         if((writtenInode->indexes[1]+i+1)%BLOCK_SIZE == writtenInode->indexes[0] || buf[i] == '~'){
             if( (writtenInode->openCount == writtenInode->writeOpenCount && writtenInode->indexes[0] != -1) || buf[i] == '~'){
                 writtenInode->indexes[1] = writtenInode->indexes[1]+i;
+                if((int) semPost(writtenInode->wSemId) == -1)
+                    return -1;
                 return 0; //Llegue al EOF
             }
             writtenInode->indexes[1] = writtenInode->indexes[1]+i;

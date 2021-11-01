@@ -239,16 +239,21 @@ void api_printFifosData(_ARGUMENTS){
         print_f(1, "R Index: %d ----- W Index: %d\n", fifosBuf[i].indexes[0], fifosBuf[i].indexes[1]);
         print_f(1, "For Unlink: %s\n", fifosBuf[i].forUnlink ? "true" : "false");
         int j = 0;
+        print_f(1, "Bloqueados por lectura: ");
         while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "\n");
         j++;
-        print_f(1, "|");
+        print_f(1, "Bloqueados por escritura: ");
         while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "\n");
         j++;
-        print_f(1, "|");
+        print_f(1, "Bloqueados por sem de lectura: ");
         while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "\n");
         j++;
-        print_f(1, "|");
+        print_f(1, "Bloqueados por sem de escritura: ");
         while(fifosBuf[i].blockedPids[j] != -1) print_f(1, "%d-", fifosBuf[i].blockedPids[j++]);
+        print_f(1, "\n");
     }
     memfree(fifosBuf);
 }

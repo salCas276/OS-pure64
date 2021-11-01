@@ -7,7 +7,7 @@
 
 
 
-void firstProcess(uint64_t functionAddress, prompt_info prompt);
+void firstProcess(uint64_t functionAddress, prompt_info shellPrompt, prompt_info backgroundPrompt);
 
 int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground);
 

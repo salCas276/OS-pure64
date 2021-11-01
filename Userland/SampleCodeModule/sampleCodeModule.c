@@ -11,28 +11,19 @@
 #include <stdarg.h>
 #include "include/testSem.h"
 
-#define MODULES_SIZE 34
+#define MODULES_SIZE 28
+#define WRAPPER_MODULE_LEN 9
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);
 
 static char * commandStrings[MODULES_SIZE] = {
 	"help",
-	"inforeg",
-	"printmem",
-	"printDate",
-	// "divisionByZero",
-	// "invalidOpcode",
-	"printFeatures",
-	"printQuadraticRoots",
 	"echo",
-	"loop",
 	"ps", 
 	"nice", 
 	"kill",
-	"cat",
-	"wc", 
-	"filter", 
+	"sem",
 
 	"mkfifo",
 	"mkreg",
@@ -48,30 +39,23 @@ static char * commandStrings[MODULES_SIZE] = {
 	"printFdTable",
 	"pipe",
 
+	"loop",
 	"testProcess",
-	"sem",
 	"testSync",
 	"testNoSync",
 	"testMM",
 	"testPriority",
+	"cat",
+	"wc", 
+	"filter", 
 };
-static commandType commandFunctions[MODULES_SIZE] = {
+static commandType commandFunctions[MODULES_SIZE + WRAPPER_MODULE_LEN] = {
 	help,
-	inforeg,
-	printmem,
-	printDate,
-	// throwDivisionByZeroException,
-	// throwInvalidOpcodeException,
-	printFeatures,
-	printQuadraticRoots,
 	echo, 
-	loop_wrapper,
 	printProcessesData,
 	nicecmd, 
 	killcmd,
-	cat_wrapper, 
-	wc_wrapper, 
-	filter_wrapper, 
+	sem,
 
 	api_createFifo,
 	api_createReg,
@@ -87,19 +71,31 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	api_printFdTableByPid,
 	api_printFifosData,
 
+	loop_wrapper,
 	test_processes_wrapper,
-	sem,
 	test_sync_wrapper,
 	test_no_sync_wrapper,
 	test_mm_wrapper,
 	test_prio_wrapper,
+	cat_wrapper, 
+	wc_wrapper, 
+	filter_wrapper, 
 
+	loop,
+	test_processes,
+	NULL,
+	NULL,
+	test_mm,
+	test_prio,
+	cat,
+	wc,
+	filter
 };
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
 // static int parseArgv(char * buffer, char argv[MAX_ARGC][MAX_COMMAND]); 
 static int parseArgvPtr(char * buffer , char *argv[MAX_ARGC+1], int * isPiped);
-commandType checkModulePtr(char *argv[] );//, int argc,int foreground);
+commandType checkModulePtr(char *argv[], int isPiped);//, int argc,int foreground);
 
 
 int main() {
@@ -153,11 +149,11 @@ int main() {
 
 	while(1) {
 		print_f(2, "\n>> ");
+		
+		/*
 		char* aux[] = {"loop"};
 		loop_wrapper(1, aux, 0);
 		write(-1, 1, "\n", 1);
-		
-		/*
 		char* aux[] = {"loop"};
 		loop_wrapper(1, aux, 0);
 		char* aux2[] = {"pipe"};
@@ -187,7 +183,7 @@ int main() {
 		sem(1, aux2, 1);
 		*/
 		int64_t ans = read(-1, 0, buffer, -1);
-		if (ans != -1) {
+		if (ans != -1 && buffer[0]!=0) {
 			char ** argvLeft = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*)); 
 			char ** argvRight = (char**) memalloc( (MAX_ARGC+3) * sizeof(char*));	
 	
@@ -221,7 +217,7 @@ int main() {
 			if (isPiped){ 
 				piping(argvLeft, argcLeft, argvRight, argcRight);	
 			} else {
-				commandType cmd = checkModulePtr(argvLeft);
+				commandType cmd = checkModulePtr(argvLeft, 0);
 				if ( cmd != 0 ) cmd(argcLeft, argvLeft, foreground) ; 
 			} ;
 
@@ -237,12 +233,16 @@ void pipeWrapper(_ARGUMENTS, int foreground) {
 	int isWriting = argv[argc-1]; 
 	char * fifoName = argv[argc-2]; 
 	int oldFd = open(-1, fifoName, !!isWriting);
+	if(!isWriting)
+		waitSemaphore(fifoName);
 	dup2(-1, oldFd, !!isWriting);
 	close(-1, oldFd);
-	commandType cmd = checkModulePtr(argv);
+	commandType cmd = checkModulePtr(argv, 1);
 	cmd(argc-2, argv, foreground); 
 	close(-1, !!isWriting);
-	//unlink(fifoName);
+	unlink(fifoName);
+	if(isWriting)
+		postSemaphore(fifoName);
 	exitUserland();
 }
 
@@ -260,16 +260,25 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	argv2[argc2++] = fifoName; 
 	argv2[argc2++] = 0; 
 
-	createProcessUserland((uint64_t) &pipeWrapper, argc1, argv1, 0); 
+	openSemaphore(fifoName, 0);
+
+	createProcessUserland((uint64_t) &pipeWrapper, argc1, argv1, 1); 
 	
-	createProcessUserland((uint64_t) &pipeWrapper, argc2, argv2, 0);
+	createProcessUserland((uint64_t) &pipeWrapper, argc2, argv2, 1);
+
+	waitSon();
+	waitSon();
+
+	closeSemaphore(fifoName);
 }
 
 
-commandType checkModulePtr(char *argv[]) {
+commandType checkModulePtr(char *argv[], int isPiped) {
 	for (int i = 0; i < MODULES_SIZE; i++){
 		if (!strcmp(argv[0], commandStrings[i])){
-			return commandFunctions[i];
+			if(isPiped && i >= MODULES_SIZE - WRAPPER_MODULE_LEN)
+				return commandFunctions[i + WRAPPER_MODULE_LEN];
+			else return commandFunctions[i];
 		}
 	}; 
 	print_f(1, "Comando no valido\n");

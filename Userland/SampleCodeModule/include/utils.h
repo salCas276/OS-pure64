@@ -56,6 +56,15 @@ void cat_wrapper(_ARGUMENTS, int foreground);
 void filter_wrapper(_ARGUMENTS, int foreground); 
 void wc_wrapper(_ARGUMENTS, int foreground); 
 
+void loop(_ARGUMENTS);
+void test_processes(_ARGUMENTS);
+void test_sync(_ARGUMENTS);
+void test_mm(_ARGUMENTS);
+void test_prio(_ARGUMENTS);
+void cat(_ARGUMENTS);
+void wc(_ARGUMENTS);
+void filter(_ARGUMENTS);
+
 void api_createFifo(_ARGUMENTS);
 void api_createReg(_ARGUMENTS);
 void api_unlink(_ARGUMENTS);

@@ -2,7 +2,7 @@
 #include <string.h>
 #include "./interruptions/roundRobin.h"
 
-#define SEMAPHORE_PASSWORD 2
+#define SEMAPHORE_PASSWORD 3
 
 #define LENGTH 20
 
