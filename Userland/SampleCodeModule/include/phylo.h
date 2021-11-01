@@ -1,7 +1,6 @@
 #include <stdio.h>
  
-#define MAXPHYLO 15
-#define MINPHYLO 8
+#define MAXPHYLO 8
 
 void phylo(int argc, char * argv[],int foreground);
 void addPhylo(); 

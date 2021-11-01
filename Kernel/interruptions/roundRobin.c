@@ -1,4 +1,3 @@
-
 #include <roundRobin.h>
 #include "../include/naiveConsole.h"
 #include "../include/memoryManager.h"
@@ -25,7 +24,7 @@ void _hlt();
 uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENTS );
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
-static void pushProcess( processControlBlock ** header, processControlBlock * process);
+static processControlBlock * pushProcess( processControlBlock * header, processControlBlock * process);
 static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
 static void restartRoundRobin(processControlBlock * header);
 // Debugging
@@ -96,7 +95,7 @@ void addProcess(processControlBlock * process){
         return; 
     }
 
-    pushProcess(&headers[0], process);
+    headers[0] = pushProcess(headers[0], process);
 	processTotal++;
 
 }
@@ -107,9 +106,15 @@ void setPrompt(prompt_info shellPromptP , prompt_info backgroundPromptP){
 }
 
 
-static void pushProcess( processControlBlock ** header, processControlBlock * process) {
-    process->tail = (*header); 
-    (*header) = process; 
+static processControlBlock * pushProcess( processControlBlock * header, processControlBlock * process) {
+    
+    if (header == 0) {
+        process->tail = 0; 
+        return process; 
+    }
+
+    header->tail = pushProcess(header->tail, process); 
+    return header; 
 }
 
 
@@ -182,7 +187,7 @@ int blockProcess(int pid, int password) {
 
     if (p == 0) return -1; 
 
-    pushProcess( &headers[password+1], p); 
+    headers[password+1] = pushProcess( headers[password+1], p); 
 
     if(pid == getCurrentPid()){
         currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; //null
@@ -203,7 +208,7 @@ int unblockProcess(int pid, int password) {
 
     if (p == 0) return -1; 
     
-    pushProcess( &headers[0], p); 
+    headers[0] =  pushProcess( headers[0], p); 
 
     
         

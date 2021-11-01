@@ -2,10 +2,11 @@
 #include <testSem.h> 
 #include <lib.h>
 #include <processApi.h>
+#include <utils.h>
 
 
 static int initialized = 0; 
-int qPhylos = MINPHYLO; 
+int qPhylos = 0; 
 char * mutex = "MUTEXPHYLO";
 char * sems[MAXPHYLO]; 
 dateType * randomizer; 
@@ -90,54 +91,50 @@ void put_fork(int phnum)
 
 
 void think(int n) {
-    for (int i=0; i<1000000*n; i++); 
+    for (int i=0; i<100000*n; i++); 
 }
 
 static void lifeOfAPhylo(int argc, char * argv[], int foreground) {
     int i = argv[0][1]-'0';
     while (1) {
-        if ( i >= qPhylos ) kill(0, getPid()); 
         fillDate(randomizer); 
-        think( randomizer->second % ( i + 2) ); // They think more as their phmun auments
+        think( randomizer->second % ( i + 2) ); 
         take_fork(i);
         put_fork(i);
     }
+    print_f(1, "Phylo %d se levanto de la mesa!\n", i); 
+    exitUserland(); 
 }
 
 void addPhylo() {
-    
-    if ( qPhylos < MAXPHYLO ) {
-        phyloPids[qPhylos] = createProcessUserland((uint64_t) &lifeOfAPhylo, 1, &sems[qPhylos], 0);
-        qPhylos ++; 
-    }
-    
+    if ( qPhylos < MAXPHYLO ) kill(2, phyloPids[qPhylos++]);
 }
 
 void rmvPhylo() {
-    qPhylos -= ( MINPHYLO < qPhylos); 
+    if ( qPhylos > 0) kill(1, phyloPids[--qPhylos]); 
+        printProcessesData(1, 0);  
+
 }
 
 
-static char buffer[3]; 
+static char buffer[3] = {0}; 
+
 void phyloKeyboard( int argc, char * argv, int foreground) {
-    
     do {
         read(-1, 0, buffer, -1); 
         if ( buffer[0] == 'a') addPhylo(); 
         else if (  buffer[0] =='r') rmvPhylo(); 
-    } while( buffer[0] != '~');
-
-    // for (int i=0; i<qPhylos; i++)
-    //     kill(0, phyloPids[i]); 
-
-    for (int i=0; i<qPhylos; i++) 
-        kill(0, phyloPids[i]);  
+    } while( buffer[0] != '1');
     
+    for (int i=0; i<qPhylos; i++)
+        kill(0, phyloPids[i]);
+
     exitUserland(); 
 }
 
 void phyloPrinter(int argc, char * argv, int foreground) {
-    while( buffer[0] != '~') {
+    print_f(1, "El problema de los filosofos\n"); 
+    while( buffer[0] != '1') {
         for (int i=0; i<100000000; i++);
         for(int i=0; i<qPhylos; i++)
             print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
@@ -146,41 +143,41 @@ void phyloPrinter(int argc, char * argv, int foreground) {
     exitUserland(); 
 }
 
-void phyloSetup(int argc, char * argv, int foreground) {
-
-    buffer[0] = 0; 
-    // Initialization if needed
-    if ( !initialized ) {
-        // Initialize semaphores
-        openSemaphore("MUTEXPHYLO", 1);
-        for ( int i = 0; i < MAXPHYLO; i++) {
-            sems[i] = memalloc(3);
-            sems[i][0] = 'P'; 
-            sems[i][1] = '0'+i;  
-            sems[i][2] = 0; 
-            openSemaphore(sems[i], 0);
-            randomizer = memalloc(sizeof(dateType)); 
-        }
-        initialized = 1; 
-    }
-
-    // Creation of phylo
-    for (int i = 0; i < qPhylos; i++) {
-        phyloPids[i] = createProcessUserland((uint64_t) &lifeOfAPhylo, 1, &sems[i], 0);
-    }
-
-    exitUserland(); 
-}
 
 
 void phylo(int argc, char * argv[], int foreground) {
 
-    char * args[3] = { "PhyloSetup", "PhyloKeyboard", "PhyloPrinter"}; 
+    char * args[2] = { "PhyloKeyboard", "PhyloPrinter"}; 
+    print_f(1, "Ingrese a para agregar phylo, r para quitar, o 1 para salir\n"); 
+
+    buffer[0] = 0; 
     
-    createProcessUserland((uint64_t) &phyloSetup, 1, &args[0], 1);
-    waitSon();
-    createProcessUserland((uint64_t) &phyloPrinter, 1, &args[2], 0);
-    createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[1], 1);
+    // Initialization if needed
+    // Initialize semaphores
+    openSemaphore("MUTEXPHYLO", 1);
+    for ( int i = 0; i < MAXPHYLO; i++) {
+        sems[i] = memalloc(3);
+        sems[i][0] = 'P'; 
+        sems[i][1] = '0'+i;  
+        sems[i][2] = 0; 
+        openSemaphore(sems[i], 0);
+        randomizer = memalloc(sizeof(dateType)); 
+    }
+    
+    for (int i=0; i<MAXPHYLO; i++)
+        phyloPids[i] = -1; 
+
+
+    // Creation of phylos
+    for (int i = 0; i < MAXPHYLO; i++) {
+        phyloPids[i] = createProcessUserland((uint64_t) &lifeOfAPhylo, 1, &sems[i], 0); 
+        kill(1, phyloPids[i]); 
+    }
+
+    qPhylos = 0; 
+    
+    createProcessUserland((uint64_t) &phyloPrinter, 1, &args[1], 0);
+    createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[0], 1);
     waitSon(); 
 
 }

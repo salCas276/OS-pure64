@@ -9,6 +9,7 @@
 #include <stdio.h>
 //#include <stdlib.h>
 #include <stdarg.h>
+#include <phylo.h>
 #include "include/testSem.h"
 
 #define MODULES_SIZE 30
@@ -23,6 +24,7 @@ static char * commandStrings[MODULES_SIZE] = {
 	"nice", 
 	"kill",
 	"sem",
+	"phylo",
 
 	"mkfifo",
 	"mkreg",
@@ -56,6 +58,7 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	nicecmd, 
 	killcmd,
 	sem,
+	phylo, 
 
 	api_createFifo,
 	api_createReg,
