@@ -118,7 +118,7 @@ int print_f(uint8_t fd, const char * format, ...) {
         while(*traverse != '%') {
             if(*traverse == '\0') {
                 va_end(arg);
-                write(-1, fd, writtingBuff, BUFF_SIZE);
+                write(-1, fd, writtingBuff, strlen(writtingBuff));
                 return (traverse - format) / sizeof(traverse);
             }
             charcat(*traverse, writtingBuff);

@@ -61,6 +61,7 @@ int openFileFromInode(int pid, inode* inode, int inodeIndex, int mode){
             openedFileTable[j]->mode = mode;
             openedFileTable[j]->inode = inode;
             openedFileTable[j]->inodeIndex = inodeIndex;
+            openedFileTable[j]->countFd = 1;
 
             if(mode == 1 || mode == 2)
                 inode->writeOpenCount++;
@@ -106,14 +107,9 @@ int closeFile(int pid, int virtualFd){
 
     getProcessByPid(pid)->processFileDescriptors[virtualFd] = -1;
 
+    openedFileTable[fd]->countFd--;
 
-    int count = 0;
-    for(int i=0; i<MAX_PFD; i++){
-        if(getProcessByPid(pid)->processFileDescriptors[i] == fd)
-            count++;
-    }
-    
-    if(!count){
+    if(!openedFileTable[fd]->countFd){
 
         auxInode->openCount--;
 
@@ -220,6 +216,7 @@ int dupp(int pid, int oldVirtualFd){
     if(newVirtualFd == -1)
         return -1;
 
+    openedFileTable[targetProcess->processFileDescriptors[oldVirtualFd]]->countFd++;
     targetProcess->processFileDescriptors[newVirtualFd] = targetProcess->processFileDescriptors[oldVirtualFd];
     return newVirtualFd;
 }
@@ -235,6 +232,7 @@ int dupp2(int pid, int oldVirtualFd, int newVirtualFd){
 
     closeFile(pid, newVirtualFd);
 
+    openedFileTable[targetProcess->processFileDescriptors[oldVirtualFd]]->countFd++;
     targetProcess->processFileDescriptors[newVirtualFd] = targetProcess->processFileDescriptors[oldVirtualFd];
     return newVirtualFd;
 }
@@ -278,6 +276,13 @@ inode* getInode(char* name, int* inodeIndex){
     }
     *inodeIndex = -1;
     return (inode*) -1; 
+}
+
+int addFd(int realFd){
+    if(realFd < 0)
+        return -1;
+    openedFileTable[realFd]->countFd++;
+    return 0;
 }
 
 int getTypeInodes(inode** inodeBuf, int fileType){

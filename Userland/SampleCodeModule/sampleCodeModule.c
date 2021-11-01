@@ -12,7 +12,6 @@
 #include "include/testSem.h"
 
 #define MODULES_SIZE 28
-#define WRAPPER_MODULE_LEN 9
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);
@@ -49,7 +48,7 @@ static char * commandStrings[MODULES_SIZE] = {
 	"wc", 
 	"filter", 
 };
-static commandType commandFunctions[MODULES_SIZE + WRAPPER_MODULE_LEN] = {
+static commandType commandFunctions[MODULES_SIZE] = {
 	help,
 	echo, 
 	printProcessesData,
@@ -81,15 +80,6 @@ static commandType commandFunctions[MODULES_SIZE + WRAPPER_MODULE_LEN] = {
 	wc_wrapper, 
 	filter_wrapper, 
 
-	loop,
-	test_processes,
-	NULL,
-	NULL,
-	test_mm,
-	test_prio,
-	cat,
-	wc,
-	filter
 };
 
 // void checkModule(char argv[MAX_ARGC][MAX_COMMAND], int argc); 
@@ -232,15 +222,10 @@ int main() {
 void pipeWrapper(_ARGUMENTS, int foreground) {
 	int isWriting = argv[argc-1]; 
 	char * fifoName = argv[argc-2]; 
-	int oldFd = open(-1, fifoName, !!isWriting);
 	if(!isWriting)
 		waitSemaphore(fifoName);
-	dup2(-1, oldFd, !!isWriting);
-	close(-1, oldFd);
 	commandType cmd = checkModulePtr(argv, 1);
 	cmd(argc-2, argv, foreground); 
-	close(-1, !!isWriting);
-	unlink(fifoName);
 	if(isWriting)
 		postSemaphore(fifoName);
 	exitUserland();
@@ -253,7 +238,12 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	fifoName[0] = 'F';
 	fifoName[1] = id+'!'; 
 	fifoName[2] = 0; 
+
 	createFifo(fifoName); 
+
+	int oldFdR = open(-1, fifoName, 0);
+	int oldFdW = open(-1, fifoName, 1);
+
 	argv1[argc1++] = fifoName; 
 	argv1[argc1++] = 1; 
 
@@ -262,23 +252,38 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	openSemaphore(fifoName, 0);
 
-	createProcessUserland((uint64_t) &pipeWrapper, argc1, argv1, 1); 
+	int auxW = dup(-1, 1);
 	
-	createProcessUserland((uint64_t) &pipeWrapper, argc2, argv2, 1);
+	dup2(-1, oldFdW, 1);
+	close(-1, oldFdW);
 
-	waitSon();
-	waitSon();
+	createProcessUserland((uint64_t) &pipeWrapper, argc1, argv1, 1);
+
+	dup2(-1, auxW, 1);
+	close(-1, auxW);
+	
+	int auxR = dup(-1, 0);
+
+	dup2(-1, oldFdR, 0);
+	close(-1, oldFdR);
+
+	createProcessUserland((uint64_t) &pipeWrapper, argc2, argv2, 1); 
+
+	dup2(-1, auxR, 0);
+	close(-1, auxR);
+
 
 	closeSemaphore(fifoName);
+	
+	waitSon();
+	waitSon();
 }
 
 
 commandType checkModulePtr(char *argv[], int isPiped) {
 	for (int i = 0; i < MODULES_SIZE; i++){
 		if (!strcmp(argv[0], commandStrings[i])){
-			if(isPiped && i >= MODULES_SIZE - WRAPPER_MODULE_LEN)
-				return commandFunctions[i + WRAPPER_MODULE_LEN];
-			else return commandFunctions[i];
+			return commandFunctions[i];
 		}
 	}; 
 	print_f(1, "Comando no valido\n");

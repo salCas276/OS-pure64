@@ -36,6 +36,7 @@ typedef struct openedFile{
     int mode;
     inode* inode;
     int inodeIndex; 
+    int countFd;
 }openedFile;
 
 int createFile(char* name, int fileType);
@@ -61,5 +62,7 @@ inode* getInode(char* name, int* inodeIndex);
 int getTypeInodes(inode* inodeBuf[], int fileType);
 
 int getPidsBlocked(inode* targetInode, int* pidsBuf);
+
+int addFd(int realFd);
 
 #endif

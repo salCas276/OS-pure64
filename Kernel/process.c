@@ -94,12 +94,17 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     task->priority = WORSTPRIORITY; 
     task->currentPushes = 0;
     task->tail = (processControlBlock *) 0; 
-    for(int i=0; i<MAX_PFD; i++)
-        task->processFileDescriptors[i] = -1;
+
+    for(int i=0; i<MAX_PFD; i++){
+        task->processFileDescriptors[i] = task->parentPid >= 0 ? getProcessByPid(task->parentPid)->processFileDescriptors[i] : -1;
+        addFd(task->processFileDescriptors[i]);
+    }
     
-    openFile(task->pid, "keyboard", 0);
-    openFile(task->pid, "console", 1);
-    openFile(task->pid, "console", 1);
+    if(task->parentPid < 0){
+        openFile(task->pid, "keyboard", 0);
+        openFile(task->pid, "console", 1);
+        openFile(task->pid, "console", 1);
+    }
 
     addProcess(task); 
     return task->pid;  
@@ -141,8 +146,6 @@ int deleteProcess(int pid){
     for(int i = 0; i < MAX_PFD; i++)
         closeFile(pid, i);
 
-
-
     if(allProcesses[pid]->parentPid >= 0 ){
         processControlBlock * parent = allProcesses[allProcesses[pid]->parentPid] ;        
         parent->quantityWaiting -- ; 
@@ -150,12 +153,10 @@ int deleteProcess(int pid){
             unblockProcess(parent->pid,WAITING);
     }
   
-    
     allProcesses[pid]=(void*)0;
     freePidsCounter++;
 
     return killProcess(pid);
-
 }
 
 processControlBlock* getProcessByPid(int pid){
