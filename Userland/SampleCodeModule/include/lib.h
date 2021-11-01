@@ -18,6 +18,12 @@ typedef struct dateType {
 	uint8_t hour, minute, second;
 } dateType;
 
+typedef struct memstateType {
+    unsigned totalMemory; 
+    unsigned occupied; 
+    unsigned free; 
+} memstateType; 
+
 // C
 int print_f(uint8_t fd, const char * format, ...);
 int testPrint_f(uint8_t fd, const char * format, ...);
@@ -36,6 +42,7 @@ int64_t fillMem(uint64_t src, uint8_t * dst, uint8_t size);
 int _quadratic(double * a, double * b, double * c, double * root1, double * root2);
 void * memalloc(uint64_t size); 
 void memfree(void * pv); 
+void getMemState(memstateType * state); 
 int getProcessesData(processDescriptor * despriptorArray);
 int getpid();
 

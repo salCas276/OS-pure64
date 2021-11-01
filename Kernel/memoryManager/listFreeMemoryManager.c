@@ -158,3 +158,10 @@ static void prvHeapInit(void)
 	pxFirstFreeBlock->xBlockSize = configADJUSTED_HEAP_SIZE;
 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
+
+
+void getMemState(memstateType * state) {
+  state->totalMemory = 0x100000; 
+  state->free = 69; 
+  state->occupied = 420; 
+}

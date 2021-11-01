@@ -7,6 +7,7 @@ GLOBAL fillMem
 GLOBAL _quadratic
 GLOBAL memalloc
 GLOBAL memfree
+GLOBAL getMemState
 GLOBAL createProcessAsm
 GLOBAL getProcessesData
 GLOBAL getPidAsm
@@ -368,6 +369,11 @@ getFdTableByPid:
 
 getFifosData:
     mov rax, 30
+    int 80h
+    ret
+
+getMemState: 
+    mov rax, 70
     int 80h
     ret
 

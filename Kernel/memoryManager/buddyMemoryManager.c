@@ -133,8 +133,14 @@ void coalescing(header * node){
   if( ( (node->index-1) / 2 ) >= 0)
     coalescing(&headers[((node->index-1)/2)]); //intento liberar a mi nodo padre
 
-
 }
+
+void getMemState(memstateType * state) {
+  state->totalMemory = 0x100000; 
+  state->free = 69; 
+  state->occupied = 420; 
+}
+
 
 
 
