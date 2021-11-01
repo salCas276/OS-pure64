@@ -40,6 +40,7 @@ int readKeyboard(inode* readInode, char* buf, int count){
 
     int32_t counter = 0;
     int64_t c;
+    count = count < 0 ? count : count-1;
     //Si le paso count=-1 va a leer hasta el \n
     while((c = getChar()) != '~' && (count != -1 || c != '\n')){
         if(counter < count || count == -1){
@@ -54,14 +55,20 @@ int readKeyboard(inode* readInode, char* buf, int count){
         else{
             if(c == '\b')
                 counter--;
-            else
-                counter++;
+            else{
+                buf[counter++] = c;
+                ncPrintCharAtt(c, &WHITE, &BLACK);
+                break;
+            }
         }
         ncPrintCharAtt(c, &WHITE, &BLACK);
     }
 
     if(c == '~'){
         ncPrintCharAtt('\n', &WHITE, &BLACK);
+        if((int) semPost(readInode->rSemId) == -1)
+            return -1;
+        return 0;
     }
     else ncPrintCharAtt(c, &WHITE, &BLACK);
 

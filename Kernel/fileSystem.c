@@ -80,7 +80,7 @@ int openFile(int pid, char* name, int mode){
     int inodeIndex;
 	inode* openedInode = getInode((char*) name, &inodeIndex);
 
-	if(openedInode == (inode*)inodeIndex)
+	if(inodeIndex == -1)
         return -1;
 
 	switch(openedInode->fileType){
