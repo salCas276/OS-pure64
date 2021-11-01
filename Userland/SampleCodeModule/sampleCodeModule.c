@@ -222,12 +222,11 @@ int main() {
 void pipeWrapper(_ARGUMENTS, int foreground) {
 	int isWriting = argv[argc-1]; 
 	char * fifoName = argv[argc-2]; 
-	//if(!isWriting)
-	//	waitSemaphore(fifoName);
 	commandType cmd = checkModulePtr(argv, 1);
-	cmd(argc-2, argv, foreground); 
-	//if(isWriting)
-	//	postSemaphore(fifoName);
+	
+	if(cmd)
+		cmd(argc-2, argv, foreground); 
+
 	exitUserland();
 }
 
@@ -238,6 +237,18 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	fifoName[0] = 'F';
 	fifoName[1] = id+'!'; 
 	fifoName[2] = 0; 
+
+	argv1[argc1++] = fifoName; 
+	argv1[argc1++] = 1; 
+
+	argv2[argc2++] = fifoName; 
+	argv2[argc2++] = 0; 
+
+	if(!checkModulePtr(argv1, 1) || !checkModulePtr(argv2, 1)){
+		memfree(fifoName);
+		return;
+	}
+
 
 	createFifo(fifoName); 
 
@@ -250,11 +261,6 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 
 	unlink(fifoName);
 
-	argv1[argc1++] = fifoName; 
-	argv1[argc1++] = 1; 
-
-	argv2[argc2++] = fifoName; 
-	argv2[argc2++] = 0; 
 
 	openSemaphore(fifoName, 0);
 
@@ -284,6 +290,8 @@ void piping(char * argv1[], int argc1, char * argv2[], int argc2) {
 	
 	waitSon();
 	waitSon();
+
+	memfree(fifoName);
 
 }
 
