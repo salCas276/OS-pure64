@@ -11,6 +11,6 @@ char * strcpy(char *strDest, const char *strSrc);
 
 int strcpy2(const char* src, char* dest);
 
-int strcat(const char* src, char* dest);
+void strcat(const char* src, char* dest);
 
 #endif

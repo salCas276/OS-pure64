@@ -1,9 +1,11 @@
 #include "include/utils.h"
 #include "include/lib.h"
+#include "include/string.h"
 
-static void askAndRead(char* buffer, char* text);
 
-void api_createReg(_ARGUMENTS){
+// static void askAndRead(char* buffer, char* text);
+
+void api_createReg(_ARGUMENTS,int foreground){
     if(argc != 2){
         print_f(1, "Los parametros no son validos\n");
         return;
@@ -14,7 +16,7 @@ void api_createReg(_ARGUMENTS){
     }
 }
 
-void api_createFifo(_ARGUMENTS){
+void api_createFifo(_ARGUMENTS,int foreground){
     if(argc != 2){
         print_f(1, "Los parametros no son validos\n");
         return;
@@ -25,7 +27,7 @@ void api_createFifo(_ARGUMENTS){
     }
 }
 
-void api_unlink(_ARGUMENTS){
+void api_unlink(_ARGUMENTS,int foreground){
     if(argc != 2)
         return;
     if(unlink(argv[1]) == -1){
@@ -35,7 +37,7 @@ void api_unlink(_ARGUMENTS){
     print_f(1, "Este sera desvinculado cuando todas sus aperturas se hayan cerrado\n");
 }
 
-void api_open(_ARGUMENTS){
+void api_open(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 3){
         if ( argc != 4 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -53,7 +55,7 @@ void api_open(_ARGUMENTS){
     print_f(1, "El fd correspondiente es: %d", fd);
 }
 
-void api_close(_ARGUMENTS){
+void api_close(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 2){
         if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -69,7 +71,7 @@ void api_close(_ARGUMENTS){
     }
 }
 
-void api_read(_ARGUMENTS){
+void api_read(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 3){
         if ( argc != 4 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -87,7 +89,7 @@ void api_read(_ARGUMENTS){
     write(-1, 1, buf, BUFFER_SIZE);
 }
 
-void api_write(_ARGUMENTS){
+void api_write(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 2){
         if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -111,7 +113,7 @@ void api_write(_ARGUMENTS){
     }
 }
 
-void api_dup(_ARGUMENTS){
+void api_dup(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 2){
         if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -130,7 +132,7 @@ void api_dup(_ARGUMENTS){
     print_f(1, "El nuevo fd es: %d\n", ret);
 }
 
-void api_dup2(_ARGUMENTS){
+void api_dup2(_ARGUMENTS,int foreground){
     int pid = -1, pos = 1;
     if ( argc != 3){
         if ( argc != 4 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -147,7 +149,7 @@ void api_dup2(_ARGUMENTS){
     }
 }
 
-void api_printFileContent(_ARGUMENTS){
+void api_printFileContent(_ARGUMENTS,int foreground){
     if(argc != 2)
         return;
 
@@ -162,7 +164,7 @@ void api_printFileContent(_ARGUMENTS){
     memfree(buf);
 }
 
-void api_printFileInfo(_ARGUMENTS){
+void api_printFileInfo(_ARGUMENTS,int foreground){
     if(argc != 2)
         return;
     fileInfo* buf = memalloc(sizeof(fileInfo));
@@ -200,7 +202,7 @@ void api_printFileInfo(_ARGUMENTS){
     memfree(buf);
 }
 
-void api_printFdTableByPid(_ARGUMENTS){
+void api_printFdTableByPid(_ARGUMENTS,int foreground){
     int pid = -1;
     if ( argc != 1){
         if ( argc != 2 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '='){
@@ -221,7 +223,7 @@ void api_printFdTableByPid(_ARGUMENTS){
     }
 }
 
-void api_printFifosData(_ARGUMENTS){
+void api_printFifosData(_ARGUMENTS,int foreground){
    fifoData* fifosBuf = memalloc(sizeof(fifoData)*MAX_PRINTING_FILES);
    if(fifosBuf <= 0){
        print_f(1, "Hubo un error al reservar memoria\n");
@@ -261,9 +263,9 @@ void api_printFifosData(_ARGUMENTS){
     memfree(fifosBuf);
 }
 
-static void askAndRead(char* buffer, char* text){
-    print_f(1, "%s\n", text);
-    read(-1, 0, buffer, BUFFER_SIZE);
-}
+// static void askAndRead(char* buffer, char* text){
+//     print_f(1, "%s\n", text);
+//     read(-1, 0, buffer, BUFFER_SIZE);
+// }
 
 

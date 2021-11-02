@@ -1,7 +1,7 @@
 include Makefile.inc
 
 
-MEMMANAGER=buddy # buddy o listfree 
+MEMMANAGER=listfree # buddy o listfree 
 KERNEL=kernel.bin
 SOURCES=$(wildcard *.c)
 SOURCES_INTERRUPTIONS=$(wildcard interruptions/*.c)

@@ -12,7 +12,7 @@
 #define ISHEXA(x) (((x) >= 'a' && (x) <= 'f') || ((x) >= 'A' && (x) <= 'F') || ISDIGIT(x))
 
 void * memset(void*destiation,int32_t c, uint64_t length);
-static void askAndRead(char* buffer, char* text);
+// static void askAndRead(char* buffer, char* text);
 
 void printDate(_ARGUMENTS) {
 	dateType currDate;
@@ -25,7 +25,7 @@ void printDate(_ARGUMENTS) {
                                                          currDate.second);
 }
 
-void help(_ARGUMENTS) {
+void help(_ARGUMENTS,int foreground) {
     print_f(1, "Los comandos disponibles son:\n");
     print_f(1, " - help: Muestra los comandos disponibles\n");
     print_f(1, " - inforeg: Muestra el estado de los registros\n");
@@ -142,7 +142,7 @@ void printQuadraticRoots(_ARGUMENTS){
     };
 }
 
-void echo(_ARGUMENTS) {
+void echo(_ARGUMENTS,int foreground) {
     if (argc > 2 && argv[1][0] == '-') {
         if ( argv[1][1] == 'm' ) {
             for (int i=0; argv[2][i]; i++)
@@ -155,7 +155,7 @@ void echo(_ARGUMENTS) {
 
 
 
-void nicecmd(_ARGUMENTS) {
+void nicecmd(_ARGUMENTS,int foreground) {
     if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'p' || argv[1][2] != '=' ||  argv[2][0] != '-' || argv[2][1] != 'b' || argv[2][2] != '=') return; 
     int pid = strtoint( &argv[1][3], NULL, 10); 
     if ( pid < 0 ) return; 
@@ -165,7 +165,7 @@ void nicecmd(_ARGUMENTS) {
 }
 
 
-void killcmd(_ARGUMENTS) {
+void killcmd(_ARGUMENTS,int foreground) {
     if ( argc != 3 || argv[1][0] != '-' || argv[1][1] != 'k' || argv[1][2] != '=') {
         print_f(2, "Cantidad de parametros invalida\n");
         return; 
@@ -189,8 +189,21 @@ void killcmd(_ARGUMENTS) {
 }
 
 
+void memStatus(_ARGUMENTS,int foreground){
+  memstateType * mem = memalloc(sizeof(memstateType));
+  if(!mem){
+    print_f(1,"El sistema no tiene memoria disponible");
+    return ;
+  }
 
-void printProcessesData(_ARGUMENTS){
+
+
+
+}
+
+
+
+void printProcessesData(_ARGUMENTS,int foreground){
     processDescriptor * descriptorArray = memalloc(MAX_PROCS*sizeof(processDescriptor));
     
     if(!descriptorArray){
@@ -199,9 +212,9 @@ void printProcessesData(_ARGUMENTS){
     }
 
     int count = getProcessesData(descriptorArray);
-    print_f(1, "NAME     PID     PRIORITY     FOREGROUND\n");
+    print_f(1, "NAME PID PRIORITY FOREGROUND STACKPOINTER BASEPOINTER\n");
     for(int i = 0; i < count; i++){
-        print_f(1, "%s     %d     %d     %d\n", (descriptorArray+i)->name, (descriptorArray+i)->pid,(descriptorArray+i)->priority,(descriptorArray+i)->foreground);
+        print_f(1, "%s   %d   %d   %d   %d   %d\n", (descriptorArray+i)->name, (descriptorArray+i)->pid,(descriptorArray+i)->priority,(descriptorArray+i)->foreground,(descriptorArray+i)->stackPointer,(descriptorArray+i)->basePointer);
     }
     memfree(descriptorArray);
 }
@@ -366,8 +379,6 @@ if(pid < 0){
   print_f(1,"Error al crear el proceso");
   return;
 }
-
-nice(pid , -5);
 
 if(foreground)
   waitSon(); 
@@ -571,7 +582,7 @@ void test_no_sync_wrapper(_ARGUMENTS , int foreground ){
 
 
 
-#define MAX_BLOCKS 128
+#define MAX_BLOCKS 120
 #define MAX_MEMORY 838861
 
 typedef struct MM_rq{
@@ -759,7 +770,7 @@ void test_prio_wrapper(_ARGUMENTS,int foreground){
 
 void cat(_ARGUMENTS) {  
   char* aux[] = {argv[0], "1"};
-  api_write(argc+1, aux);
+  api_write(argc+1, aux,0);
   exitUserland(); 
 }
 
@@ -771,7 +782,7 @@ void cat_wrapper(_ARGUMENTS, int foreground) {
 }
 
 void wc(_ARGUMENTS) {
-  char c; 
+  // char c; 
   char buf[256];
   int lineCount = 0, count;
 
@@ -833,15 +844,20 @@ void filter_wrapper(_ARGUMENTS, int foreground) {
       waitSon();
 }
 
-static void askAndRead(char* buffer, char* text){
-    print_f(1, "%s\n", text);
-    read(-1, 0, buffer, BUFFER_SIZE);
-}
+// static void askAndRead(char* buffer, char* text){
+//     print_f(1, "%s\n", text);
+//     read(-1, 0, buffer, BUFFER_SIZE);
+// }
 
 void printMemState(_ARGUMENTS, int foreground) {
 
 
     memstateType * state = memalloc(sizeof(memstateType)); 
+    if(!state){
+      print_f(1,"El sistema no tiene memoria disponible");
+      return;
+    }
+
     getMemState(state); 
     print_f(1, "MEMSTATE\nTotal memory: %d\nFree memory: %d\nOccupied memory: %d\n", state->totalMemory, state->free, state->occupied); 
     memfree(state); 

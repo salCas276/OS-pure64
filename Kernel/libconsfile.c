@@ -2,6 +2,9 @@
 #include "include/fileSystem.h"
 #include "include/naiveConsole.h"
 #include "include/semaphore.h"
+#include <string.h>
+
+
 
 int createConsole(inode* createdInode){
     createdInode->block = 0;

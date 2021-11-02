@@ -19,6 +19,9 @@ typedef struct A_BLOCK_LINK
 #define configTOTAL_HEAP_SIZE 1048576
 typedef unsigned long portPOINTERSIZETYPE;
 
+
+static int deliveredMemory = 0 ; 
+
 static void prvHeapInit(void);
 
 static const unsigned long heapSTRUCT_SIZE = ((sizeof(BlockLink_t) + (portBYTE_ALIGNMENT - 1)) & ~portBYTE_ALIGNMENT_MASK);
@@ -113,6 +116,9 @@ void *malloc(size_t xWantedSize)
 		}
 	}
 
+	if(pvReturn){
+		deliveredMemory+=xWantedSize;
+	}
 	return pvReturn;
 }
 
@@ -130,11 +136,11 @@ void free(void *ptr)
 		/* This unexpected casting is to keep some compilers from issuing
 		byte alignment warnings. */
 		NewFreeBlock = (BlockLink_t *)BlockStartPtr;
+		deliveredMemory-=NewFreeBlock->xBlockSize;
 
-		{
-			/* Add this block to the list of free blocks. */
-			prvInsertBlockIntoFreeList((NewFreeBlock));
-		}
+		/* Add this block to the list of free blocks. */
+		prvInsertBlockIntoFreeList((NewFreeBlock));
+		
 	}
 }
 
@@ -159,9 +165,8 @@ static void prvHeapInit(void)
 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 
-
 void getMemState(memstateType * state) {
-  state->totalMemory = 0x100000; 
-  state->free = 69; 
-  state->occupied = 420; 
+  state->totalMemory = configTOTAL_HEAP_SIZE; 
+  state->free = configTOTAL_HEAP_SIZE - deliveredMemory; 
+  state->occupied = deliveredMemory; 
 }

@@ -210,7 +210,6 @@ int unblockProcess(int pid, int password) {
     return 0; 
 }
 
-//salteño
 static void restartRoundRobin(processControlBlock * header){
     processControlBlock * current = header;
     while(current != (void*) 0){

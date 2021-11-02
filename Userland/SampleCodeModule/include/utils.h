@@ -8,16 +8,18 @@
 #define MAX_PRINTING_FILES 40
 #define BUFFER_SIZE 128
 #define _ARGUMENTS int argc , char * argv[]
-#define NULL 0
+// #define NULL 0
 #include <stdint.h>
 //#include <test_util.h>
 
 
 typedef struct processDescriptor{
-    char * name;
+    char * name ;
     uint8_t pid;
     uint8_t priority;
     uint8_t foreground;
+    int stackPointer;
+    int basePointer;
 } processDescriptor;
 
 typedef struct semaphoreDescriptor{
@@ -41,16 +43,19 @@ typedef struct fileInfo{
     int forUnlink; //Flag que me indica si se le hizo un unlink
 } fileInfo;
 
+
+
+
 void printDate(_ARGUMENTS);
-void help(_ARGUMENTS);
+void help(_ARGUMENTS,int foreground);
 void printmem(_ARGUMENTS);
 void printFeatures(_ARGUMENTS);
 void printQuadraticRoots(_ARGUMENTS);
-void echo(_ARGUMENTS); 
-void printProcessesData(_ARGUMENTS);
+void echo(_ARGUMENTS,int foreground); 
+void printProcessesData(_ARGUMENTS,int foreground);
 void loop_wrapper(_ARGUMENTS,int foreground);
-void nicecmd(_ARGUMENTS); 
-void killcmd(_ARGUMENTS); 
+void nicecmd(_ARGUMENTS,int foreground); 
+void killcmd(_ARGUMENTS,int foreground); 
 void test_processes_wrapper(_ARGUMENTS,int foreground);
 void cat_wrapper(_ARGUMENTS, int foreground); 
 void filter_wrapper(_ARGUMENTS, int foreground); 
@@ -67,19 +72,19 @@ void cat(_ARGUMENTS);
 void wc(_ARGUMENTS);
 void filter(_ARGUMENTS);
 
-void api_createFifo(_ARGUMENTS);
-void api_createReg(_ARGUMENTS);
-void api_unlink(_ARGUMENTS);
-void api_open(_ARGUMENTS);
-void api_close(_ARGUMENTS);
-void api_read(_ARGUMENTS);
-void api_write(_ARGUMENTS);
-void api_dup(_ARGUMENTS);
-void api_dup2(_ARGUMENTS);
-void api_printFileContent(_ARGUMENTS);
-void api_printFileInfo(_ARGUMENTS);
-void api_printFdTableByPid(_ARGUMENTS);
-void api_printFifosData(_ARGUMENTS);
+void api_createFifo(_ARGUMENTS,int foreground);
+void api_createReg(_ARGUMENTS,int foreground);
+void api_unlink(_ARGUMENTS,int foreground);
+void api_open(_ARGUMENTS,int foreground);
+void api_close(_ARGUMENTS,int foreground);
+void api_read(_ARGUMENTS,int foreground);
+void api_write(_ARGUMENTS,int foreground);
+void api_dup(_ARGUMENTS,int foreground);
+void api_dup2(_ARGUMENTS,int foreground);
+void api_printFileContent(_ARGUMENTS,int foreground);
+void api_printFileInfo(_ARGUMENTS,int foreground);
+void api_printFdTableByPid(_ARGUMENTS,int foreground);
+void api_printFifosData(_ARGUMENTS,int foreground);
 
 
 void sem(_ARGUMENTS,int foreground);

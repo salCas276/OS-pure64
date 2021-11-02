@@ -121,7 +121,9 @@ int getProcessesData(uint64_t descriptorArray){
             (descriptorArrayAux+j)->name=allProcesses[i]->name;
             (descriptorArrayAux+j)->pid=allProcesses[i]->pid;
             (descriptorArrayAux+j)->priority=allProcesses[i]->priority;
-            (descriptorArrayAux+j)->foreground=( allProcesses[i]->parentPid > 0 );
+            (descriptorArrayAux+j)->stackPointer=allProcesses[i]->taskRSP;
+            (descriptorArrayAux+j)->basePointer=allProcesses[i]->baseRSP;
+            (descriptorArrayAux+j)->foreground=( !allProcesses[i]->pid || allProcesses[i]->parentPid > 0 );
             j++;
         }
     }
@@ -161,7 +163,7 @@ int deleteProcess(int pid){
 
 processControlBlock* getProcessByPid(int pid){
     if(pid < -1)
-        return -1;
+        return (processControlBlock*)0;
     if(pid == -1)
         return getCurrentTask();
     return allProcesses[pid];

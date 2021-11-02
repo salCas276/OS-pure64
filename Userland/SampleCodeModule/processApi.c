@@ -6,7 +6,7 @@ uint64_t killAsm(uint64_t signal, uint64_t pid);
 uint64_t renounceAsm(void); 
 void exitAsm();
 void waitAsm();
-
+uint64_t getPidAsm();
 
 int createProcessUserland(uint64_t function,_ARGUMENTS,int foreground){
     return createProcessAsm(function,argc,argv,foreground); 

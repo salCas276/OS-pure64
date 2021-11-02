@@ -20,6 +20,7 @@ header  * headers = (header*) 0xC00000;
 char ** pointersDelivered= (char**) 0xF00000; 
 
 int initialize=0;
+int deliveredMemory = 0 ; 
 
 
 static void markSubTree(header *  node , int value );
@@ -37,6 +38,7 @@ void * malloc(size_t size){
 
   return findNode(&headers[0],size);
 
+
 }
 
 
@@ -51,6 +53,8 @@ void free(void * ptr){
     }
   }
   if(i == DIM) return ; 
+
+  deliveredMemory -= headers[i].bytes;
 
   
   markSubTree(&headers[i],1);
@@ -90,6 +94,7 @@ void * findNode(header * node , int size){
   //tengo que retornar este bloque 
     
   if( node->free && (node->bytes==LEAF_BLOCK || size > (node->bytes/2) ) ){
+    deliveredMemory+=node->bytes;
     markSubTree(node,0);
     pointersDelivered[node->index]=(char*)node->ptr;
     return node->ptr;
@@ -136,9 +141,9 @@ void coalescing(header * node){
 }
 
 void getMemState(memstateType * state) {
-  state->totalMemory = 0x100000; 
-  state->free = 69; 
-  state->occupied = 420; 
+  state->totalMemory = SIZE; 
+  state->free = SIZE - deliveredMemory; 
+  state->occupied = deliveredMemory; 
 }
 
 

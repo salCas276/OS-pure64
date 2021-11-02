@@ -25,7 +25,7 @@ char * strcpy(char *strDest, const char *strSrc)
     return (char*) 0 ;   
 
     char *temp = strDest;
-    while(*strDest++ = *strSrc++); // or while((*strDest++=*strSrc++) != '\0');
+    while( (*strDest++ = *strSrc++) ); 
     return temp;
 }
 
@@ -39,9 +39,11 @@ int strcpy2(const char* src, char* dest){
   return i;
 }
 
-int strcat(const char* src, char* dest){
+void strcat(const char* src, char* dest){
   int i = 0, j = 0;
-  while(*(dest+i)) i++;
-  while(*(src+j)) dest[i++] = src[j++];
+  while( (dest[i]) ) 
+    i++;
+  while( src[j] ) 
+    dest[i++] = src[j++];
   dest[i] = 0;
 }

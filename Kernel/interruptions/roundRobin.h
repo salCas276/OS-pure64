@@ -16,8 +16,8 @@ typedef struct processControlBlock {
     int parentPid;
     int quantityWaiting;
     uint64_t taskRSP;
-    uint64_t functionAddress; //no deberia ser necesario
-    uint64_t baseRSP; //no deberia ser necesario 
+    uint64_t functionAddress;
+    uint64_t baseRSP; 
     char priority; // between 0 and WORSTPRIORITY. 0 = HIGHPRIORITY 
     char currentPushes; 
     prompt_info prompt;
@@ -31,6 +31,8 @@ typedef struct processDescriptor{
     uint8_t pid;
     uint8_t priority;
     uint8_t foreground;
+    int stackPointer;
+    int basePointer;
 } processDescriptor;
 
 void addProcess(processControlBlock * process);

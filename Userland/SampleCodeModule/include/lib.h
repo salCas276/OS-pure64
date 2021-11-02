@@ -28,7 +28,7 @@ typedef struct memstateType {
 int print_f(uint8_t fd, const char * format, ...);
 int testPrint_f(uint8_t fd, const char * format, ...);
 void put_char(uint8_t fd, const char character);
-void put_s(uint8_t fd, const char * s);
+void put_s(uint8_t fd,  char * s);
 int sscan(char * buff, char * fmt, ...) ;
 int64_t strtoint(const char *nptr, char **endptr, register int base);
 double strtodouble(char * start, char ** end);

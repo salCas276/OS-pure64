@@ -177,7 +177,7 @@ void put_char(uint8_t fd,  char character) {
     write(-1, fd, &character, 1);
 }
 
-void put_s(uint8_t fd, const char * s) {
+void put_s(uint8_t fd,  char * s) {
     write(-1, fd, s, strlen(s));
 }
 
@@ -186,7 +186,7 @@ void put_s(uint8_t fd, const char * s) {
 int64_t get_s(char * buffer, uint64_t maxLength) {
     int32_t counter = 0;
     int64_t c[2];
-    while ((*c = read(-1, 0, c, 1)) != '\n') {
+    while ((*c = read(-1, 0, (char*)c, 1)) != '\n') {
         if (counter < maxLength) {
             if (*c == '\b') { // Backspace
                 if (counter == 0)

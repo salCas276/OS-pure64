@@ -21,7 +21,7 @@ typedef struct dateType {
 
 uint64_t sys_writeFifo(uint64_t fd, uint64_t buf, uint64_t count);
 uint64_t sys_readFifo(uint64_t fd, uint64_t buf, uint64_t count);
-uint64_t sys_write(int pid, uint8_t fd, char * buffer, uint64_t count);
+uint64_t sys_write(int pid, int fd, char * buffer, uint64_t count);
 int64_t sys_read(int pid, uint8_t fd, char * buffer, uint64_t count);
 uint64_t sys_date(dateType * pDate);
 uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx);
@@ -47,11 +47,11 @@ void sysExit();
 void sysWait();
 void printSemaphore();
 
-// TODO: Usar un arreglo y no switch case
+
 int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, int r8) {
 	switch(rcx) {
-		case 1: return sys_write(rdi, (char*)rsi, rdx, r8);
-		case 2: return sys_read((int)rdi, (char*)rsi, (int)rdx, r8);
+		case 1: return sys_write(rdi, (int)rsi, (char*)rdx, (uint64_t)r8);
+		case 2: return sys_read((int)rdi, (uint8_t)rsi, (char*)rdx, (uint64_t) r8);
 		case 3: return sys_date((dateType *)rdi);
 		case 4: return sys_mem(rdi, rsi, rdx);
 		case 5 : return createProcess(rdi,rsi,(char**)rdx, r8);
@@ -79,10 +79,10 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, in
 		case 26: return sys_getFileInfo(rdi, rsi);
 		case 27: return sys_dup(rdi, rsi);
 		case 28: return sys_dup2(rdi, rsi, rdx);
-		case 29: return sys_getFdTableByPid(rdi, rsi);
-		case 30: return sys_getFifosData(rdi);
+		case 29: return sys_getFdTableByPid(rdi, (int*) rsi);
+		case 30: return sys_getFifosData((fifoData*)rdi);
 
-		case 70:  getMemState(rdi); break; 
+		case 70:  getMemState((memstateType *)rdi); break; 
 	}
 	return 0;
 }
@@ -97,7 +97,7 @@ void sysExit(){
 	exit();
 }
 
-uint64_t sys_write(int pid, uint8_t fd, char * buffer, uint64_t count) {
+uint64_t sys_write(int pid, int fd, char * buffer, uint64_t count) {
 	if (buffer == 0 || count <= 0)
 		return -1;
 	
@@ -236,13 +236,13 @@ uint64_t sys_unlink(uint64_t name){
 //TODO sacar los prints del testeo en los dups
 uint64_t sys_dup(int pid, uint64_t oldVirtualFd){
 	int newVirtualFd = dupp(pid, (int) oldVirtualFd);
-	int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
+	// int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
 	return newVirtualFd;
 }
 
 uint64_t sys_dup2(int pid, uint64_t oldVirtualFd, uint64_t newVirtualFd){
 	int ret = dupp2(pid, (int) oldVirtualFd, (int) newVirtualFd);
-	int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
+	//int* fdVirtualTable = getProcessByPid(pid)->processFileDescriptors;
 	return ret;
 }
 
