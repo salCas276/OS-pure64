@@ -65,7 +65,6 @@ void * initializeKernelBinary()
 
 
 int main() {	
-
 	 drawShellBorder(&WHITE);
 	_cli();
 	 load_idt();

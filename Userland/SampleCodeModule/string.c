@@ -31,14 +31,6 @@ char * strcpy(char *strDest, const char *strSrc)
     return temp;
 }
 
-int strcpy2(const char* src, char* dest){
-  int i = 0;
-  while(*(src+i)){
-    dest[i] = src[i];
-    i++;
-  }
-  return i;
-}
 
 int strcat(const char* src, char* dest){
   int i = 0, j = 0;
@@ -54,10 +46,4 @@ int charcat(char c, char* dest){
   dest[i++] = c;
   dest[i] = 0; 
   return i;
-}
-
-int lenUntil(char* str, char c){
-  int counter = 0;
-  // while(str[counter] != c) counter;
-  return counter;
 }

@@ -56,9 +56,7 @@ void prvInsertBlockIntoFreeList(BlockLink_t * pxBlockToInsert)
 
 void *malloc(size_t xWantedSize)
 {
-	BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
 	static int xHeapHasBeenInitialised = 0;
-	void *pvReturn = (void *)0;
 
 	if (!xHeapHasBeenInitialised)
 	{
@@ -78,8 +76,13 @@ void *malloc(size_t xWantedSize)
 		}
 	}
 
+	void *pvReturn = (void *)0;
+	BlockLink_t *pxBlock;
+
 	if ((xWantedSize > 0) && (xWantedSize < configADJUSTED_HEAP_SIZE))
 	{
+		BlockLink_t *pxPreviousBlock; 
+
 		pxPreviousBlock = &xStart;
 		pxBlock = xStart.pxNextFreeBlock;
 
@@ -102,6 +105,7 @@ void *malloc(size_t xWantedSize)
 			/* If the block is larger than required it can be split into two. */
 			if ((pxBlock->xBlockSize - xWantedSize) > heapMINIMUM_BLOCK_SIZE)
 			{
+				BlockLink_t * pxNewBlockLink;
 				/* This block is to be split into two.  Create a new block
 					following the number of bytes requested. The void cast is
 					used to prevent byte alignment warnings from the compiler. */
@@ -127,10 +131,10 @@ void *malloc(size_t xWantedSize)
 void free(void *ptr)
 {
 	char *BlockStartPtr = (char *)ptr;
-	BlockLink_t *NewFreeBlock;
 
 	if (ptr != (void *)0)
 	{
+		BlockLink_t *NewFreeBlock;
 		/* The memory being freed will have an BlockLink_t structure immediately
 		before it. */
 		BlockStartPtr -= heapSTRUCT_SIZE;

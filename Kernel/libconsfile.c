@@ -49,7 +49,7 @@ int writeConsole(inode* writtenInode, char* buf, int count){
         return -1;
 
     int counter = 0;
-    while(*(buf+counter) && counter < count) ncPrintCharAtt(*(buf+counter++), &WHITE, &BLACK);
+    while(counter < count && *(buf+counter) ) ncPrintCharAtt(*(buf+counter++), &WHITE, &BLACK);
 
     if((int) semPost(writtenInode->wSemId) == -1)
         return -1;

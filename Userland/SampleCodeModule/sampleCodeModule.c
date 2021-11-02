@@ -237,8 +237,8 @@ static int parseArgvPtr(char * buffer , char *argv[], int * isPiped){
 
 	int currentBuffPos = *isPiped; 
 	int index=0;
-  	int inside = 0 ;
 	while( buffer[currentBuffPos]!=0 && buffer[currentBuffPos] != '|'){
+	  	int inside = 0 ;
 		char * aux = (char*)memalloc( (MAX_COMMAND+1) * sizeof(char));
 		if(aux == 0)
 			return -1;

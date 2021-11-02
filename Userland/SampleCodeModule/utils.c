@@ -16,16 +16,6 @@
 void * memset(void*destiation,int32_t c, uint64_t length);
 // static void askAndRead(char* buffer, char* text);
 
-void printDate(_ARGUMENTS) {
-	dateType currDate;
-	fillDate(&currDate);
-	print_f(1, "Date: %d/%d/%d\nTime: %d:%d:%d (UTC)\n", currDate.day, 
-                                                         currDate.month, 
-                                                         currDate.year + 2000, 
-                                                         currDate.hour, 
-                                                         currDate.minute, 
-                                                         currDate.second);
-}
 
 void help(_ARGUMENTS,int foreground) {
     print_f(1, "Los comandos disponibles son:\n");
@@ -57,92 +47,7 @@ void help(_ARGUMENTS,int foreground) {
 
 }
 
-void printmem(_ARGUMENTS) {
-    uint8_t arr[BYTES_TO_READ] = {0};
-    char buffer[BUFFER_SIZE + 1] = {0};
-    uint64_t dir = 0;
-    int ans;
 
-    do {
-        print_f(1, "Ingrese una direccion de 64 bits a partir de la cual leer:\n0x");
-        ans = read(-1, 0, buffer, 100);
-    } while (ans == -1);
-    
-    for (int i = 0; i < ans; i++) {
-        if (!ISHEXA(buffer[i])) {
-            print_f(1, "\nNo es una direccion valida\n");
-            return;
-        }
-    }
-
-    sscan(buffer, "%x", &dir);
-
-    // fillMem debería devolver la cantidad de bytes leídos correctamente
-    // Actualmente como no hay validación, siempre es 32
-    // print_f(1, "%x\n", fillMem(dir, arr, BYTES_TO_READ));
-    fillMem(dir, arr, BYTES_TO_READ);
-    for (int i = 0; i < BYTES_TO_READ; i++)
-        print_f(1, "\n0x%x: %xh", dir + i, arr[i]);
-    
-    print_f(1, "\n");
-}
-
-void printFeatures(_ARGUMENTS) {
-    // Chequear si se pude usar cpuig
-    uint32_t eax, ebx, ecx, edx;
-
-    if (supports_cpuid()){
-        print_f(1, "CPUID: YES\n");
-
-        __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-        print_f(1, "MX: %s\n", (edx & CPUID_FEAT_EDX_MMX) == 0 ? "NO":"YES");
-        print_f(1, "SSE: %s\n", (edx & CPUID_FEAT_EDX_SSE) == 0 ? "NO":"YES");
-        print_f(1, "SSE2: %s\n", (edx & CPUID_FEAT_EDX_SSE2) == 0 ? "NO":"YES");
-        print_f(1, "SSE3: %s\n", (ecx & CPUID_FEAT_ECX_SSE3) == 0 ? "NO":"YES");
-        print_f(1, "SSE41: %s\n", (ecx & CPUID_FEAT_ECX_SSE4_1) == 0 ? "NO":"YES");
-        print_f(1, "SSE42: %s\n", (ecx & CPUID_FEAT_ECX_SSE4_2) == 0 ? "NO":"YES");
-        print_f(1, "AESNI: %s\n", (ecx & CPUID_FEAT_ECX_AES) == 0 ? "NO":"YES");
-        print_f(1, "PCLMULQDQ: %s\n", (ecx & CPUID_FEAT_ECX_PCLMUL) == 0 ? "NO":"YES");
-        print_f(1, "AVX: %s\n", (ecx & CPUID_FEAT_ECX_AVX) == 0 ? "NO":"YES");
-        print_f(1, "VAESNI: %s\n", supports_vaesni() == 0 ? "NO":"YES");
-        print_f(1, "VPCLMULQDQ: %s\n", supports_vpclmulqdq() == 0 ? "NO":"YES");
-        print_f(1, "F16C: %s\n", supports_f16c() == 0 ?  "NO":"YES");
-        print_f(1, "FMA: %s\n", supports_fma() == 0 ? "NO":"YES");
-        print_f(1, "AVX2: %s\n", supports_avx2() == 0 ? "NO":"YES");
-    } else {
-        print_f(1, "CPUID: NO\n");
-    }
-
-}
-
-void printQuadraticRoots(_ARGUMENTS){
-    double a, b, c, x1, x2;
-    char buffer[100 + 1] = {0};
-    int ans;
-
-    do {
-        print_f(1, "Ingresar coeficientes a, b y c: ");
-        ans = read(-1, 0, buffer, -1);
-    } while (ans == -1);
-
-    sscan(buffer, "%g %g %g", &a, &b, &c);
-
-    put_char(1, '\n');
-
-    print_f(1, "%c(x) = %gx%c%c%gx%c%g\n\n", 13, a, 14, b >= 0 ? '+':0, b, c >= 0 ? '+':0, c);
-    ans = _quadratic(&a, &b, &c, &x1, &x2);
-    switch (ans){
-        case 0:
-            print_f(1, "Sol = {x%c = %g, x%c = %g}\n", 11, x1, 12, x2);
-            break;
-        case 1:
-            print_f(1, "%c tiene raices complejas.\n", 13);
-            break;
-        case 2:
-            print_f(1, "%c no es una funcion cuadratica.\n", 13);
-            break;
-    };
-}
 
 void echo(_ARGUMENTS,int foreground) {
     if (argc > 2 && argv[1][0] == '-') {
@@ -190,18 +95,6 @@ void killcmd(_ARGUMENTS,int foreground) {
     } 
 }
 
-
-void memStatus(_ARGUMENTS,int foreground){
-  memstateType * mem = memalloc(sizeof(memstateType));
-  if(!mem){
-    print_f(1,"El sistema no tiene memoria disponible");
-    return ;
-  }
-
-
-
-
-}
 
 
 
@@ -599,10 +492,10 @@ typedef struct MM_rq{
 
 void test_mm(_ARGUMENTS){
   mm_rq mm_rqs[MAX_BLOCKS];
-  uint8_t rq;
-  uint32_t total;
 
   while (1){
+    uint8_t rq;
+    uint32_t total;
     rq = 0;
     total = 0;
 
@@ -792,14 +685,15 @@ void cat_wrapper(_ARGUMENTS, int foreground) {
 void wc(_ARGUMENTS) {
   // char c; 
   char buf[256];
-  int lineCount = 0, count;
+  int lineCount = 0;
 
   int flag = 1;
   while(flag){
+    int count = 0;
     flag = read(-1, 0, buf, 255);
-    count = 0;
 
-    while(buf[count] && count < 256){
+
+    while(count < 256 && buf[count] ){
       if(buf[count] == '\n')
         lineCount++;
       count++;
@@ -812,15 +706,14 @@ void wc(_ARGUMENTS) {
 
 void filter(_ARGUMENTS) {
   char buf[256];
-  int i = 0, vowCount = 0;
   
   int flag = 1;
   while(flag){
-    i = 0, vowCount = 0;
+    int i = 0, vowCount = 0;
     flag = read(-1, 0, buf, 256);
     if(flag == -1)
       return; 
-    while(buf[i] && i < 256){
+    while(i < 256 && buf[i] ){
      buf[i-vowCount] = buf[i];
      if(buf[i] == 'a' || buf[i] == 'e' || buf[i] == 'i' || buf[i] == 'o' || buf[i] == 'u' || buf[i] == 'A' || buf[i] == 'E' || buf[i] == 'I' || buf[i] == 'O' || buf[i] == 'U')
         vowCount++;

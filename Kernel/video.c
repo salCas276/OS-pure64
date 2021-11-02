@@ -45,11 +45,6 @@ void drawShellBorder(Color * color) {
             setPixel(vbeInfo->width / 2 + i, j, color);
 }
 
-void fillScreen(Color * color) {
-    for (int i = 0; i < vbeInfo->width; i++)
-        for (int j = 0; j < vbeInfo->height; j++)
-            setPixel(i, j, color);
-}
 
 static void scrollUp(prompt_info * p, Color * backgroundColor) {
     for (int dy = 0; dy < p->windowHeight - font.Height; dy++){

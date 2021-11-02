@@ -31,15 +31,15 @@ char * strcpy(char *strDest, const char *strSrc)
     return temp;
 }
 
-int strcpy2(const char* src, char* dest){
-  int i = 0;
-  while(*(src+i)){
-    dest[i] = src[i];
-    i++;
-  }
-  dest[i] = 0;
-  return i;
-}
+// int strcpy2(const char* src, char* dest){
+//   int i = 0;
+//   while(*(src+i)){
+//     dest[i] = src[i];
+//     i++;
+//   }
+//   dest[i] = 0;
+//   return i;
+// }
 
 void strcat(const char* src, char* dest){
   int i = 0, j = 0;
