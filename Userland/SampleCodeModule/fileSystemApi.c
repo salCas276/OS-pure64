@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/utils.h"
 #include "include/lib.h"
 #include "include/string.h"
@@ -105,7 +107,7 @@ void api_write(_ARGUMENTS,int foreground){
     while(flag){
         flag = read(pid, 0, buf, BUFFER_SIZE-1);
         if(flag)
-            buf[BUFFER_SIZE] = 0;
+            buf[BUFFER_SIZE-1] = 0;
         if(write(pid, strtoint(argv[pos], NULL, 10), buf, strlen(buf)) == -1){
             print_f(1, "Hubo un problema con la escritura\n");
             return;
@@ -174,7 +176,9 @@ void api_printFileInfo(_ARGUMENTS,int foreground){
         return;
     }
 
-    char* auxFileType;
+    char* auxFileType =(void*) 0;
+
+
     switch (buf->fileType)
     {
     case 0:
@@ -190,6 +194,9 @@ void api_printFileInfo(_ARGUMENTS,int foreground){
         auxFileType = "fifo";
         break;
     }
+
+    if(!auxFileType)
+        return ; 
 
     print_f(1, "------------%s-----------\n", argv[1]);
     print_f(1, "Read Index: %d\n", buf->indexes[0]);
@@ -225,7 +232,7 @@ void api_printFdTableByPid(_ARGUMENTS,int foreground){
 
 void api_printFifosData(_ARGUMENTS,int foreground){
    fifoData* fifosBuf = memalloc(sizeof(fifoData)*MAX_PRINTING_FILES);
-   if(fifosBuf <= 0){
+   if(fifosBuf == 0){
        print_f(1, "Hubo un error al reservar memoria\n");
        return;
    }

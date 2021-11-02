@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphore.h>
 #include <string.h>
 #include "./interruptions/roundRobin.h"
@@ -23,7 +25,7 @@ static int searchSemaphore(char * sem_id);
 // static int8_t strcmp (const char *p1, const char *p2);
 
 
-uint64_t semOpen(char * sem_id, uint64_t initialValue){
+int64_t semOpen(char * sem_id, uint64_t initialValue){
  
     int isYet = searchSemaphore(sem_id);
     if(isYet >= 0){
@@ -54,7 +56,7 @@ uint64_t semOpen(char * sem_id, uint64_t initialValue){
 
 }
 
-uint64_t semWait(char * sem_id){
+int64_t semWait(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
     if(semIndex < 0){
       return 0; //not found
@@ -87,7 +89,7 @@ uint64_t semWait(char * sem_id){
 
 }
 
-uint64_t semPost(char * sem_id){
+int64_t semPost(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
     if(semIndex < 0){ //not found
       return 0;
@@ -107,7 +109,7 @@ uint64_t semPost(char * sem_id){
     
 }
 
-uint64_t semClose(char * sem_id){
+int64_t semClose(char * sem_id){
     int semIndex = searchSemaphore(sem_id);
  
     if(semaphores[semIndex]->attachedProcess==1){

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/libfifo.h"
 #include "interruptions/roundRobin.h"
 #include "include/semaphore.h"
@@ -17,12 +19,30 @@ int createFifo(inode* createdInode){
     createdInode->wPassword = getAvailablePassword();
 
     strcpy(createdInode->wSemId, createdInode->name); 
-    strcat("W", createdInode->wSemId);
+
+    char * Wmode = malloc(sizeof(char)*2);
+    if(!Wmode)
+        return -1;
+    strcpy(Wmode,"W");
+
+
+    char * Rmode = malloc(sizeof(char)*2);
+    if(!Rmode){
+        free(Wmode);
+        return -1;
+    }
+    strcpy(Rmode,"R");
+
+
+    strcat(Wmode, createdInode->wSemId);
     int ret1 = (int) semOpen(createdInode->wSemId, 1);
 
     strcpy(createdInode->rSemId, createdInode->name); 
-    strcat("R", createdInode->rSemId);
+    strcat(Rmode, createdInode->rSemId);
     int ret2 = (int) semOpen(createdInode->rSemId, 1);
+
+    free(Wmode);
+    free(Rmode);
 
     if(ret1 == -1 || ret2 == -1 || createdInode->rPassword == -1 || createdInode->wPassword == -1)
         return -1;

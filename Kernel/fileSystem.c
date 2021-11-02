@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/fileSystem.h"
 #include "include/string.h"
 #include "include/naiveConsole.h"
@@ -26,6 +28,10 @@ int createFile(char* name, int fileType){
         return -2; //No hay espacio para crear un nuevo archivo
 
     inodeTable[candidate] = malloc(sizeof(inode));
+    if(!inodeTable[candidate]){
+        return -1;
+    }
+
     strcpy(inodeTable[candidate]->name, name);
 
 
@@ -51,6 +57,10 @@ int openFileFromInode(int pid, inode* inode, int inodeIndex, int mode){
         if(!openedFileTable[j]){
 
             openedFileTable[j] = malloc(sizeof(openedFile));
+            if(!openedFileTable[j]){
+                return -1;
+            }
+
 
             if(inode->indexes[0] == -1 && (mode == 0 || mode == 2))
                 inode->indexes[0] = 0;
@@ -224,11 +234,13 @@ int dupp(int pid, int oldVirtualFd){
 int dupp2(int pid, int oldVirtualFd, int newVirtualFd){
     processControlBlock* targetProcess = getProcessByPid(pid);
 
+    if(newVirtualFd >= MAX_PFD )
+        return -1;
+
     if(targetProcess->processFileDescriptors[oldVirtualFd] == -1)
         return -1;
 
-    if(newVirtualFd > MAX_PFD)
-        return -1;
+
 
     closeFile(pid, newVirtualFd);
 

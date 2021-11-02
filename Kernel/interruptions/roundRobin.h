@@ -12,7 +12,7 @@
 #define _ARGUMENTS  int argc,char **argv
 
 typedef struct processControlBlock {
-    uint8_t pid;
+    int8_t pid;
     int parentPid;
     int quantityWaiting;
     uint64_t taskRSP;

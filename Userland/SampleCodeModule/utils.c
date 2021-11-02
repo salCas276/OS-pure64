@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <utils.h>
 #include <lib.h>
 #include <cpuid.h>
@@ -225,7 +227,7 @@ void loop(_ARGUMENTS){
         print_f(1,"%d----%s\n",id,argv[1]);
          
         for(int i=0 ; i < 1000000;i++)
-        renounceUserland();
+          renounceUserland();
     }
 }
 
@@ -293,8 +295,11 @@ void test_processes(_ARGUMENTS){
 char ** arguments = memalloc(sizeof(char*));
 
 char * name = memalloc(12*sizeof(char));
-if(!arguments || !name)
+if(!arguments || !name){
   exitUserland();  
+  return;
+}
+
 strcpy(name,"endlessLoop");
 
 arguments[0]=name;
@@ -467,6 +472,7 @@ void test_sync(_ARGUMENTS ){
     print_f(1,"El sistema no tiene memoria disponible");
     memfree(argv);
     exitUserland();
+    return ; 
   }
 
   buffer = "1";
@@ -478,6 +484,7 @@ void test_sync(_ARGUMENTS ){
     print_f(1,"El sistema no tiene memoria disponible");
     memfree(argv);
     exitUserland();
+    return ; 
   }
 
   buffer = "-1";
@@ -667,7 +674,7 @@ void endless_loopPid(){
 #define TOTAL_PROCESSES 3
 
 void test_prio(_ARGUMENTS){
-  uint64_t pids[TOTAL_PROCESSES];
+  int64_t pids[TOTAL_PROCESSES];
   uint64_t i;
 
   char ** arguments = memalloc(sizeof(char*));
@@ -681,7 +688,7 @@ void test_prio(_ARGUMENTS){
       exitUserland();
   }
 
-    for (i = 0; i < 10000; i++);
+    for(int i =0 ; i < 5 ; i++)
       renounceUserland();
 
   print_f(1,"\nCHANGING PRIORITIES...\n");
@@ -701,8 +708,7 @@ void test_prio(_ARGUMENTS){
     }
   }
 
-
-    for (i = 0; i < 10000; i++);
+    for(int i = 0 ; i < 5 ; i++)
       renounceUserland();
   bussy_wait(WAIT);
   print_f(1,"\nBLOCKING...\n");
@@ -710,9 +716,9 @@ void test_prio(_ARGUMENTS){
   for(i = 0; i < TOTAL_PROCESSES; i++)
     kill(1,pids[i]);
   
-  
-    for (i = 0; i < 10000; i++);
+  for(int i = 0 ; i < 5 ; i++)
       renounceUserland();
+
   bussy_wait(WAIT);
   print_f(1,"CHANGING PRIORITIES WHILE BLOCKED...\n");
  
@@ -742,8 +748,10 @@ void test_prio(_ARGUMENTS){
     kill(2,pids[i]);
 
   
-  for (i = 0; i < 10000; i++);
+  for (i = 0; i < 5; i++){
     renounceUserland();
+  }
+
   bussy_wait(WAIT);
   print_f(1,"\nKILLING...\n");
 

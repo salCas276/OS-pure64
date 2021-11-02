@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <syscalls.h>
 #include <naiveConsole.h>
 #include <stdint.h>
@@ -131,8 +133,8 @@ uint64_t sys_mem(uint64_t rdi, uint64_t rsi, uint8_t rdx){
 	// qemu tiene 64GB mapeados en memoria, asi que en el emulador
 	// incluso con sólo 512MB de memoria
 	// Podés acceder a todas las direcciones hasta 0x1000000000 - 1
-	if (src >= (uint8_t *) 0x1000000000 || src - 1 + rdx >= (uint8_t *)0x1000000000)
-		return 1;
+	// if (src >= (uint8_t *) 0x1000000000 || src - 1 + rdx >= (uint8_t *)0x1000000000)
+	// 	return 1;
 
 	uint8_t i;
 	for (i = 0; i < rdx; i++) 

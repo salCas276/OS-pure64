@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/libconsfile.h"
 #include "include/fileSystem.h"
 #include "include/naiveConsole.h"
@@ -16,9 +18,18 @@ int createConsole(inode* createdInode){
     for(int i=0; i<2; i++) createdInode->indexes[i] = -1;
     
     strcpy(createdInode->wSemId, createdInode->name); 
-    strcat("W", createdInode->wSemId);
+
+    char * mode= malloc(sizeof(char)*2);
+ 
+    if(!mode){
+        return -1;
+    }
+    strcpy(mode,"W");
+
+    strcat(mode, createdInode->wSemId);
     int ret1 = (int) semOpen(createdInode->wSemId, 1);
 
+    free(mode);
     if(ret1 == -1)
         return -1;
 

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <phylo.h>
 #include <testSem.h> 
 #include <lib.h>
@@ -114,7 +116,8 @@ void addPhylo() {
 }
 
 void rmvPhylo() {
-    qPhylos -= ( MINPHYLO < qPhylos); 
+    if(qPhylos > MINPHYLO)
+        qPhylos -= 1; 
 }
 
 
@@ -138,7 +141,7 @@ void phyloKeyboard( int argc, char * argv, int foreground) {
 
 void phyloPrinter(int argc, char * argv, int foreground) {
     while( buffer[0] != '~') {
-        for (int i=0; i<100000000; i++);
+        for (int i=0; i<100000000; i++){}
         for(int i=0; i<qPhylos; i++)
             print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
         print_f(1, "\n"); 

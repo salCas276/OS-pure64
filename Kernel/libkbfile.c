@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/libkbfile.h"
 #include "interruptions/keyboard.h"
 #include "naiveConsole.h"
@@ -17,9 +19,17 @@ int createKeyboard(inode* createdInode){
     createdInode->rPassword = KEYBOARD_PASSWORD;
 
     strcpy(createdInode->rSemId, createdInode->name); 
-    strcat("R", createdInode->rSemId);
+
+    char * readMode = malloc(2*sizeof(char));
+    if(!readMode){
+        return -1;
+    }
+    strcpy(readMode,"R");
+
+    strcat(readMode, createdInode->rSemId);
     int ret2 = (int) semOpen(createdInode->rSemId, 1);
 
+    free(readMode);
     if(ret2 == -1)
         return -1;
 

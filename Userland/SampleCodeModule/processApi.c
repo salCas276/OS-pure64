@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <processApi.h>
 
 uint64_t createProcessAsm(uint64_t function,_ARGUMENTS,int foreground);

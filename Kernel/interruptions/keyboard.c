@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboard.h>
 #include <lib.h>
 #include <naiveConsole.h>
@@ -96,7 +98,7 @@ int64_t getChar(void) {
       if (tail == BUFFER_SIZE)
         tail = 0;
     }
-    else if(head == tail || ans == 0){
+    else if( ans == 0){
       blockProcess(getCurrentPid(),KEYBOARD_PASSWORD);
       continue;
     }

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <process.h>
 #include "include/fileSystem.h"
 #include "include/string.h"
@@ -30,8 +32,11 @@ void firstProcess(uint64_t functionAddress, prompt_info shellPrompt , prompt_inf
     uint64_t * basePointer = malloc(4096 * sizeof(uint64_t));
     processControlBlock * task= malloc(sizeof(processControlBlock));
 
-    if(!task || ! basePointer)
+    if(!task || ! basePointer){
+        free(task);
+        free(basePointer);
         return ; 
+    }
 
     task->name = "Shell";
     freePidsCounter--;
@@ -69,14 +74,22 @@ int createProcess(uint64_t functionAddress,_ARGUMENTS,int foreground){
     processControlBlock * task= (processControlBlock*) malloc(sizeof(processControlBlock));
     char * nameAux = malloc(strlen(argv[0])+1);
 
-    if(!task || !basePointer || !nameAux)
-    return -1; 
+    if(!task || !basePointer || !nameAux){
+        free(task);
+        free(basePointer);
+        free(nameAux);
+        return -1; 
+    }
     
     strcpy(nameAux,argv[0]);
     task->name = nameAux;
     task->pid=generateNextPid();
-    if(task->pid < 0 )
+    if(task->pid < 0 ){
+        free(basePointer);
+        free(task);
+        free(nameAux);
         return -1; 
+    }
 
     
     if(foreground)
@@ -162,15 +175,20 @@ int deleteProcess(int pid){
 }
 
 processControlBlock* getProcessByPid(int pid){
-    if(pid < -1)
+    if(pid < -1 || pid >=MAX_PIDS)
         return (processControlBlock*)0;
     if(pid == -1)
         return getCurrentTask();
+    
     return allProcesses[pid];
 }
 
 int getMinFdByPid(int pid){
     processControlBlock* process = getProcessByPid(pid);
+
+    if(!process)
+        return -1;
+
     for(int i=0; i<MAX_PFD; i++){
         if(process->processFileDescriptors[i] == -1)
             return i;

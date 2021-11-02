@@ -1,10 +1,12 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include <roundRobin.h>
 #include "../include/naiveConsole.h"
 #include "../include/memoryManager.h"
 
 #define SIZE 20
-#define QHEADERS MAXBLOCKTYPES+1
+#define QHEADERS (MAXBLOCKTYPES+1)
 #define KEYBOARD_PASSWORD 1
 #define WAITING 2
 
@@ -50,6 +52,9 @@ int * getBlockedBy(int password , int maxQ){
 
     int * pidArray = malloc((maxQ+1)*(sizeof(uint64_t)));
 
+    if(!pidArray)
+        return (void*)0;
+
     processControlBlock * currentProcess = headers[password+1];
 
     int index = 0;
@@ -89,6 +94,12 @@ void addProcess(processControlBlock * process){
         uint64_t * basePointerIdle = malloc(256 * sizeof(uint64_t));
         processControlBlock * idleProcess = malloc(sizeof(processControlBlock));
         
+        if( !idleProcess || !basePointerIdle ){
+            free(basePointerIdle);
+            free(idleProcess);  
+            return ; 
+        }
+
         idleProcess->baseRSP = (uint64_t)&basePointerIdle[255] ;
         idleProcess->functionAddress= (uint64_t)&idleProcessFunction;
         idleProcess->taskRSP = _buildContext(idleProcess->baseRSP, idleProcess->functionAddress,0,0);
@@ -199,6 +210,11 @@ int unblockProcess(int pid, int password) {
     if ( password < 0 || password > MAXBLOCKTYPES) return -1; 
     
     processControlBlock * p; 
+
+    if(password + 1 > MAXBLOCKTYPES ){
+        return -1;
+    }
+
     headers[password+1] = unlinkProcess(headers[password+1], pid, &p); 
 
     if (p == 0) return -1; 
