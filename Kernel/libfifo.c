@@ -92,7 +92,7 @@ int readFifo(inode* readInode, char* buf, int count){
                 buf[i] = 0;
                 return 0; //Llegue al EOF
             }
-            popAndUnblock(readInode->wPassword);//TODO al tener un semaforo seria suficiente con que solo se desbloquee 1?
+            popAndUnblock(readInode->wPassword);
             blockMyself(readInode->rPassword);
         }
 
@@ -100,7 +100,7 @@ int readFifo(inode* readInode, char* buf, int count){
         readInode->indexes[0] = (readInode->indexes[0]+1)%BLOCK_SIZE;
     }
 
-    popAndUnblock(readInode->wPassword);//TODO al tener un semaforo seria suficiente con que solo se desbloquee 1?
+    popAndUnblock(readInode->wPassword);
     
 
     if((int) semPost(readInode->rSemId) == -1)
@@ -122,14 +122,14 @@ int writeFifo(inode* writtenInode, char* buf, int count){
                     return -1;
                 return 0; //Llegue al EOF
             }
-            popAndUnblock(writtenInode->rPassword); //TODO al tener un semaforo seria suficiente con que solo se desbloquee 1?
+            popAndUnblock(writtenInode->rPassword);
             blockMyself(writtenInode->wPassword);
         }
         writtenInode->block[writtenInode->indexes[1]] = buf[i];
         writtenInode->indexes[1] = (writtenInode->indexes[1]+1)%BLOCK_SIZE;
     }
 
-    popAndUnblock(writtenInode->rPassword); //TODO al tener un semaforo seria suficiente con que solo se desbloquee 1?
+    popAndUnblock(writtenInode->rPassword);
 
 
     if((int) semPost(writtenInode->wSemId) == -1)

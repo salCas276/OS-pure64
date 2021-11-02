@@ -5,7 +5,6 @@
 #include "include/string.h"
 
 
-// static void askAndRead(char* buffer, char* text);
 
 void api_createReg(_ARGUMENTS,int foreground){
     if(argc != 2){
@@ -102,7 +101,6 @@ void api_write(_ARGUMENTS,int foreground){
         pos = 2;
     }
     char buf[BUFFER_SIZE];
-    //askAndRead(buf, "Ingrese a continuacion lo que desee escribir:");
     int flag = 1;
     while(flag){
         flag = read(pid, 0, buf, BUFFER_SIZE-1);
@@ -270,9 +268,5 @@ void api_printFifosData(_ARGUMENTS,int foreground){
     memfree(fifosBuf);
 }
 
-// static void askAndRead(char* buffer, char* text){
-//     print_f(1, "%s\n", text);
-//     read(-1, 0, buffer, BUFFER_SIZE);
-// }
 
 

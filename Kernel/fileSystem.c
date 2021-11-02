@@ -130,13 +130,9 @@ int closeFile(int pid, int virtualFd){
         openedFileTable[fd] = (openedFile*) 0;
     }
 
-    //TODO mirar que cierre fd's y no aperturas
-
-    //Miro si se cerraron todos las aperturas del archivo y si se habia hecho un llamado a unlink, en tal caso lo elimino de la lista de inodes
     if(auxInode->openCount == 0 && auxInode->forUnlink == 1)
         return freeInode(auxInode, auxInodeIndex);
     
-    //No hace falta validar si estoy cerrando el ultimo escritor para agregar un EOF ya que este ultimo se deduce de writerCount == 0 y wIndex != -1
 
     return 0;
 }
@@ -160,6 +156,13 @@ int unlinkFile(char* name){
 static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
     if(onDeleteInode->block)
         free(onDeleteInode->block);
+
+    if(onDeleteInode->rSemId)
+        semClose(onDeleteInode->rSemId);
+
+    if(onDeleteInode->wSemId)
+        semClose(onDeleteInode->wSemId);
+
     free(onDeleteInode);
     inodeTable[onDeleteInodeIndex] = (inode*) 0;
     return 0;
