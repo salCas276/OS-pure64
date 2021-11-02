@@ -7,7 +7,7 @@
 #include "../include/video.h"
 
 #define WORSTPRIORITY 40
-#define MAXBLOCKTYPES 40
+#define MAXBLOCKTYPES 100
 #define MAX_PFD 40
 #define _ARGUMENTS  int argc,char **argv
 
