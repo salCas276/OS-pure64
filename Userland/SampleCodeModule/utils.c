@@ -19,32 +19,25 @@ void * memset(void*destiation,int32_t c, uint64_t length);
 
 void help(_ARGUMENTS,int foreground) {
     print_f(1, "Los comandos disponibles son:\n");
-    print_f(1, " - help: Muestra los comandos disponibles\n");
-    print_f(1, " - inforeg: Muestra el estado de los registros\n");
-    print_f(1, " - printmem: Imprime la memoria a partir de la direccion dada\n");
-    print_f(1, " - printDate: Imprime informacion acerca del tiempo\n");
-    print_f(1, " - printFeatures: Muestra caracteristicas del microprocesador\n");
-    print_f(1, " - printQuadraticRoots: Resuelve una funcion cuadratica\n");
-   // print_f(1, " - invalidOpcode: Genera excepcion por operacion invalida\n");
-   //  print_f(1, " - divisionByZero: Genera excepcion por division por 0\n");
-    print_f(1, " - echo: Imprime un argumento. \n     -m: en mayuscula.\n");
+    print_f(1, " - help: Lista los comandos disponibles\n");
+    print_f(1, " - echo [-m] <word>: Imprime un argumento. \n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
-    print_f(1, " - nice: Modifica la prioridad de un proceso.\n     -p=PID: pid.\n     -b=B: bonus a agregar.\n");
-    print_f(1, " - kill: Bloquea o mata un proceso.\n     -k=: 0 para matar, 1 para bloquear, 2 para desbloquear.\n");
+    print_f(1, " - nice <-pid> <-bonus>: Modifica la prioridad de un proceso.\n");
+    print_f(1, " - kill <-mode> : Bloquea o mata un proceso.\n");
     print_f(1, " - mkfifo <filename>: Crea un pipe con nombre en el file system\n");
     print_f(1, " - mkreg <filename>: Crea un file en el file system\n");
     print_f(1, " - unlink <filename>: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
-    print_f(1, " - open [-p] <m> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
-    print_f(1, " - close [-p] <fd>: Cierra un archivo previamente abierto del file system\n");
+    print_f(1, " - open [-p] <mode> <filename>: Abre un archivo preexistente en el file system para escritura y/o lectura\n");
+    print_f(1, " - close [-p] <fd>: Cierra un fd previamente abierto del file system\n");
     print_f(1, " - write [-p] <fd>: Escribe el texto ingresado en el fd idicado\n");
     print_f(1, " - read [-p] <fd> <count>: Lee una cantidad de bytes count del fd idicado\n");
     print_f(1, " - dup [-p] <oldfd>: Toma un fd y crea otro nuevo que apunta a la misma apertura\n");
-    print_f(1, " - dup2 [-p] <oldfd> <newfd>: Toma un fd viejo y uno nuevo que apuntara a la misma apertura\n");
+    print_f(1, " - dup2 [-p] <oldfd> <newfd>: Genera un nuevo fd que rederencia a la misma apertura que el original\n");
     print_f(1, " - printFileContent <filename>: Imprime el contenido escrito en un elemento del file system\n");
     print_f(1, " - printFileInfo <filename>: Imprime la informacion del inode de un elemento del file system\n");
     print_f(1, " - printFdTable [-p]: Imprimie la tabla de file descriptors del proces indicado\n");
     print_f(1, " - pipe: Imprime informacion sobre todos los pipes con nombre abiertos\n");
-
+    print_f(1, " - phylo: Simula el problema de los filosofos que comen");
 }
 
 
