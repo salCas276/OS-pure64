@@ -137,10 +137,6 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
     return process; 
 }
 
-
-
-
-// Te mata un proceso que esta en la cola de listos. Falta borrar de process.c
 int killProcess(int pid) {
 
     if (pid == 0) return -1; // No puedes matar al primer proceso!

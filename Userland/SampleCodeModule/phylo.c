@@ -122,12 +122,10 @@ static char buffer[3] = {0};
 void phyloKeyboard( int argc, char * argv, int foreground) {
     do {
         read(-1, 0, buffer, -1); 
-        if ( buffer[0] == 'a') addPhylo(); 
-        else if (  buffer[0] =='r') rmvPhylo(); 
+        //if ( buffer[0] == 'a') addPhylo(); 
+        //else if (  buffer[0] =='r') rmvPhylo(); 
     } while( buffer[0] != '1');
     
-    for (int i=0; i<qPhylos; i++)
-        kill(0, phyloPids[i]);
 
     exitUserland(); 
 }
@@ -135,7 +133,7 @@ void phyloKeyboard( int argc, char * argv, int foreground) {
 void phyloPrinter(int argc, char * argv, int foreground) {
     print_f(1, "El problema de los filosofos\n"); 
     while( buffer[0] != '1') {
-        for (int i=0; i<100000000; i++);
+        for (int i=0; i<1000000; i++);
         for(int i=0; i<qPhylos; i++)
             print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
         print_f(1, "\n"); 
@@ -171,14 +169,27 @@ void phylo(int argc, char * argv[], int foreground) {
     // Creation of phylos
     for (int i = 0; i < MAXPHYLO; i++) {
         phyloPids[i] = createProcessUserland((uint64_t) &lifeOfAPhylo, 1, &sems[i], 0); 
-        kill(1, phyloPids[i]); 
+        //kill(1, phyloPids[i]); 
     }
 
-    qPhylos = 0; 
+    qPhylos = MAXPHYLO; 
     
     createProcessUserland((uint64_t) &phyloPrinter, 1, &args[1], 0);
     createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[0], 1);
     waitSon(); 
+
+    for(int i = 0; i < MAXPHYLO; i++)
+        print_f(1, "Phylo %d has pid %d\n", i, phyloPids[i]);
+
+    for (int i=0; i<qPhylos; i++)
+        kill(0, phyloPids[i]);
+
+    for(int i = 0; i < MAXPHYLO; i++){
+        closeSemaphore(sems[i]);
+        memfree(sems[i]);
+    }
+
+    closeSemaphore("MUTEXPHYLO");
 
 }
 
