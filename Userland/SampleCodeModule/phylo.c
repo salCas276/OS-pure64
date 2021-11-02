@@ -4,8 +4,6 @@
 #include <processApi.h>
 #include <utils.h>
 
-
-static int initialized = 0; 
 int qPhylos = 0; 
 char * mutex = "MUTEXPHYLO";
 char * sems[MAXPHYLO]; 
@@ -100,6 +98,7 @@ void think(int n) {
 static void lifeOfAPhylo(int argc, char * argv[], int foreground) {
     int i = argv[0][1]-'0';
     while (1) {
+        if (i>=qPhylos) kill(1, phyloPids[i]); 
         fillDate(randomizer); 
         think( randomizer->second % ( i + 2) ); 
         take_fork(i);
@@ -110,42 +109,26 @@ static void lifeOfAPhylo(int argc, char * argv[], int foreground) {
 }
 
 void addPhylo() {
+    print_f(1, "ADDING PHYLO ! \n"); 
     if ( qPhylos < MAXPHYLO ) kill(2, phyloPids[qPhylos++]);
 }
 
 void rmvPhylo() {
-    if ( qPhylos > 0) kill(1, phyloPids[--qPhylos]); 
-        printProcessesData(1, 0);  
-
+     if ( qPhylos > 0) --qPhylos;  // kill(1, phyloPids[]);
+    print_f(1, "REMOVING PHYLO ! \n"); 
+ 
 }
 
 
 static char buffer[3] = {0}; 
 
 void phyloKeyboard( int argc, char * argv, int foreground) {
+    print_f(1, "Si se traba, presionar r o a. :D\n");
     do {
         read(-1, 0, buffer, -1); 
-        //if ( buffer[0] == 'a') addPhylo(); 
-        //else if (  buffer[0] =='r') rmvPhylo(); 
+        if ( buffer[0] == 'a') addPhylo(); 
+        else if (  buffer[0] =='r') rmvPhylo(); 
     } while( buffer[0] != '1');
-    
-
-    exitUserland(); 
-}
-
-void testito(){
-    return;
-}
-
-void phyloPrinter(int argc, char * argv, int foreground) {
-    print_f(1, "El problema de los filosofos\n"); 
-    while( buffer[0] != '1') {
-        for (int i=0; i<10000000; i++);
-        testito();
-        for(int i=0; i<qPhylos; i++)
-            print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
-        print_f(1, "\n"); 
-    }
     exitUserland(); 
 }
 
@@ -156,62 +139,55 @@ void printPhyloArray(){
 }
 
 
-
-
 void phylo(int argc, char * argv[], int foreground) {
 
-    char * args[2] = { "PhyloKeyboard", "PhyloPrinter"}; 
-    print_f(1, "Ingrese a para agregar phylo, r para quitar, o 1 para salir\n"); 
 
     buffer[0] = 0; 
-    
-    // Initialization if needed
-    // Initialize semaphores
     openSemaphore("MUTEXPHYLO", 1);
     for ( int i = 0; i < MAXPHYLO; i++) {
         sems[i] = memalloc(3);
         sems[i][0] = 'P'; 
         sems[i][1] = '0'+i;  
         sems[i][2] = 0; 
-        openSemaphore(sems[i], 0);
-        randomizer = memalloc(sizeof(dateType)); 
+        if (  openSemaphore(sems[i], 0) < 0 )
+            print_f(1, "EL SEMAFOROOOOO\n");
     }
     
+    randomizer = memalloc(sizeof(dateType)); 
     for (int i=0; i<MAXPHYLO; i++)
         phyloPids[i] = -1; 
-
 
     // Creation of phylos
     for (int i = 0; i < MAXPHYLO; i++) {
         phyloPids[i] = createProcessUserland((uint64_t) &lifeOfAPhylo, 1, &sems[i], 0); 
-        //kill(1, phyloPids[i]); 
+        print_f(1, "phylo %d is alive!\n", phyloPids[i]);
     }
 
     qPhylos = MAXPHYLO; 
     
-    createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[0], 0);
+    char * kybprocess= "PhyloKeyboard"; 
+    createProcessUserland((uint64_t) &phyloKeyboard, 1, &kybprocess,  0);
 
-    print_f(1, "El problema de los filosofos\n"); 
+    print_f(1, "El problema de los filosofos\n");
+    print_f(1, "Ingrese a para agregar phylo, r para quitar, o 1 para salir\n"); 
     while( buffer[0] != '1') {
         for (int i=0; i<500000; i++);
-        testito();
-        for(int i=0; i<qPhylos; i++)
-            print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
-        print_f(1, "\n"); 
+        // testito();
+        if (qPhylos > 0) printPhyloArray(); 
     }
 
     print_f(1, "------------------------------\n");
 
-    for(int i = 0; i < MAXPHYLO; i++)
-        print_f(1, "Phylo %d has pid %d\n", i, phyloPids[i]);
+    // // Checkout
 
-    for (int i=0; i<qPhylos; i++)
+    for (int i=0; i<MAXPHYLO; i++)
         kill(0, phyloPids[i]);
 
     for(int i = 0; i < MAXPHYLO; i++){
         closeSemaphore(sems[i]);
         memfree(sems[i]);
     }
+    memfree(randomizer); 
 
     closeSemaphore("MUTEXPHYLO");
 
