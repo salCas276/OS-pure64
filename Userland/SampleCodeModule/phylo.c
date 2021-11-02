@@ -24,6 +24,8 @@ state states[MAXPHYLO];
 #define LEFT (phnum + qPhylos - 1) % qPhylos
 #define RIGHT (phnum + 1) % qPhylos
 
+void testito();
+void printPhyloArray();
 
 void test(int phnum) {
     if (states[phnum] == hungry && states[LEFT] != eating && states[RIGHT] != eating) {
@@ -48,7 +50,7 @@ void test(int phnum) {
 // take up chopsticks
 void take_fork(int phnum)
 {
- 
+    //print_f(1, "take\n");
     waitSemaphore("MUTEXPHYLO");
 
  
@@ -73,7 +75,8 @@ void take_fork(int phnum)
 // put down chopsticks
 void put_fork(int phnum)
 {
- 
+
+    //print_f(1, "put\n");
     waitSemaphore("MUTEXPHYLO");
  
     // state that thinking
@@ -130,16 +133,28 @@ void phyloKeyboard( int argc, char * argv, int foreground) {
     exitUserland(); 
 }
 
+void testito(){
+    return;
+}
+
 void phyloPrinter(int argc, char * argv, int foreground) {
     print_f(1, "El problema de los filosofos\n"); 
     while( buffer[0] != '1') {
-        for (int i=0; i<1000000; i++);
+        for (int i=0; i<10000000; i++);
+        testito();
         for(int i=0; i<qPhylos; i++)
             print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
         print_f(1, "\n"); 
     }
     exitUserland(); 
 }
+
+void printPhyloArray(){
+    for(int i=0; i<qPhylos; i++)
+        print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
+    print_f(1, "\n"); 
+}
+
 
 
 
@@ -174,9 +189,18 @@ void phylo(int argc, char * argv[], int foreground) {
 
     qPhylos = MAXPHYLO; 
     
-    createProcessUserland((uint64_t) &phyloPrinter, 1, &args[1], 0);
-    createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[0], 1);
-    waitSon(); 
+    createProcessUserland((uint64_t) &phyloKeyboard, 1, &args[0], 0);
+
+    print_f(1, "El problema de los filosofos\n"); 
+    while( buffer[0] != '1') {
+        for (int i=0; i<500000; i++);
+        testito();
+        for(int i=0; i<qPhylos; i++)
+            print_f(1, " %s ", (states[i] == eating ?  "E": "-")); 
+        print_f(1, "\n"); 
+    }
+
+    print_f(1, "------------------------------\n");
 
     for(int i = 0; i < MAXPHYLO; i++)
         print_f(1, "Phylo %d has pid %d\n", i, phyloPids[i]);
