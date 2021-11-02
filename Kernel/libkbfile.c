@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/libkbfile.h"
 #include "interruptions/keyboard.h"
 #include "naiveConsole.h"
@@ -67,7 +69,6 @@ int readKeyboard(inode* readInode, char* buf, int count){
                 counter--;
             else{
                 buf[counter++] = c;
-                ncPrintCharAtt(c, &WHITE, &BLACK);
                 break;
             }
         }

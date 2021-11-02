@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <utils.h>
 #include <lib.h>
 #include <cpuid.h>
@@ -23,7 +25,7 @@ void help(_ARGUMENTS,int foreground) {
     print_f(1, " - echo [-m] <word>: Imprime un argumento. \n");
     print_f(1, " - ps: Imprime una lista con los procesos actuales y sus datos\n");
     print_f(1, " - nice <-pid> <-bonus>: Modifica la prioridad de un proceso.\n");
-    print_f(1, " - kill <-mode> : Bloquea o mata un proceso.\n");
+    print_f(1, " - kill <-mode> <pid> : Bloquea o mata un proceso.\n");
     print_f(1, " - mkfifo <filename>: Crea un pipe con nombre en el file system\n");
     print_f(1, " - mkreg <filename>: Crea un file en el file system\n");
     print_f(1, " - unlink <filename>: Elimina un archivo del file system una vez que todas sus aperturas sean cerradas\n");
@@ -37,7 +39,14 @@ void help(_ARGUMENTS,int foreground) {
     print_f(1, " - printFileInfo <filename>: Imprime la informacion del inode de un elemento del file system\n");
     print_f(1, " - printFdTable [-p]: Imprimie la tabla de file descriptors del proces indicado\n");
     print_f(1, " - pipe: Imprime informacion sobre todos los pipes con nombre abiertos\n");
-    print_f(1, " - phylo: Simula el problema de los filosofos que comen");
+    print_f(1, " - phylo: Simula el problema de los filosofos que comen\n");
+    print_f(1, " - wc: Imprime la cantidad de lineas que recibe por entrada estandar\n");
+    print_f(1, " - filter:filtra las vocales que recibe por entrada estandar\n");
+    print_f(1, " - cat: Imprime en pantalla lo que recibe por entrada estandar\n");
+    print_f(1, " - test: Los test provistos por la catedra integrados como comandos\n");
+    print_f(1, " - sem : imprime el estado de los semaforos\n");
+    print_f(1, " - mem:Imprime el estado de la memoria\n");
+    print_f(1, " - loop:Imprime su ID cada un determinado tiempo\n");
 }
 
 

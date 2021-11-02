@@ -1,6 +1,5 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-
 #include <roundRobin.h>
 #include "../include/naiveConsole.h"
 #include "../include/memoryManager.h"
@@ -27,25 +26,9 @@ void _hlt();
 uint64_t _buildContext(uint64_t basePointer , uint64_t functionAddress,_ARGUMENTS );
 
 static processControlBlock * unlinkProcess(processControlBlock * process, int pid, processControlBlock ** p) ; 
-static void pushProcess( processControlBlock ** header, processControlBlock * process);
+static processControlBlock * pushProcess( processControlBlock * header, processControlBlock * process);
 static int changeNicenessRec(processControlBlock * header, int pid, int bonus);
 static void restartRoundRobin(processControlBlock * header);
-// Debugging
-void printChain(processControlBlock * c) {
-   
-   if ( c ==0 ) {
-       ncPrint("[EOP]\n"); 
-       return; 
-   } 
-
-   char str[] = {2, 0}; 
-   str[0] = c->pid + '0'; 
-   ncPrint(str); 
-   ncPrint("->"); 
-   printChain(c->tail); 
-}
-
-
 
 int * getBlockedBy(int password , int maxQ){
     //chequear password incorrecta
@@ -54,6 +37,7 @@ int * getBlockedBy(int password , int maxQ){
 
     if(!pidArray)
         return (void*)0;
+
 
     processControlBlock * currentProcess = headers[password+1];
 
@@ -93,13 +77,15 @@ void addProcess(processControlBlock * process){
 
         uint64_t * basePointerIdle = malloc(256 * sizeof(uint64_t));
         processControlBlock * idleProcess = malloc(sizeof(processControlBlock));
-        
-        if( !idleProcess || !basePointerIdle ){
-            free(basePointerIdle);
-            free(idleProcess);  
-            return ; 
-        }
 
+        if(!basePointerIdle || !idleProcess){
+            free(basePointerIdle);
+            free(idleProcess);
+            return;
+            }
+
+
+        
         idleProcess->baseRSP = (uint64_t)&basePointerIdle[255] ;
         idleProcess->functionAddress= (uint64_t)&idleProcessFunction;
         idleProcess->taskRSP = _buildContext(idleProcess->baseRSP, idleProcess->functionAddress,0,0);
@@ -107,7 +93,7 @@ void addProcess(processControlBlock * process){
         return; 
     }
 
-    pushProcess(&headers[0], process);
+    headers[0] = pushProcess(headers[0], process);
 	processTotal++;
 
 }
@@ -118,9 +104,15 @@ void setPrompt(prompt_info shellPromptP , prompt_info backgroundPromptP){
 }
 
 
-static void pushProcess( processControlBlock ** header, processControlBlock * process) {
-    process->tail = (*header); 
-    (*header) = process; 
+static processControlBlock * pushProcess( processControlBlock * header, processControlBlock * process) {
+    
+    if (header == 0) {
+        process->tail = 0; 
+        return process; 
+    }
+
+    header->tail = pushProcess(header->tail, process); 
+    return header; 
 }
 
 
@@ -143,10 +135,6 @@ static processControlBlock * unlinkProcess(processControlBlock * process, int pi
     return process; 
 }
 
-
-
-
-// Te mata un proceso que esta en la cola de listos. Falta borrar de process.c
 int killProcess(int pid) {
 
     if (pid == 0) return -1; // No puedes matar al primer proceso!
@@ -193,7 +181,11 @@ int blockProcess(int pid, int password) {
 
     if (p == 0) return -1; 
 
-    pushProcess( &headers[password+1], p); 
+    if(password + 1 >= MAXBLOCKTYPES ){
+        return -1;
+    }
+
+    headers[password+1] = pushProcess( headers[password+1], p); 
 
     if(pid == getCurrentPid()){
         currentProcess->currentPushes = WORSTPRIORITY + 1 - currentProcess->priority; //null
@@ -211,20 +203,21 @@ int unblockProcess(int pid, int password) {
     
     processControlBlock * p; 
 
-    if(password + 1 > MAXBLOCKTYPES ){
+    if(password >= MAXBLOCKTYPES)
         return -1;
-    }
+
 
     headers[password+1] = unlinkProcess(headers[password+1], pid, &p); 
 
     if (p == 0) return -1; 
     
-    pushProcess( &headers[0], p); 
+    headers[0] =  pushProcess( headers[0], p); 
 
     
         
     return 0; 
 }
+
 
 static void restartRoundRobin(processControlBlock * header){
     processControlBlock * current = header;

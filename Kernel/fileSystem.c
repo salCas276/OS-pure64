@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/fileSystem.h"
 #include "include/string.h"
 #include "include/naiveConsole.h"
@@ -157,10 +159,10 @@ static int freeInode(inode* onDeleteInode, int onDeleteInodeIndex){
     if(onDeleteInode->block)
         free(onDeleteInode->block);
 
-    if(onDeleteInode->rSemId)
+
         semClose(onDeleteInode->rSemId);
 
-    if(onDeleteInode->wSemId)
+
         semClose(onDeleteInode->wSemId);
 
     free(onDeleteInode);
