@@ -13,6 +13,7 @@
 #include "../include/fileSystem.h"
 #include "../include/libfifo.h"
 #include <semaphore.h>
+#include "../include/libshmem.h"
 
 #define SYSCALL_BLOCK_PASSWORD 0 
 
@@ -87,6 +88,8 @@ int syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, in
 		case 30: return sys_getFifosData((fifoData*)rdi);
 
 		case 70:  getMemState((memstateType *)rdi); break; 
+		case 71: return createShmem((int)rdi); 
+		case 72: return unlinkShmem((int)rdi); 
 	}
 	return 0;
 }

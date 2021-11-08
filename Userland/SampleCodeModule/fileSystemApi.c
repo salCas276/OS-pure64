@@ -6,7 +6,8 @@
 #include "include/lib.h"
 #include "include/string.h"
 
-
+void * createShmemAsm(int id); 
+int unlinkShmemAsm(int id); 
 
 void api_createReg(_ARGUMENTS,int foreground){
     if(argc != 2){
@@ -272,3 +273,10 @@ void api_printFifosData(_ARGUMENTS,int foreground){
 
 
 
+void * createShmem(int id) {
+    return createShmemAsm(id); 
+}
+
+int unlinkShmem(int id){
+    return unlinkShmemAsm(id); 
+}

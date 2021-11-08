@@ -92,4 +92,6 @@ void test_sync_wrapper(_ARGUMENTS , int foreground );
 void test_no_sync_wrapper(_ARGUMENTS , int foreground );
 void test_mm_wrapper(_ARGUMENTS,int foreground);
 void test_prio_wrapper(_ARGUMENTS,int foreground);
+
+void defensa(_ARGUMENTS, int foreground); 
 #endif

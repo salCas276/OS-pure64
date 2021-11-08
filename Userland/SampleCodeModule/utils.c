@@ -766,3 +766,45 @@ void printMemState(_ARGUMENTS, int foreground) {
     memfree(state); 
 
 }
+
+void proceso1fun(_ARGUMENTS, int foreground) {
+
+    print_f(1, "Soy el proceso escritor.\n"); 
+    char * sampleShmem = (char *) createShmem(0);
+    sampleShmem[0] = 'H'; 
+    sampleShmem[1] = 'o'; 
+    sampleShmem[2] = 'l'; 
+    sampleShmem[3] = 'a'; 
+    sampleShmem[4] = '\n'; 
+    sampleShmem[5] = 0; 
+
+    unlinkShmem(0); 
+
+    exitUserland(); 
+}
+
+void proceso2fun(_ARGUMENTS, int foreground) {
+    
+    print_f(1, "Soy el proceso lector.\n"); 
+    char * sampleShmem = (char *) createShmem(0);
+    print_f(1, "El proceso lector leyo (%s)", sampleShmem); 
+
+    unlinkShmem(0); 
+    exitUserland(); 
+}
+
+void defensa(_ARGUMENTS, int foreground) {
+
+    void * sampleShmem = createShmem(0);
+
+
+    char * name = "proceso"; 
+    createProcessUserland( (uint64_t) &proceso1fun, 1, &name, 1); 
+
+    waitSon(); 
+
+    createProcessUserland( (uint64_t) &proceso2fun, 1, &name, 1); 
+    waitSon(); 
+
+    unlinkShmem(0); 
+}

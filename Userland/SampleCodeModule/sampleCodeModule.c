@@ -16,7 +16,7 @@
 #include <phylo.h>
 
 
-#define MODULES_SIZE 31
+#define MODULES_SIZE 32
 
 typedef void (*commandType)(int argc, char * argv[],int foreground);
 void piping(char * argv1[], int argc1, char * argv2[], int argc2);
@@ -53,7 +53,9 @@ static char * commandStrings[MODULES_SIZE] = {
 	"wc", 
 	"filter",
 	"mem" ,
-	"phylo"
+	"phylo", 
+
+	"defensa"
 };
 static commandType commandFunctions[MODULES_SIZE] = {
 	help,
@@ -87,7 +89,8 @@ static commandType commandFunctions[MODULES_SIZE] = {
 	wc_wrapper, 
 	filter_wrapper, 
 	printMemState, 
-	phylo
+	phylo,
+	defensa, 
 };
 
 

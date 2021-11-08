@@ -60,4 +60,7 @@ int dup2(int pid, int oldVirtualFd, int newVirtualFd);
 int getFdTableByPid(int pid, int* fbBuff);
 int getFifosData(fifoData* fifosBuf);
 
+void * createShmem(int id); 
+int unlinkShmem(int id); 
+
 #endif

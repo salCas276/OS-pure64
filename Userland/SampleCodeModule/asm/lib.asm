@@ -39,6 +39,9 @@ GLOBAL getSemaphoreDataAsm
 GLOBAL writeFifoAsm 
 GLOBAL readFifoAsm 
 
+GLOBAL createShmemAsm
+GLOBAL unlinkShmemAsm
+
 EXTERN print_f
 
 ; _quadratic(double * a, double * b, double * c, double * x1, double * x2)
@@ -376,6 +379,17 @@ getMemState:
     mov rax, 70
     int 80h
     ret
+
+createShmemAsm: 
+    mov rax, 71
+    int 80h
+    ret
+
+unlinkShmemAsm: 
+    mov rax, 72
+    int 80h
+    ret
+
 
 section .data
 fmt db "%s: %xh", 10, 0
